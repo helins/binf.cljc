@@ -390,7 +390,19 @@
 #?(:cljs
 
 (deftype View [dataview
-               endianess]
+               endianess
+               ^:mutable -offset]
+
+  IRelative
+
+    (offset [_]
+      -offset)
+
+    (seek [this offset]
+      (set! -offset
+            offset)
+      this)
+
 
   IAbsoluteReader
 
@@ -440,6 +452,80 @@
                    endianess))
 
 
+  IRelativeReader
+
+
+    (rr-u8 [this]
+      (let [ret (ra-u8 this
+                       -offset)]
+        (set! -offset
+              (inc -offset))
+        ret))
+
+    (rr-i8 [this]
+      (let [ret (ra-i8 this
+                       -offset)]
+        (set! -offset
+              (inc -offset))
+        ret))
+
+    (rr-u16 [this]
+      (let [ret (ra-u16 this
+                        -offset)]
+        (set! -offset
+              (+ -offset
+                 2))
+        ret))
+
+    (rr-i16 [this]
+      (let [ret (ra-i16 this
+                        -offset)]
+        (set! -offset
+              (+ -offset
+                 2))
+        ret))
+
+    (rr-u32 [this]
+      (let [ret (ra-u32 this
+                        -offset)]
+        (set! -offset
+              (+ -offset
+                 4))
+        ret))
+
+    (rr-i32 [this]
+      (let [ret (ra-i32 this
+                        -offset)]
+        (set! -offset
+              (+ -offset
+                 4))
+        ret))
+
+    (rr-i64 [this]
+      (let [ret (ra-i64 this
+                        -offset)]
+        (set! -offset
+              (+ -offset
+                 8))
+        ret))
+
+    (rr-f32 [this]
+      (let [ret (ra-f32 this
+                        -offset)]
+        (set! -offset
+              (+ -offset
+                 8))
+        ret))
+
+    (rr-f64 [this]
+      (let [ret (ra-f64 this
+                       -offset)]
+        (set! -offset
+              (+ -offset
+                 8))
+        ret))
+
+
   IAbsoluteWriter
 
     (wa-8 [this offset integer]
@@ -482,6 +568,63 @@
                    offset
                    floating
                    endianess)
+      this)
+
+
+  IRelativeWriter
+    
+
+    (wr-8 [this integer]
+      (wa-8 this
+            -offset
+            integer)
+      (set! -offset
+            (inc -offset))
+      this)
+
+    (wr-16 [this integer]
+      (wa-16 this
+             -offset
+             integer)
+      (set! -offset
+            (+ -offset
+               2))
+      this)
+
+    (wr-32 [this integer]
+      (wa-32 this
+             -offset
+             integer)
+      (set! -offset
+            (+ -offset
+               4))
+      this)
+
+    (wr-64 [this integer]
+      (wa-64 this
+             -offset
+             integer)
+      (set! -offset
+            (+ -offset
+               8))
+      this)
+
+    (wr-f32 [this floating]
+      (wa-f32 this
+              -offset
+              floating)
+      (set! -offset
+            (+ -offset
+               8))
+      this)
+
+    (wr-f64 [this floating]
+      (wa-f64 this
+             -offset
+             floating)
+      (set! -offset
+            (+ -offset
+               8))
       this)))
 
 
