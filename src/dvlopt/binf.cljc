@@ -3,6 +3,7 @@
   ""
 
   {:author "Adam Helinski"}
+  #?(:clj (:import java.nio.ByteBuffer))
   ;;
   ;; <!> Attention, higly confusing if not kept in mind <!>
   ;;
@@ -159,42 +160,47 @@
   IAbsoluteReader
 
     (ra-u8 [this offset]
-      (.getUint8 this
+      (.getUint8 dataview
                  offset
                  endianess))
 
     (ra-i8 [this offset]
-      (.getInt8 this
+      (.getInt8 dataview
                 offset
                 endianess))
 
     (ra-u16 [this offset]
-      (.getUint16 this
+      (.getUint16 dataview
                   offset
                   endianess))
 
     (ra-i16 [this offset]
-      (.getInt16 this
+      (.getInt16 dataview
                  offset
                  endianess))
 
     (ra-u32 [this offset]
-      (.getUint32 this
+      (.getUint32 dataview
                   offset
                   endianess))
 
-    (ra-i64 [this offset]
-      (.getInt64 this
+    (ra-i32 [this offset]
+      (.getInt32 dataview
                  offset
                  endianess))
 
+    (ra-i64 [this offset]
+      (.getBigInt64 dataview
+                    offset
+                    endianess))
+
     (ra-f32 [this offset]
-      (.getFloat32 this
+      (.getFloat32 dataview
                    offset
                    endianess))
 
     (ra-f64 [this offset]
-      (.getFloat64 this
+      (.getFloat64 dataview
                    offset
                    endianess))
 
@@ -202,63 +208,63 @@
   IAbsoluteWriter
 
     (wa-u8 [this offset u8]
-       (.setUint8 this
+       (.setUint8 dataview
                   offset
                   u8
                   endianess)
         this)
 
     (wa-i8 [this offset i8]
-      (.setInt8 this
+      (.setInt8 dataview
                 offset
                 i8
                 endianess)
       this)
 
     (wa-u16 [this offset u16]
-      (.setUint16 this
+      (.setUint16 dataview
                   offset
                   u16
                   endianess)
         this)
 
     (wa-i16 [this offset i16]
-      (.setInt16 this
+      (.setInt16 dataview
                  offset
                  i16
                  endianess)
       this)
 
     (wa-u32 [this offset u32]
-      (.setUint32 this
+      (.setUint32 dataview
                   offset
                   u32
                   endianess)
       this)
 
     (wa-i32 [this offset i32]
-      (.setInt32 this
+      (.setInt32 dataview
                  offset
                  i32
                  endianess)
       this)
 
     (wa-i64 [this offset i64]
-      (.setInt64 this
-                 offset
-                 i64
-                 endianess)
+      (.setBigInt64 dataview
+                    offset
+                    i64
+                    endianess)
       this)
 
     (wa-f32 [this offset f32]
-      (.setFloat32 this
+      (.setFloat32 dataview
                    offset
                    f32
                    endianess)
       this)
 
     (wa-f64 [this offset f64]
-      (.setFloat64 this
+      (.setFloat64 dataview
                    offset
                    f64
                    endianess)
@@ -289,7 +295,8 @@
 
   ([buffer endianess]
 
-   #?(:cljs (View. buffer
+   #?(:clj  (View. (ByteBuffer. buffer))
+      :cljs (View. (js/DataView. buffer)
                    (if endianess
                      (case endianess
                        :big    false
@@ -373,8 +380,13 @@
 
   ([i32]
 
-   (and 0xffffffff
-        i32))
+   #?(:clj  (and 0xffffffff
+                 i32)
+      ;; Because bitwise operations in JS are 32 bits, bit-and'ing does not work in this case.
+      :cljs (-> -conv-view
+                (wa-i32 0
+                        i32)
+                (ra-u32 0))))
 
   ([i8-1 i8-2 i8-3 i8-4]
 
@@ -478,3 +490,41 @@
              i8-6
              i8-7
              i8-8))))
+
+
+
+(defn integer
+
+  ""
+
+  [floating]
+
+  (long floating))
+
+
+
+(defn bits-f32
+
+  ""
+
+  [f32]
+
+  #?(:clj  (Float/floatToIntBits f32)
+     :cljs (-> -conv-view
+               (wa-f32 0
+                       f32)
+               (ra-u32 0))))
+
+
+
+(defn bits-f64
+
+  ""
+
+  [f64]
+
+  #?(:clj  (Double/doubleToLongBits f64)
+     :cljs (-> -conv-view
+               (wa-f64 0
+                       f64)
+               (ra-i64 0))))
