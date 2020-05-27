@@ -76,6 +76,113 @@
 ;;;;;;;;;; Views
 
 
+(def offset
+     4)
+
+
+(def size
+     16)
+
+
+(def size-2
+     4)
+
+
+(def view
+     (binf/view (binf/buffer size)))
+
+
+(t/deftest buffer->view
+
+  ;; Without offset nor size
+  
+  (t/is (= 0
+           (binf/offset view)))
+  (t/is (= 0
+           (binf/position view)))
+  (t/is (= size
+           (count view)))
+  (t/is (= size
+           (binf/remaining view)))
+
+  ;; With offset
+
+  (let [v (binf/view (binf/buffer size)
+                     offset)]
+    (t/is (= offset
+             (binf/offset v)))
+    (t/is (= 0
+             (binf/position v)))
+    (t/is (= (- size
+                offset)
+             (count v)))
+    (t/is (= (- size
+                offset)
+             (binf/remaining v))))
+
+
+  ;; With offset and size
+
+  (let [v (binf/view (binf/buffer size)
+                     offset
+                     size-2)]
+    (t/is (= offset
+             (binf/offset v)))
+    (t/is (= 0
+             (binf/position v)))
+    (t/is (= size-2
+             (count v)))
+    (t/is (= size-2
+             (binf/remaining v)))))
+
+
+
+(t/deftest view->view
+
+  ;; Without offset nor size
+  
+  (let [v (binf/view view)]
+    (t/is (= 0
+             (binf/offset v)))
+    (t/is (= 0
+             (binf/position v)))
+    (t/is (= size
+             (count v)))
+    (t/is (= size
+             (binf/remaining v))))
+
+  ;; With offset
+
+  (let [v (binf/view view
+                     offset)]
+    (t/is (= offset
+             (binf/offset v)))
+    (t/is (= 0
+             (binf/position v)))
+    (t/is (= (- size
+                offset)
+             (count v)))
+    (t/is (= (- size
+                offset)
+             (binf/remaining v))))
+
+
+  ;; With offset and size
+
+  (let [v (binf/view view
+                     offset
+                     size-2)]
+    (t/is (= offset
+             (binf/offset v)))
+    (t/is (= 0
+             (binf/position v)))
+    (t/is (= size-2
+             (count v)))
+    (t/is (= size-2
+             (binf/remaining v)))))
+
+
+
 (defn view-8
 
   []

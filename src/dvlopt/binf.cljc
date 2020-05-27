@@ -99,6 +99,16 @@
 ;;;;;;;;;; Protocols
 
 
+(defprotocol IViewBuilder
+
+  ""
+
+  (view [this]
+        [this offset]
+        [this offset size]
+    ""))
+
+
 (defprotocol IView
 
   ""
@@ -107,6 +117,9 @@
     "")
 
   (offset [this]
+    "")
+
+  (to-buffer [this]
     ""))
 
 
@@ -276,11 +289,32 @@
     (offset [_]
       -offset)
 
+    (to-buffer [_]
+      (.array byte-buffer))
+
+
+  IViewBuilder
+
+    (view [this]
+      this)
+
+    (view [_ offset]
+      (view (.array byte-buffer)
+            (+ -offset
+               offset)))
+
+    (view [_ offset size]
+      (view (.array byte-buffer)
+            (+ -offset
+               offset)
+            size))
+
 
   IRelative
 
     (position [_]
-      (.position byte-buffer))
+      (- (.position byte-buffer)
+         -offset))
 
     (seek [this position]
       (.position byte-buffer
@@ -462,11 +496,13 @@
 
   ICounted
 
+
     (-count [_]
       (.-byteLength dataview))
 
 
   IView
+
 
     (garanteed? [_ n-bytes]
       (>= (- (.byteLength dataview)
@@ -474,10 +510,35 @@
           n-bytes))
 
     (offset [_]
-      (.byteOffset dataview))
+      (.-byteOffset dataview))
+
+    (to-buffer [_]
+      (.-buffer dataview))
+
+
+  IViewBuilder
+
+    (view [this]
+      this)
+
+    (view [this offset]
+      (View. (js/DataView. (.-buffer dataview)
+                           (+ (.-byteOffset dataview)
+                              offset))
+             little-endian?
+             0))
+
+    (view [this offset size]
+      (View. (js/DataView. (.-buffer dataview)
+                           (+ (.-byteOffset dataview)
+                              offset)
+                           size)
+             little-endian?
+             0))
 
 
   IRelative
+
 
     (position [_]
       -position)
@@ -489,6 +550,7 @@
 
 
   IEndianess
+
 
     (endianess [_]
       (if little-endian?
@@ -504,6 +566,7 @@
 
 
   IAbsoluteReader
+
 
     (ra-u8 [_ position]
       (.getUint8 dataview
@@ -552,7 +615,6 @@
 
 
   IRelativeReader
-
 
     (rr-u8 [this]
       (let [ret (ra-u8 this
@@ -626,6 +688,7 @@
 
 
   IAbsoluteWriter
+
 
     (wa-8 [this position integer]
        (.setUint8 dataview
@@ -739,43 +802,58 @@
 
 
 
-(defn view
+#?(:clj
 
-  ""
+(extend-protocol IViewBuilder
 
-  ([buffer]
+  (Class/forName "[B")
 
-   (view buffer
-         nil))
+    (view
+     
+      ([this]
+       (View. (ByteBuffer/wrap this)
+              0))
 
-  ([buffer offset]
+      ([this offset]
+       (View. (doto (ByteBuffer/wrap this)
+                (.position offset))
+              offset))
 
-   (view buffer
-         offset
-         nil))
-
-  ([buffer offset size]
-
-   (let [offset-2 (clj/or offset
-                          0)]
-     #?(:clj  (View. (let [bb (doto (ByteBuffer/wrap buffer)
-                                (.order ByteOrder/LITTLE_ENDIAN)
-                                (.position offset-2))]
-                       (when size
-                         (.limit bb
-                                 (+ offset-2
-                                    size)))
-                       bb)
-                     offset-2)
-        :cljs (View. (js/DataView. buffer
-                                   offset-2
-                                   (or size
-                                       (- (count buffer)
-                                          offset-2)))
-                     true
-                     0)))))
+      ([this offset size]
+       (View. (doto (ByteBuffer/wrap this)
+                (.position offset)
+                (.limit (+ offset
+                           size)))
+              offset)))))
 
 
+
+#?(:cljs
+
+(extend-protocol IViewBuilder
+
+  js/ArrayBuffer
+
+    (view
+
+      ([this]
+       (View. (js/DataView. this)
+              true
+              0))
+
+      ([this offset]
+       (View. (js/DataView. this
+                            offset)
+              true
+              0))
+
+      ([this offset size]
+       (View. (js/DataView. this
+                            offset
+                            size)
+              true
+              0)))))
+   
 
 ;;;;;;;;;; Creating primitives from bytes
 
