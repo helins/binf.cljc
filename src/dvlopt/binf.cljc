@@ -133,25 +133,16 @@
 
   ""
   
-  (wa-u8 [this offset integer]
+  (wa-8 [this offset integer]
     "")
 
-  (wa-i8 [this offset integer]
+  (wa-16 [this offset integer]
     "")
 
-  (wa-u16 [this offset integer]
+  (wa-32 [this offset integer]
     "")
 
-  (wa-i16 [this offset integer]
-    "")
-
-  (wa-u32 [this offset integer]
-    "")
-
-  (wa-i32 [this offset integer]
-    "")
-
-  (wa-i64 [this offset integer]
+  (wa-64 [this offset integer]
     "")
 
   (wa-f32 [this offset floating]
@@ -216,43 +207,25 @@
   IAbsoluteWriter
 
 
-    (wa-u8 [this offset integer]
+    (wa-8 [this offset integer]
       (.put byte-buffer
             offset
             (unchecked-byte integer))
       this)
 
-    (wa-i8 [this offset integer]
-      (.put byte-buffer
-            offset
-            (unchecked-byte integer))
-      this)
-
-    (wa-u16 [this offset integer]
+    (wa-16 [this offset integer]
       (.putShort byte-buffer
                  offset
                  (unchecked-short integer))
       this)
 
-    (wa-i16 [this offset integer]
-      (.putShort byte-buffer
-                 offset
-                 (unchecked-short integer))
-      this)
-
-    (wa-u32 [this offset integer]
+    (wa-32 [this offset integer]
       (.putInt byte-buffer
                offset
                (unchecked-int integer))
       this)
 
-    (wa-i32 [this offset integer]
-      (.putInt byte-buffer
-               offset
-               (unchecked-int integer))
-      this)
-
-    (wa-i64 [this offset integer]
+    (wa-64 [this offset integer]
       (.putLong byte-buffer
                 offset
                 integer)
@@ -327,66 +300,45 @@
 
   IAbsoluteWriter
 
-    (wa-u8 [this offset u8]
+    (wa-8 [this offset integer]
        (.setUint8 dataview
                   offset
-                  u8
+                  integer
                   endianess)
         this)
 
-    (wa-i8 [this offset i8]
-      (.setInt8 dataview
-                offset
-                i8
-                endianess)
-      this)
-
-    (wa-u16 [this offset u16]
-      (.setUint16 dataview
-                  offset
-                  u16
-                  endianess)
-        this)
-
-    (wa-i16 [this offset i16]
+    (wa-16 [this offset integer]
       (.setInt16 dataview
                  offset
-                 i16
+                 integer
                  endianess)
       this)
 
-    (wa-u32 [this offset u32]
-      (.setUint32 dataview
-                  offset
-                  u32
-                  endianess)
-      this)
-
-    (wa-i32 [this offset i32]
+    (wa-32 [this offset integer]
       (.setInt32 dataview
                  offset
-                 i32
+                 integer
                  endianess)
       this)
 
-    (wa-i64 [this offset i64]
+    (wa-64 [this offset integer]
       (.setBigInt64 dataview
                     offset
-                    i64
+                    integer
                     endianess)
       this)
 
-    (wa-f32 [this offset f32]
+    (wa-f32 [this offset floating]
       (.setFloat32 dataview
                    offset
-                   f32
+                   floating
                    endianess)
       this)
 
-    (wa-f64 [this offset f64]
+    (wa-f64 [this offset floating]
       (.setFloat64 dataview
                    offset
-                   f64
+                   floating
                    endianess)
       this)))
 
@@ -457,8 +409,8 @@
 
   #?(:clj  (unchecked-byte u8)
      :cljs (-> -conv-view
-               (wa-u8 0
-                      u8)
+               (wa-8 0
+                     u8)
                (ra-i8 0))))
 
 
@@ -489,8 +441,8 @@
 
    #?(:clj  (unchecked-short u16)
       :cljs (-> -conv-view
-                (wa-u16 0
-                        u16)
+                (wa-16 0
+                       u16)
                 (ra-i16 0))))
 
 
@@ -511,8 +463,8 @@
                  i32)
       ;; Because bitwise operations in JS are 32 bits, bit-and'ing does not work in this case.
       :cljs (-> -conv-view
-                (wa-i32 0
-                        i32)
+                (wa-32 0
+                       i32)
                 (ra-u32 0))))
 
   ([i8-1 i8-2 i8-3 i8-4]
@@ -535,8 +487,8 @@
 
    #?(:clj  (unchecked-int u32)
       :cljs (-> -conv-view
-                (wa-u32 0
-                        u32)
+                (wa-32 0
+                       u32)
                 (ra-i32 0))))
 
   ([i8-1 i8-2 i8-3 i8-4]
@@ -580,8 +532,8 @@
 
    #?(:clj  (Float/intBitsToFloat u32)
       :cljs (-> -conv-view
-                (wa-u32 0
-                        u32)
+                (wa-32 0
+                       u32)
                 (ra-f32 0))))
 
 
@@ -602,8 +554,8 @@
 
    #?(:clj  (Double/longBitsToDouble i64)
       :cljs (-> -conv-view
-                (wa-i64 0
-                        i64)
+                (wa-64 0
+                       i64)
                 (ra-f64 0))))
 
 

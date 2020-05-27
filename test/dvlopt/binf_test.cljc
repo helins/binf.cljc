@@ -91,12 +91,12 @@
                  (rd 0)))
 
 
-    binf/wa-u8  binf/ra-u8  (binf/integer (dec (Math/pow 2 8)))
-    binf/wa-i8  binf/ra-i8  -1
-    binf/wa-u16 binf/ra-u16 (binf/integer (dec (Math/pow 2 16)))
-    binf/wa-i16 binf/ra-i16 -1
-    binf/wa-i32 binf/ra-i32 -1
-    binf/wa-u32 binf/ra-u32 (binf/integer (dec (Math/pow 2 32)))))
+    binf/wa-8  binf/ra-u8  (binf/integer (dec (Math/pow 2 8)))
+    binf/wa-8  binf/ra-i8  -1
+    binf/wa-16 binf/ra-u16 (binf/integer (dec (Math/pow 2 16)))
+    binf/wa-16 binf/ra-i16 -1
+    binf/wa-32 binf/ra-i32 -1
+    binf/wa-32 binf/ra-u32 (binf/integer (dec (Math/pow 2 32)))))
 
 
 
@@ -108,8 +108,8 @@
              :cljs (js/BigInt js/Number.MAX_SAFE_INTEGER))]
     (t/is (= x
              (-> view-8
-                 (binf/wa-i64 0
-                              x)
+                 (binf/wa-64 0
+                             x)
                  (binf/ra-i64 0))))))
 
 
