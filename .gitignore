@@ -9,7 +9,7 @@
 /.nrepl-port
 .hgignore
 .hg/
-
+.rebel_readline_history
 
 // For running kaocha-cljs
 
