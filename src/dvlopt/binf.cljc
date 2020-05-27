@@ -3,7 +3,9 @@
   ""
 
   {:author "Adam Helinski"}
-  #?(:clj (:import (java.nio ByteBuffer
+  (:require [clojure.core :as clj])
+  #?(:clj (:import clojure.lang.Counted
+                   (java.nio ByteBuffer
                              ByteOrder)))
   ;;
   ;; <!> Attention, higly confusing if not kept in mind <!>
@@ -97,35 +99,46 @@
 ;;;;;;;;;; Protocols
 
 
+(defprotocol IView
+
+  ""
+
+  (garanteed? [this n-bytes]
+    "")
+
+  (offset [this]
+    ""))
+
+
 (defprotocol IAbsoluteReader
 
   ""
   
-  (ra-u8 [this offset]
+  (ra-u8 [this position]
     "")
 
-  (ra-i8 [this offset]
+  (ra-i8 [this position]
     "")
 
-  (ra-u16 [this offset]
+  (ra-u16 [this position]
     "")
 
-  (ra-i16 [this offset]
+  (ra-i16 [this position]
     "")
 
-  (ra-u32 [this offset]
+  (ra-u32 [this position]
     "")
 
-  (ra-i32 [this offset]
+  (ra-i32 [this position]
     "")
 
-  (ra-i64 [this offset]
+  (ra-i64 [this position]
     "")
 
-  (ra-f32 [this offset]
+  (ra-f32 [this position]
     "")
 
-  (ra-f64 [this offset]
+  (ra-f64 [this position]
     ""))
 
 
@@ -165,22 +178,22 @@
 
   ""
   
-  (wa-8 [this offset integer]
+  (wa-8 [this position integer]
     "")
 
-  (wa-16 [this offset integer]
+  (wa-16 [this position integer]
     "")
 
-  (wa-32 [this offset integer]
+  (wa-32 [this position integer]
     "")
 
-  (wa-64 [this offset integer]
+  (wa-64 [this position integer]
     "")
 
-  (wa-f32 [this offset floating]
+  (wa-f32 [this position floating]
     "")
 
-  (wa-f64 [this offset floating]
+  (wa-f64 [this position floating]
     ""))
 
 
@@ -211,29 +224,83 @@
 
   ""
 
-  (offset [this]
+  (position [this]
 
     "")
 
-  (seek [this offset]
+  (seek [this position]
     ""))
 
+
+(defprotocol IEndianess
+
+  ""
+  
+  (endianess [this]
+             [this new-endianess]
+    ""))
+
+
 ;;;;;;;;;; Types and protocol extensions
+
+
+#?(:cljs
+
+(extend-protocol ICounted
+
+  js/ArrayBuffer
+
+    (-count [this]
+      (.-byteLength this))))
+
 
 
 #?(:clj
 
 (deftype View [^ByteBuffer byte-buffer
-               endianess]
+               -offset]
+
+  clojure.lang.Counted
+
+    (count [_]
+      (- (.limit byte-buffer)
+         -offset))
+
+  IView
+
+    (garanteed? [_ n-bytes]
+      (>= (- (.limit byte-buffer)
+             (.position byte-buffer))
+          n-bytes))
+
+    (offset [_]
+      -offset)
+
 
   IRelative
 
-    (offset [_]
+    (position [_]
       (.position byte-buffer))
 
-    (seek [this offset]
+    (seek [this position]
       (.position byte-buffer
-                 offset)
+                 position)
+      this)
+
+
+  IEndianess
+
+    (endianess [_]
+      (condp =
+             (.order byte-buffer)
+        ByteOrder/BIG_ENDIAN    :big-endian
+        ByteOrder/LITTLE_ENDIAN :little-endian))
+
+    (endianess [this new-endianess]
+      (.order byte-buffer
+              (case new-endianess
+                :big-endian    ByteOrder/BIG_ENDIAN
+                :little-endian ByteOrder/LITTLE_ENDIAN))
       this)
 
 
@@ -390,66 +457,98 @@
 #?(:cljs
 
 (deftype View [dataview
-               endianess
-               ^:mutable -offset]
+               ^:mutable little-endian?
+               ^:mutable -position]
+
+  ICounted
+
+    (-count [_]
+      (.-byteLength dataview))
+
+
+  IView
+
+    (garanteed? [_ n-bytes]
+      (>= (- (.byteLength dataview)
+             -position)
+          n-bytes))
+
+    (offset [_]
+      (.byteOffset dataview))
+
 
   IRelative
 
-    (offset [_]
-      -offset)
+    (position [_]
+      -position)
 
-    (seek [this offset]
-      (set! -offset
-            offset)
+    (seek [this position]
+      (set! -position
+            position)
+      this)
+
+
+  IEndianess
+
+    (endianess [_]
+      (if little-endian?
+        :little-endian
+        :big-endian))
+
+    (endianess [this new-endianess]
+      (set! little-endian?
+            (case new-endianess
+              :big-endian    false
+              :little-endian true))
       this)
 
 
   IAbsoluteReader
 
-    (ra-u8 [_ offset]
+    (ra-u8 [_ position]
       (.getUint8 dataview
-                 offset
-                 endianess))
+                 position
+                 little-endian?))
 
-    (ra-i8 [_ offset]
+    (ra-i8 [_ position]
       (.getInt8 dataview
-                offset
-                endianess))
+                position
+                little-endian?))
 
-    (ra-u16 [_ offset]
+    (ra-u16 [_ position]
       (.getUint16 dataview
-                  offset
-                  endianess))
+                  position
+                  little-endian?))
 
-    (ra-i16 [_ offset]
+    (ra-i16 [_ position]
       (.getInt16 dataview
-                 offset
-                 endianess))
+                 position
+                 little-endian?))
 
-    (ra-u32 [_ offset]
+    (ra-u32 [_ position]
       (.getUint32 dataview
-                  offset
-                  endianess))
+                  position
+                  little-endian?))
 
-    (ra-i32 [_ offset]
+    (ra-i32 [_ position]
       (.getInt32 dataview
-                 offset
-                 endianess))
+                 position
+                 little-endian?))
 
-    (ra-i64 [_ offset]
+    (ra-i64 [_ position]
       (.getBigInt64 dataview
-                    offset
-                    endianess))
+                    position
+                    little-endian?))
 
-    (ra-f32 [_ offset]
+    (ra-f32 [_ position]
       (.getFloat32 dataview
-                   offset
-                   endianess))
+                   position
+                   little-endian?))
 
-    (ra-f64 [_ offset]
+    (ra-f64 [_ position]
       (.getFloat64 dataview
-                   offset
-                   endianess))
+                   position
+                   little-endian?))
 
 
   IRelativeReader
@@ -457,117 +556,117 @@
 
     (rr-u8 [this]
       (let [ret (ra-u8 this
-                       -offset)]
-        (set! -offset
-              (inc -offset))
+                       -position)]
+        (set! -position
+              (inc -position))
         ret))
 
     (rr-i8 [this]
       (let [ret (ra-i8 this
-                       -offset)]
-        (set! -offset
-              (inc -offset))
+                       -position)]
+        (set! -position
+              (inc -position))
         ret))
 
     (rr-u16 [this]
       (let [ret (ra-u16 this
-                        -offset)]
-        (set! -offset
-              (+ -offset
+                        -position)]
+        (set! -position
+              (+ -position
                  2))
         ret))
 
     (rr-i16 [this]
       (let [ret (ra-i16 this
-                        -offset)]
-        (set! -offset
-              (+ -offset
+                        -position)]
+        (set! -position
+              (+ -position
                  2))
         ret))
 
     (rr-u32 [this]
       (let [ret (ra-u32 this
-                        -offset)]
-        (set! -offset
-              (+ -offset
+                        -position)]
+        (set! -position
+              (+ -position
                  4))
         ret))
 
     (rr-i32 [this]
       (let [ret (ra-i32 this
-                        -offset)]
-        (set! -offset
-              (+ -offset
+                        -position)]
+        (set! -position
+              (+ -position
                  4))
         ret))
 
     (rr-i64 [this]
       (let [ret (ra-i64 this
-                        -offset)]
-        (set! -offset
-              (+ -offset
+                        -position)]
+        (set! -position
+              (+ -position
                  8))
         ret))
 
     (rr-f32 [this]
       (let [ret (ra-f32 this
-                        -offset)]
-        (set! -offset
-              (+ -offset
+                        -position)]
+        (set! -position
+              (+ -position
                  8))
         ret))
 
     (rr-f64 [this]
       (let [ret (ra-f64 this
-                       -offset)]
-        (set! -offset
-              (+ -offset
+                       -position)]
+        (set! -position
+              (+ -position
                  8))
         ret))
 
 
   IAbsoluteWriter
 
-    (wa-8 [this offset integer]
+    (wa-8 [this position integer]
        (.setUint8 dataview
-                  offset
+                  position
                   integer
-                  endianess)
+                  little-endian?)
         this)
 
-    (wa-16 [this offset integer]
+    (wa-16 [this position integer]
       (.setInt16 dataview
-                 offset
+                 position
                  integer
-                 endianess)
+                 little-endian?)
       this)
 
-    (wa-32 [this offset integer]
+    (wa-32 [this position integer]
       (.setInt32 dataview
-                 offset
+                 position
                  integer
-                 endianess)
+                 little-endian?)
       this)
 
-    (wa-64 [this offset integer]
+    (wa-64 [this position integer]
       (.setBigInt64 dataview
-                    offset
+                    position
                     integer
-                    endianess)
+                    little-endian?)
       this)
 
-    (wa-f32 [this offset floating]
+    (wa-f32 [this position floating]
       (.setFloat32 dataview
-                   offset
+                   position
                    floating
-                   endianess)
+                   little-endian?)
       this)
 
-    (wa-f64 [this offset floating]
+    (wa-f64 [this position floating]
       (.setFloat64 dataview
-                   offset
+                   position
                    floating
-                   endianess)
+                   little-endian?)
       this)
 
 
@@ -576,54 +675,54 @@
 
     (wr-8 [this integer]
       (wa-8 this
-            -offset
+            -position
             integer)
-      (set! -offset
-            (inc -offset))
+      (set! -position
+            (inc -position))
       this)
 
     (wr-16 [this integer]
       (wa-16 this
-             -offset
+             -position
              integer)
-      (set! -offset
-            (+ -offset
+      (set! -position
+            (+ -position
                2))
       this)
 
     (wr-32 [this integer]
       (wa-32 this
-             -offset
+             -position
              integer)
-      (set! -offset
-            (+ -offset
+      (set! -position
+            (+ -position
                4))
       this)
 
     (wr-64 [this integer]
       (wa-64 this
-             -offset
+             -position
              integer)
-      (set! -offset
-            (+ -offset
+      (set! -position
+            (+ -position
                8))
       this)
 
     (wr-f32 [this floating]
       (wa-f32 this
-              -offset
+              -position
               floating)
-      (set! -offset
-            (+ -offset
+      (set! -position
+            (+ -position
                8))
       this)
 
     (wr-f64 [this floating]
       (wa-f64 this
-             -offset
+             -position
              floating)
-      (set! -offset
-            (+ -offset
+      (set! -position
+            (+ -position
                8))
       this)))
 
@@ -649,23 +748,33 @@
    (view buffer
          nil))
 
+  ([buffer offset]
 
-  ([buffer endianess]
+   (view buffer
+         offset
+         nil))
 
-   #?(:clj  (let [endianess-2 (if endianess
-                                (case endianess
-                                  :big-endian    ByteOrder/BIG_ENDIAN
-                                  :little-endian ByteOrder/LITTLE_ENDIAN)
-                                ByteOrder/LITTLE_ENDIAN)]
-              (View. (doto (ByteBuffer/wrap buffer)
-                       (.order endianess-2))
-                     endianess-2))
-      :cljs (View. (js/DataView. buffer)
-                   (if endianess
-                     (case endianess
-                       :big-endian    false
-                       :little-endian true)
-                     true)))))
+  ([buffer offset size]
+
+   (let [offset-2 (clj/or offset
+                          0)]
+     #?(:clj  (View. (let [bb (doto (ByteBuffer/wrap buffer)
+                                (.order ByteOrder/LITTLE_ENDIAN)
+                                (.position offset-2))]
+                       (when size
+                         (.limit bb
+                                 (+ offset-2
+                                    size)))
+                       bb)
+                     offset-2)
+        :cljs (View. (js/DataView. buffer
+                                   offset-2
+                                   (or size
+                                       (- (count buffer)
+                                          offset-2)))
+                     true
+                     0)))))
+
 
 
 ;;;;;;;;;; Creating primitives from bytes
@@ -892,3 +1001,45 @@
                (wa-f64 0
                        f64)
                (ra-i64 0))))
+
+
+;;;;;;;;;; Miscellaneous
+
+
+(defn copy
+
+  ""
+
+  ([^bytes src dest dest-offset]
+
+   (copy src
+         0
+         dest
+         dest-offset
+         (alength src)))
+
+
+  ([^bytes src src-offset ^bytes dest dest-offset n]
+
+   #?(:clj  (System/arraycopy src
+                              src-offset
+                              dest
+                              dest-offset
+                              n)
+      :cljs (.set dest
+                  (.subarray src
+                             src-offset
+                             (+ src-offset
+                                n))
+                  dest-offset))))
+
+
+
+(defn remaining
+
+  ""
+
+  [view]
+
+  (- (count view)
+     (position view)))
