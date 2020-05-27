@@ -1,0 +1,20 @@
+/target
+/classes
+/checkouts
+*.jar
+*.class
+/.cpcache
+/.lein-*
+/.nrepl-history
+/.nrepl-port
+.hgignore
+.hg/
+
+
+// For running kaocha-cljs
+
+.cljs_node_repl/
+node_modules/
+package-lock.json
+tests.edn
+out

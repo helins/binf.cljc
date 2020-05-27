@@ -1,0 +1,28 @@
+{:deps
+ {org.clojure/clojure {:mvn/version "1.10.1"}}
+
+ :paths
+ ["src"]
+
+ :aliases
+ {:deploy
+  {:extra-deps {deps-deploy {:mvn/version "0.0.9"}}
+   :main-opts ["-m" "deps-deploy.deps-deploy" "deploy" "binf.jar"]}
+
+  :dev
+  {:extra-paths ["dev"
+                 "test"]
+   :extra-deps {org.clojure/test.check {:mvn/version "0.10.0"}}}
+
+  :jar
+  {:extra-deps {seancorfield/depstar {:mvn/version "0.5.2"}}
+   :main-opts ["-m" "hf.depstar.jar" "binf.jar"]}
+
+  :install
+  {:extra-deps {deps-deploy {:mvn/version "0.0.9"}}
+   :main-opts ["-m" "deps-deploy.deps-deploy" "install" "binf.jar"]}
+
+  :test
+  {:extra-deps  {lambdaisland/kaocha      {:mvn/version "1.0-612"}
+                 lambdaisland/kaocha-cljs {:mvn/version "0.0-71"}}
+   :extra-paths ["test"]}}}
