@@ -76,27 +76,38 @@
 ;;;;;;;;;; Views
 
 
-(def view-8
-     (binf/view (binf/buffer 8)))
+(defn view-8
+
+  []
+  
+  (binf/view (binf/buffer 8)))
 
 
 
 (t/deftest view-uints
 
-  (t/are [wr rd value]
-         (== value
-             (-> view-8
-                 (wr 0
-                     value)
-                 (rd 0)))
+  (t/are [wa ra wr rr value]
+         (and (t/is (= value
+                       (-> (view-8)
+                           (wa 0
+                               value)
+                           (ra 0)))
+                    "Absolute")
+              (t/is (= value
+                       (-> (view-8)
+                           (wr value)
+                           (binf/seek 0)
+                           rr))
+                    "Relative"))
 
 
-    binf/wa-8  binf/ra-u8  (binf/integer (dec (Math/pow 2 8)))
-    binf/wa-8  binf/ra-i8  -1
-    binf/wa-16 binf/ra-u16 (binf/integer (dec (Math/pow 2 16)))
-    binf/wa-16 binf/ra-i16 -1
-    binf/wa-32 binf/ra-i32 -1
-    binf/wa-32 binf/ra-u32 (binf/integer (dec (Math/pow 2 32)))))
+
+    binf/wa-8  binf/ra-u8  binf/wr-8  binf/rr-u8  (binf/integer (dec (Math/pow 2 8)))
+    binf/wa-8  binf/ra-i8  binf/wr-8  binf/rr-i8  -1
+    binf/wa-16 binf/ra-u16 binf/wr-16 binf/rr-u16 (binf/integer (dec (Math/pow 2 16)))
+    binf/wa-16 binf/ra-i16 binf/wr-16 binf/rr-i16 -1
+    binf/wa-32 binf/ra-u32 binf/wr-32 binf/rr-u32 (binf/integer (dec (Math/pow 2 32)))
+    binf/wa-32 binf/ra-i32 binf/wr-32 binf/rr-i32 -1))
 
 
 
@@ -107,7 +118,7 @@
   (let [x #?(:clj  Long/MAX_VALUE
              :cljs (js/BigInt js/Number.MAX_SAFE_INTEGER))]
     (t/is (= x
-             (-> view-8
+             (-> (view-8)
                  (binf/wa-64 0
                              x)
                  (binf/ra-i64 0))))))
@@ -118,7 +129,7 @@
 
   (let [x (float 42.42)]
     (t/is (= x
-             (-> view-8
+             (-> (view-8)
                  (binf/wa-f32 0
                               x)
                  (binf/ra-f32 0))))))
@@ -129,7 +140,7 @@
 
   (let [x 42.42]
     (t/is (= x
-             (-> view-8
+             (-> (view-8)
                  (binf/wa-f64 0
                               x)
                  (binf/ra-f64 0))))))

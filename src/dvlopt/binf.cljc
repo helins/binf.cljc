@@ -129,6 +129,38 @@
     ""))
 
 
+(defprotocol IRelativeReader
+
+  ""
+
+  (rr-u8 [this]
+    "")
+
+  (rr-i8 [this]
+    "")
+
+  (rr-u16 [this]
+    "")
+
+  (rr-i16 [this]
+    "")
+
+  (rr-u32 [this]
+    "")
+
+  (rr-i32 [this]
+    "")
+
+  (rr-i64 [this]
+    "")
+
+  (rr-f32 [this]
+    "")
+
+  (rr-f64 [this]
+    ""))
+
+
 (defprotocol IAbsoluteWriter
 
   ""
@@ -152,6 +184,40 @@
     ""))
 
 
+(defprotocol IRelativeWriter
+
+  ""
+
+  (wr-8 [this integer]
+    "")
+
+  (wr-16 [this integer]
+    "")
+
+  (wr-32 [this integer]
+    "")
+
+  (wr-64 [this integer]
+    "")
+
+  (wr-f32 [this floating]
+    "")
+
+  (wr-f64 [this floating]
+    ""))
+
+
+(defprotocol IRelative
+
+  ""
+
+  (offset [this]
+
+    "")
+
+  (seek [this offset]
+    ""))
+
 ;;;;;;;;;; Types and protocol extensions
 
 
@@ -160,48 +226,90 @@
 (deftype View [^ByteBuffer byte-buffer
                endianess]
 
+  IRelative
+
+    (offset [_]
+      (.position byte-buffer))
+
+    (seek [this offset]
+      (.position byte-buffer
+                 offset)
+      this)
+
+
   IAbsoluteReader
 
-    (ra-u8 [this offset]
+    (ra-u8 [_ offset]
       (u8 (.get byte-buffer
                 ^long offset)))
 
-    (ra-i8 [this offset]
+    (ra-i8 [_ offset]
       (.get byte-buffer
             ^long offset))
 
 
-    (ra-u16 [this offset]
+    (ra-u16 [_ offset]
       (u16 (.getShort byte-buffer
                       offset)))
 
-    (ra-i16 [this offset]
+    (ra-i16 [_ offset]
       (.getShort byte-buffer
                  offset))
 
 
-    (ra-u32 [this offset]
+    (ra-u32 [_ offset]
       (u32 (.getInt byte-buffer
                     offset)))
 
 
-    (ra-i32 [this offset]
+    (ra-i32 [_ offset]
       (.getInt byte-buffer
                offset))
 
 
-    (ra-i64 [this offset]
+    (ra-i64 [_ offset]
       (.getLong byte-buffer
                 offset))
 
 
-    (ra-f32 [this offset]
+    (ra-f32 [_ offset]
       (.getFloat byte-buffer
                  offset))
 
-    (ra-f64 [this offset]
+    (ra-f64 [_ offset]
       (.getDouble byte-buffer
                   offset))
+
+
+  IRelativeReader
+
+    
+    (rr-u8 [_]
+      (u8 (.get byte-buffer)))
+
+    (rr-i8 [_]
+      (.get byte-buffer))
+
+    (rr-u16 [_]
+      (u16 (.getShort byte-buffer)))
+
+    (rr-i16 [_]
+      (.getShort byte-buffer))
+
+    (rr-u32 [_]
+      (u32 (.getInt byte-buffer)))
+
+    (rr-i32 [_]
+      (.getInt byte-buffer))
+
+    (rr-i64 [_]
+      (.getLong byte-buffer))
+
+    (rr-f32 [_]
+      (.getFloat byte-buffer))
+
+    (rr-f64 [_]
+      (.getDouble byte-buffer))
 
 
   IAbsoluteWriter
@@ -241,6 +349,40 @@
       (.putDouble byte-buffer
                   offset
                   floating)
+      this)
+
+
+  IRelativeWriter
+
+
+    (wr-8 [this integer]
+      (.put byte-buffer
+            (unchecked-byte integer))
+      this)
+
+    (wr-16 [this integer]
+      (.putShort byte-buffer
+                 (unchecked-short integer))
+      this)
+
+    (wr-32 [this integer]
+      (.putInt byte-buffer
+               (unchecked-int integer))
+      this)
+
+    (wr-64 [this integer]
+      (.putLong byte-buffer
+                integer)
+      this)
+
+    (wr-f32 [this floating]
+      (.putFloat byte-buffer
+                 floating)
+      this)
+
+    (wr-f64 [this floating]
+      (.putDouble byte-buffer
+                  floating)
       this)))
 
 
@@ -252,47 +394,47 @@
 
   IAbsoluteReader
 
-    (ra-u8 [this offset]
+    (ra-u8 [_ offset]
       (.getUint8 dataview
                  offset
                  endianess))
 
-    (ra-i8 [this offset]
+    (ra-i8 [_ offset]
       (.getInt8 dataview
                 offset
                 endianess))
 
-    (ra-u16 [this offset]
+    (ra-u16 [_ offset]
       (.getUint16 dataview
                   offset
                   endianess))
 
-    (ra-i16 [this offset]
+    (ra-i16 [_ offset]
       (.getInt16 dataview
                  offset
                  endianess))
 
-    (ra-u32 [this offset]
+    (ra-u32 [_ offset]
       (.getUint32 dataview
                   offset
                   endianess))
 
-    (ra-i32 [this offset]
+    (ra-i32 [_ offset]
       (.getInt32 dataview
                  offset
                  endianess))
 
-    (ra-i64 [this offset]
+    (ra-i64 [_ offset]
       (.getBigInt64 dataview
                     offset
                     endianess))
 
-    (ra-f32 [this offset]
+    (ra-f32 [_ offset]
       (.getFloat32 dataview
                    offset
                    endianess))
 
-    (ra-f64 [this offset]
+    (ra-f64 [_ offset]
       (.getFloat64 dataview
                    offset
                    endianess))
