@@ -3,12 +3,24 @@
   ""
 
   {:author "Adam Helinski"}
-  #?(:clj (:import java.nio.ByteBuffer))
+  #?(:clj (:import (java.nio ByteBuffer
+                             ByteOrder)))
   ;;
   ;; <!> Attention, higly confusing if not kept in mind <!>
   ;;
   (:refer-clojure :exclude [and
                             or]))
+
+
+;;;;;;;;;; Gathering declarations
+
+
+(declare u8
+         i8
+         u16
+         i16
+         u32
+         i32)
 
 
 ;;;;;;;;; Aliases for bitwise operations
@@ -121,35 +133,143 @@
 
   ""
   
-  (wa-u8 [this offset u8]
+  (wa-u8 [this offset integer]
     "")
 
-  (wa-i8 [this offset i8]
+  (wa-i8 [this offset integer]
     "")
 
-  (wa-u16 [this offset u16]
+  (wa-u16 [this offset integer]
     "")
 
-  (wa-i16 [this offset i16]
+  (wa-i16 [this offset integer]
     "")
 
-  (wa-u32 [this offset u32]
+  (wa-u32 [this offset integer]
     "")
 
-  (wa-i32 [this offset i32]
+  (wa-i32 [this offset integer]
     "")
 
-  (wa-i64 [this offset i64]
+  (wa-i64 [this offset integer]
     "")
 
-  (wa-f32 [this offset f32]
+  (wa-f32 [this offset floating]
     "")
 
-  (wa-f64 [this offset f64]
+  (wa-f64 [this offset floating]
     ""))
 
 
 ;;;;;;;;;; Types and protocol extensions
+
+
+#?(:clj
+
+(deftype View [^ByteBuffer byte-buffer
+               endianess]
+
+  IAbsoluteReader
+
+    (ra-u8 [this offset]
+      (u8 (.get byte-buffer
+                ^long offset)))
+
+    (ra-i8 [this offset]
+      (.get byte-buffer
+            ^long offset))
+
+
+    (ra-u16 [this offset]
+      (u16 (.getShort byte-buffer
+                      offset)))
+
+    (ra-i16 [this offset]
+      (.getShort byte-buffer
+                 offset))
+
+
+    (ra-u32 [this offset]
+      (u32 (.getInt byte-buffer
+                    offset)))
+
+
+    (ra-i32 [this offset]
+      (.getInt byte-buffer
+               offset))
+
+
+    (ra-i64 [this offset]
+      (.getLong byte-buffer
+                offset))
+
+
+    (ra-f32 [this offset]
+      (.getFloat byte-buffer
+                 offset))
+
+    (ra-f64 [this offset]
+      (.getDouble byte-buffer
+                  offset))
+
+
+  IAbsoluteWriter
+
+
+    (wa-u8 [this offset integer]
+      (.put byte-buffer
+            offset
+            (unchecked-byte integer))
+      this)
+
+    (wa-i8 [this offset integer]
+      (.put byte-buffer
+            offset
+            (unchecked-byte integer))
+      this)
+
+    (wa-u16 [this offset integer]
+      (.putShort byte-buffer
+                 offset
+                 (unchecked-short integer))
+      this)
+
+    (wa-i16 [this offset integer]
+      (.putShort byte-buffer
+                 offset
+                 (unchecked-short integer))
+      this)
+
+    (wa-u32 [this offset integer]
+      (.putInt byte-buffer
+               offset
+               (unchecked-int integer))
+      this)
+
+    (wa-i32 [this offset integer]
+      (.putInt byte-buffer
+               offset
+               (unchecked-int integer))
+      this)
+
+    (wa-i64 [this offset integer]
+      (.putLong byte-buffer
+                offset
+                integer)
+      this)
+
+    (wa-f32 [this offset floating]
+      (.putFloat byte-buffer
+                 offset
+                 floating)
+      this)
+
+    (wa-f64 [this offset floating]
+      (.putDouble byte-buffer
+                  offset
+                  floating)
+      this)))
+
 
 
 #?(:cljs
@@ -295,12 +415,19 @@
 
   ([buffer endianess]
 
-   #?(:clj  (View. (ByteBuffer. buffer))
+   #?(:clj  (let [endianess-2 (if endianess
+                                (case endianess
+                                  :big-endian    ByteOrder/BIG_ENDIAN
+                                  :little-endian ByteOrder/LITTLE_ENDIAN)
+                                ByteOrder/LITTLE_ENDIAN)]
+              (View. (doto (ByteBuffer/wrap buffer)
+                       (.order endianess-2))
+                     endianess-2))
       :cljs (View. (js/DataView. buffer)
                    (if endianess
                      (case endianess
-                       :big    false
-                       :little true)
+                       :big-endian    false
+                       :little-endian true)
                      true)))))
 
 

@@ -5,7 +5,9 @@
   (:require [clojure.repl]
             [clojure.test     :as t]
             [dvlopt.binf      :as binf]
-            [dvlopt.binf-test :as binf-test]))
+            [dvlopt.binf-test :as binf-test])
+  (:import (java.nio ByteBuffer
+                     ByteOrder)))
 
 
 ;;;;;;;;;;
