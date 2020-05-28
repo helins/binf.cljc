@@ -254,3 +254,91 @@
                  (binf/wa-f64 0
                               x)
                  (binf/ra-f64 0))))))
+
+
+;;;;;;;;;; Copying
+
+
+(defn cp-view
+
+  []
+
+  (let [view (binf/view (binf/buffer 5))]
+    (dotimes [_ 5]
+      (binf/wr-8 view
+                 1))
+    view))
+
+
+(def cp-target
+     (concat (repeat 5
+                     0)
+             (repeat 2
+                     1)
+             (repeat 3
+                     0)))
+
+
+(t/deftest copy
+
+  (t/is (= (concat (repeat 5
+                           0)
+                   (repeat 5
+                           1))
+           (seq (binf/copy (binf/buffer 10)
+                           5
+                           (binf/to-buffer (cp-view)))))
+        "Without offset nor length")
+
+  (t/is (= (concat (repeat 5
+                           0)
+                   (repeat 3
+                           1)
+                   (repeat 2
+                           0))
+           (seq (binf/copy (binf/buffer 10)
+                           5
+                           (binf/to-buffer (cp-view))
+                           2)))
+        "With offset")
+
+
+  (t/is (= cp-target
+           (seq (binf/copy (binf/buffer 10)
+                           5
+                           (binf/to-buffer (cp-view))
+                           2
+                           2)))
+        "With offset and length"))
+
+
+
+(t/deftest acopy
+
+  (let [view (binf/view (binf/buffer 10))]
+    (t/is (= cp-target
+             (seq (binf/to-buffer (binf/acopy view
+                                              5
+                                              (binf/to-buffer (cp-view))
+                                              2
+                                              2))))
+          "Absolute copying to view")
+    (t/is (zero? (binf/position view))
+          "Copy is absolute")))
+
+
+
+(t/deftest rcopy
+
+  (let [view (binf/view (binf/buffer 10))]
+    (binf/skip view
+               5)
+    (t/is (= cp-target
+             (seq (binf/to-buffer (binf/rcopy view
+                                              (binf/to-buffer (cp-view))
+                                              2
+                                              2))))
+          "Relative copying to view")
+    (t/is (= (binf/position view)
+             7)
+          "Copy is relative")))

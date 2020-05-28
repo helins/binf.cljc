@@ -99,30 +99,6 @@
 ;;;;;;;;;; Protocols
 
 
-(defprotocol IViewBuilder
-
-  ""
-
-  (view [this]
-        [this offset]
-        [this offset size]
-    ""))
-
-
-(defprotocol IView
-
-  ""
-
-  (garanteed? [this n-bytes]
-    "")
-
-  (offset [this]
-    "")
-
-  (to-buffer [this]
-    ""))
-
-
 (defprotocol IAbsoluteReader
 
   ""
@@ -152,6 +128,38 @@
     "")
 
   (ra-f64 [this position]
+    ""))
+
+
+(defprotocol IAbsoluteWriter
+
+  ""
+  
+  (wa-8 [this position integer]
+    "")
+
+  (wa-16 [this position integer]
+    "")
+
+  (wa-32 [this position integer]
+    "")
+
+  (wa-64 [this position integer]
+    "")
+
+  (wa-f32 [this position floating]
+    "")
+
+  (wa-f64 [this position floating]
+    ""))
+
+
+(defprotocol IEndianess
+
+  ""
+  
+  (endianess [this]
+             [this new-endianess]
     ""))
 
 
@@ -187,29 +195,6 @@
     ""))
 
 
-(defprotocol IAbsoluteWriter
-
-  ""
-  
-  (wa-8 [this position integer]
-    "")
-
-  (wa-16 [this position integer]
-    "")
-
-  (wa-32 [this position integer]
-    "")
-
-  (wa-64 [this position integer]
-    "")
-
-  (wa-f32 [this position floating]
-    "")
-
-  (wa-f64 [this position floating]
-    ""))
-
-
 (defprotocol IRelativeWriter
 
   ""
@@ -233,24 +218,37 @@
     ""))
 
 
-(defprotocol IRelative
+(defprotocol IView
 
   ""
+
+  (garanteed? [this n-bytes]
+    "")
+
+  (offset [this]
+    "")
 
   (position [this]
 
     "")
 
   (seek [this position]
+    "")
+  
+  (skip [this n-bytes]
+    "")
+
+  (to-buffer [this]
     ""))
 
 
-(defprotocol IEndianess
+(defprotocol IViewBuilder
 
   ""
-  
-  (endianess [this]
-             [this new-endianess]
+
+  (view [this]
+        [this offset]
+        [this offset size]
     ""))
 
 
@@ -259,12 +257,18 @@
 
 #?(:cljs
 
-(extend-protocol ICounted
+(extend-type js/ArrayBuffer
 
-  js/ArrayBuffer
+  ICounted
 
     (-count [this]
-      (.-byteLength this))))
+      (.-byteLength this))
+
+
+  ISeqable
+
+    (-seq [this]
+      (array-seq (js/Uint8Array. this)))))
 
 
 
@@ -273,72 +277,17 @@
 (deftype View [^ByteBuffer byte-buffer
                -offset]
 
+
   clojure.lang.Counted
+
 
     (count [_]
       (- (.limit byte-buffer)
          -offset))
 
-  IView
-
-    (garanteed? [_ n-bytes]
-      (>= (- (.limit byte-buffer)
-             (.position byte-buffer))
-          n-bytes))
-
-    (offset [_]
-      -offset)
-
-    (to-buffer [_]
-      (.array byte-buffer))
-
-
-  IViewBuilder
-
-    (view [this]
-      this)
-
-    (view [_ offset]
-      (view (.array byte-buffer)
-            (+ -offset
-               offset)))
-
-    (view [_ offset size]
-      (view (.array byte-buffer)
-            (+ -offset
-               offset)
-            size))
-
-
-  IRelative
-
-    (position [_]
-      (- (.position byte-buffer)
-         -offset))
-
-    (seek [this position]
-      (.position byte-buffer
-                 position)
-      this)
-
-
-  IEndianess
-
-    (endianess [_]
-      (condp =
-             (.order byte-buffer)
-        ByteOrder/BIG_ENDIAN    :big-endian
-        ByteOrder/LITTLE_ENDIAN :little-endian))
-
-    (endianess [this new-endianess]
-      (.order byte-buffer
-              (case new-endianess
-                :big-endian    ByteOrder/BIG_ENDIAN
-                :little-endian ByteOrder/LITTLE_ENDIAN))
-      this)
-
 
   IAbsoluteReader
+
 
     (ra-u8 [_ offset]
       (u8 (.get byte-buffer
@@ -382,37 +331,6 @@
                   offset))
 
 
-  IRelativeReader
-
-    
-    (rr-u8 [_]
-      (u8 (.get byte-buffer)))
-
-    (rr-i8 [_]
-      (.get byte-buffer))
-
-    (rr-u16 [_]
-      (u16 (.getShort byte-buffer)))
-
-    (rr-i16 [_]
-      (.getShort byte-buffer))
-
-    (rr-u32 [_]
-      (u32 (.getInt byte-buffer)))
-
-    (rr-i32 [_]
-      (.getInt byte-buffer))
-
-    (rr-i64 [_]
-      (.getLong byte-buffer))
-
-    (rr-f32 [_]
-      (.getFloat byte-buffer))
-
-    (rr-f64 [_]
-      (.getDouble byte-buffer))
-
-
   IAbsoluteWriter
 
 
@@ -453,6 +371,54 @@
       this)
 
 
+  IEndianess
+
+
+    (endianess [_]
+      (condp =
+             (.order byte-buffer)
+        ByteOrder/BIG_ENDIAN    :big-endian
+        ByteOrder/LITTLE_ENDIAN :little-endian))
+
+    (endianess [this new-endianess ]
+      (.order byte-buffer
+              (case new-endianess
+                :big-endian    ByteOrder/BIG_ENDIAN
+                :little-endian ByteOrder/LITTLE_ENDIAN))
+      this)
+
+
+  IRelativeReader
+
+    
+    (rr-u8 [_]
+      (u8 (.get byte-buffer)))
+
+    (rr-i8 [_]
+      (.get byte-buffer))
+
+    (rr-u16 [_]
+      (u16 (.getShort byte-buffer)))
+
+    (rr-i16 [_]
+      (.getShort byte-buffer))
+
+    (rr-u32 [_]
+      (u32 (.getInt byte-buffer)))
+
+    (rr-i32 [_]
+      (.getInt byte-buffer))
+
+    (rr-i64 [_]
+      (.getLong byte-buffer))
+
+    (rr-f32 [_]
+      (.getFloat byte-buffer))
+
+    (rr-f64 [_]
+      (.getDouble byte-buffer))
+
+
   IRelativeWriter
 
 
@@ -484,8 +450,55 @@
     (wr-f64 [this floating]
       (.putDouble byte-buffer
                   floating)
-      this)))
+      this)
 
+
+  IView
+
+
+    (garanteed? [_ n-bytes]
+      (>= (- (.limit byte-buffer)
+             (.position byte-buffer))
+          n-bytes))
+
+    (offset [_]
+      -offset)
+
+    (position [_]
+      (- (.position byte-buffer)
+         -offset))
+
+    (seek [this position]
+      (.position byte-buffer
+                 position)
+      this)
+
+    (skip [this n-bytes]
+      (.position byte-buffer
+                 (+ (.position byte-buffer)
+                    n-bytes))
+      this)
+
+    (to-buffer [_]
+      (.array byte-buffer))
+
+
+  IViewBuilder
+
+
+    (view [this]
+      this)
+
+    (view [_ offset]
+      (view (.array byte-buffer)
+            (+ -offset
+               offset)))
+
+    (view [_ offset size]
+      (view (.array byte-buffer)
+            (+ -offset
+               offset)
+            size))))
 
 
 #?(:cljs
@@ -499,70 +512,6 @@
 
     (-count [_]
       (.-byteLength dataview))
-
-
-  IView
-
-
-    (garanteed? [_ n-bytes]
-      (>= (- (.byteLength dataview)
-             -position)
-          n-bytes))
-
-    (offset [_]
-      (.-byteOffset dataview))
-
-    (to-buffer [_]
-      (.-buffer dataview))
-
-
-  IViewBuilder
-
-    (view [this]
-      this)
-
-    (view [this offset]
-      (View. (js/DataView. (.-buffer dataview)
-                           (+ (.-byteOffset dataview)
-                              offset))
-             little-endian?
-             0))
-
-    (view [this offset size]
-      (View. (js/DataView. (.-buffer dataview)
-                           (+ (.-byteOffset dataview)
-                              offset)
-                           size)
-             little-endian?
-             0))
-
-
-  IRelative
-
-
-    (position [_]
-      -position)
-
-    (seek [this position]
-      (set! -position
-            position)
-      this)
-
-
-  IEndianess
-
-
-    (endianess [_]
-      (if little-endian?
-        :little-endian
-        :big-endian))
-
-    (endianess [this new-endianess]
-      (set! little-endian?
-            (case new-endianess
-              :big-endian    false
-              :little-endian true))
-      this)
 
 
   IAbsoluteReader
@@ -612,6 +561,68 @@
       (.getFloat64 dataview
                    position
                    little-endian?))
+
+
+  IAbsoluteWriter
+
+
+    (wa-8 [this position integer]
+       (.setUint8 dataview
+                  position
+                  integer
+                  little-endian?)
+        this)
+
+    (wa-16 [this position integer]
+      (.setInt16 dataview
+                 position
+                 integer
+                 little-endian?)
+      this)
+
+    (wa-32 [this position integer]
+      (.setInt32 dataview
+                 position
+                 integer
+                 little-endian?)
+      this)
+
+    (wa-64 [this position integer]
+      (.setBigInt64 dataview
+                    position
+                    integer
+                    little-endian?)
+      this)
+
+    (wa-f32 [this position floating]
+      (.setFloat32 dataview
+                   position
+                   floating
+                   little-endian?)
+      this)
+
+    (wa-f64 [this position floating]
+      (.setFloat64 dataview
+                   position
+                   floating
+                   little-endian?)
+      this)
+
+
+  IEndianess
+
+
+    (endianess [_]
+      (if little-endian?
+        :little-endian
+        :big-endian))
+
+    (endianess [this new-endianess]
+      (set! little-endian?
+            (case new-endianess
+              :big-endian    false
+              :little-endian true))
+      this)
 
 
   IRelativeReader
@@ -687,52 +698,6 @@
         ret))
 
 
-  IAbsoluteWriter
-
-
-    (wa-8 [this position integer]
-       (.setUint8 dataview
-                  position
-                  integer
-                  little-endian?)
-        this)
-
-    (wa-16 [this position integer]
-      (.setInt16 dataview
-                 position
-                 integer
-                 little-endian?)
-      this)
-
-    (wa-32 [this position integer]
-      (.setInt32 dataview
-                 position
-                 integer
-                 little-endian?)
-      this)
-
-    (wa-64 [this position integer]
-      (.setBigInt64 dataview
-                    position
-                    integer
-                    little-endian?)
-      this)
-
-    (wa-f32 [this position floating]
-      (.setFloat32 dataview
-                   position
-                   floating
-                   little-endian?)
-      this)
-
-    (wa-f64 [this position floating]
-      (.setFloat64 dataview
-                   position
-                   floating
-                   little-endian?)
-      this)
-
-
   IRelativeWriter
     
 
@@ -787,8 +752,57 @@
       (set! -position
             (+ -position
                8))
-      this)))
+      this)
 
+
+  IView
+
+
+    (garanteed? [_ n-bytes]
+      (>= (- (.byteLength dataview)
+             -position)
+          n-bytes))
+
+    (offset [_]
+      (.-byteOffset dataview))
+
+    (position [_]
+      -position)
+
+    (seek [this position]
+      (set! -position
+            position)
+      this)
+
+    (skip [this n-bytes]
+      (set! -position
+            (+ -position
+               n-bytes))
+      this)
+
+    (to-buffer [_]
+      (.-buffer dataview))
+
+
+  IViewBuilder
+
+    (view [this]
+      this)
+
+    (view [this offset]
+      (View. (js/DataView. (.-buffer dataview)
+                           (+ (.-byteOffset dataview)
+                              offset))
+             little-endian?
+             0))
+
+    (view [this offset size]
+      (View. (js/DataView. (.-buffer dataview)
+                           (+ (.-byteOffset dataview)
+                              offset)
+                           size)
+             little-endian?
+             0))))
 
 
 (defn buffer
@@ -1081,35 +1095,119 @@
                (ra-i64 0))))
 
 
-;;;;;;;;;; Miscellaneous
+;;;;;;;;;; Copying and miscellaneous
 
 
 (defn copy
 
   ""
 
-  ([^bytes src dest dest-offset]
+  ([dest-buffer dest-offset src-buffer]
 
-   (copy src
-         0
-         dest
+   (copy dest-buffer
          dest-offset
-         (alength src)))
+         src-buffer
+         nil))
 
 
-  ([^bytes src src-offset ^bytes dest dest-offset n]
+  ([dest-buffer dest-offset src-buffer src-offset]
 
-   #?(:clj  (System/arraycopy src
-                              src-offset
-                              dest
+   (copy dest-buffer
+         dest-offset
+         src-buffer
+         src-offset
+         nil))
+
+
+  ([dest-buffer dest-offset src-buffer src-offset n-bytes]
+
+   (let [src-offset-2 (clj/or src-offset
+                              0)
+         n-bytes-2    (clj/or n-bytes
+                              (- (count src-buffer)
+                                 src-offset-2))]
+   #?(:clj  (System/arraycopy ^bytes src-buffer
+                              src-offset-2
+                              ^bytes dest-buffer
                               dest-offset
-                              n)
-      :cljs (.set dest
-                  (.subarray src
-                             src-offset
-                             (+ src-offset
-                                n))
-                  dest-offset))))
+                              n-bytes-2)
+      :cljs (.set (js/Uint8Array. dest-buffer)
+                  (js/Uint8Array. src-buffer
+                                  src-offset-2
+                                  n-bytes-2)
+                  dest-offset)))
+   dest-buffer))
+
+
+
+(defn acopy
+
+  ""
+
+  ([dest-view dest-position src-buffer]
+
+   (acopy dest-view
+          dest-position
+          src-buffer
+          nil
+          nil))
+
+
+  ([dest-view dest-position src-buffer src-offset]
+
+   (acopy dest-view
+          dest-position
+          src-buffer
+          src-offset
+          nil))
+
+
+  ([dest-view dest-position src-buffer src-offset n-bytes]
+
+   (copy (to-buffer dest-view)
+         (+ dest-position
+            (offset dest-view))
+         src-buffer
+         src-offset
+         n-bytes)
+   dest-view))
+
+
+
+(defn rcopy
+
+  ""
+
+  ([dest-view src-buffer]
+
+   (rcopy dest-view
+          src-buffer
+          nil
+          nil))
+
+  ([dest-view src-buffer src-offset]
+
+   (rcopy dest-view
+          src-buffer
+          src-offset
+          nil))
+
+
+  ([dest-view src-buffer src-offset n-bytes]
+
+   (let [src-offset-2 (clj/or src-offset
+                              0)
+         n-bytes-2    (clj/or n-bytes
+                              (- (count src-buffer)
+                                 src-offset-2))]
+     (copy (to-buffer dest-view)
+           (position dest-view)
+           src-buffer
+           src-offset-2
+           n-bytes-2)
+     (skip dest-view
+           n-bytes-2))
+   dest-view))
 
 
 
