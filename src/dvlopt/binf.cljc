@@ -490,7 +490,7 @@
 
 #?(:cljs
 
-(deftype View [dataview
+(deftype View [^js/DataView dataview
                ^:mutable little-endian?
                ^:mutable -position]
 
@@ -1000,12 +1000,12 @@
 
   ""
 
-  ([u32]
+  ([integer]
 
-   #?(:clj  (Float/intBitsToFloat u32)
+   #?(:clj  (Float/intBitsToFloat integer)
       :cljs (-> -conv-view
                 (wa-32 0
-                       u32)
+                       integer)
                 (ra-f32 0))))
 
 
@@ -1022,12 +1022,12 @@
 
   ""
 
-  ([i64]
+  ([integer]
 
-   #?(:clj  (Double/longBitsToDouble i64)
+   #?(:clj  (Double/longBitsToDouble integer)
       :cljs (-> -conv-view
                 (wa-64 0
-                       i64)
+                       integer)
                 (ra-f64 0))))
 
 

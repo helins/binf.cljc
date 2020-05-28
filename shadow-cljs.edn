@@ -1,0 +1,8 @@
+{:builds
+ {:test
+  {:target    :browser-test
+   :runner-ns lambdaisland.chui.shadow.browser-runner
+   :test-dir  "test_shadow"}}
+
+ :deps
+ {:alias [:cljs]}}

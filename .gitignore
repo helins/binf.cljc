@@ -18,3 +18,11 @@ node_modules/
 package-lock.json
 tests.edn
 out
+
+
+// Shadow-cljs
+
+.shadow-cljs/
+package.json
+resources/
+test_shadow/

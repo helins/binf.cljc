@@ -5,7 +5,11 @@
  ["src"]
 
  :aliases
- {:deploy
+ {:cljs
+  {:extra-deps {thheller/shadow-cljs {:mvn/version "2.9.10"}}
+   :main-opts  ["-m" "shadow.cljs.devtools.cli"]}
+
+  :deploy
   {:extra-deps {deps-deploy {:mvn/version "0.0.9"}}
    :main-opts ["-m" "deps-deploy.deps-deploy" "deploy" "binf.jar"]}
 
@@ -23,6 +27,7 @@
    :main-opts ["-m" "deps-deploy.deps-deploy" "install" "binf.jar"]}
 
   :test
-  {:extra-deps  {lambdaisland/kaocha      {:mvn/version "1.0-612"}
+  {:extra-deps  {lambdaisland/chui        {:mvn/version "0.0.117"}
+                 lambdaisland/kaocha      {:mvn/version "1.0-612"}
                  lambdaisland/kaocha-cljs {:mvn/version "0.0-71"}}
    :extra-paths ["test"]}}}

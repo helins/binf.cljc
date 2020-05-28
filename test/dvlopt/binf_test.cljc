@@ -53,15 +53,16 @@
                        (binf/u8 value))))))
 
 
+#?(:clj
 
-(t/deftest ^:no-js f32
+(t/deftest f32
 
   ; JS does not have real floats, imprecision arise when they get converted automatically to f64.
   ; Other than that, the implementation is technically correct.
 
   (t/is (= (float 42.42)
            (binf/f32 (binf/bits-f32 42.42)))
-        "f32"))
+        "f32")))
 
 
 (t/deftest ^:no-node f64
@@ -232,14 +233,16 @@
 
 
 
-(t/deftest ^:no-js view-f32
+#?(:clj
+
+(t/deftest view-f32
 
   (let [x (float 42.42)]
     (t/is (= x
              (-> (view-8)
                  (binf/wa-f32 0
                               x)
-                 (binf/ra-f32 0))))))
+                 (binf/ra-f32 0)))))))
 
 
 
