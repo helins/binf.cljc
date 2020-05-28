@@ -21,7 +21,8 @@
 ;;;;;;;;;; Gathering declarations
 
 
-(declare i8
+(declare copy
+         i8
          i16
          i32
          text-decoder
@@ -172,6 +173,14 @@
   
   (endianess [this]
              [this new-endianess]
+    ""))
+
+
+(defprotocol IGrowing
+
+  ""
+
+  (garantee [this n-bytes]
     ""))
 
 
@@ -389,23 +398,6 @@
 ;;;;;;;;;; Types and protocol extensions
 
 
-#?(:cljs
-
-(extend-type js/ArrayBuffer
-
-  ICounted
-
-    (-count [this]
-      (.-byteLength this))
-
-
-  ISeqable
-
-    (-seq [this]
-      (array-seq (js/Uint8Array. this)))))
-
-
-
 #?(:clj
 
 (deftype View [^ByteBuffer byte-buffer
@@ -474,8 +466,8 @@
       (String. (.array byte-buffer)
                ^long position
                ^long n-bytes
-               ^Charset (clj/or encoding
-                                -charset-utf-8)))
+               (clj/or ^Charset encoding
+                       -charset-utf-8)))
 
 
   IAbsoluteWriter
@@ -530,9 +522,7 @@
         (.position byte-buffer
                    saved-position)
         res))
-
     
-
 
   IEndianess
 
@@ -1071,6 +1061,7 @@
              0))))
 
 
+
 (defn buffer
 
   ""
@@ -1133,7 +1124,404 @@
                             size)
               true
               0)))))
-   
+
+
+
+#?(:cljs
+
+(extend-type js/ArrayBuffer
+
+  ICounted
+
+    (-count [this]
+      (.-byteLength this))
+
+
+  ISeqable
+
+    (-seq [this]
+      (array-seq (js/Uint8Array. this)))))
+
+
+
+
+
+(defprotocol ^:private -IGrowing
+
+  ;;
+
+  (-grow [this]
+    ;;
+    ))
+
+
+
+(deftype GrowingView [next-size
+                     ; #?@(:clj  [^:unsynchronized-mutable -view])
+                     ; #?@(:cljs [^:mutable -view])
+      ^:unsynchronized-mutable -view
+                      ]
+  
+
+
+  -IGrowing
+
+  
+    (-grow [this]
+      (let [buffer-new (buffer (next-size (count -view)))]
+        (copy buffer-new
+              0
+              (to-buffer -view))
+        (set! -view
+              (view buffer-new)))
+      this)
+
+  Counted (count [_] 42)
+  ; #?(:clj  clojure.lang.Counted
+  ;    :cljs ICounted)
+
+
+  ; #?(:clj  (count [_]
+  ;            (count -view))
+  ;    :cljs (-count [_]
+  ;            (count -view)))
+
+
+  IAbsoluteReader
+
+
+    (ra-u8 [_ position]
+      (ra-u8 -view
+             position))
+
+    (ra-i8 [_ position]
+      (ra-i8 -view
+             position))
+
+    (ra-u16 [_ position]
+      (ra-u16 -view
+              position))
+
+    (ra-i16 [_ position]
+      (ra-i16 -view
+              position))
+
+    (ra-u32 [_ position]
+      (ra-u32 -view
+              position))
+
+    (ra-i32 [_ position]
+      (ra-i32 -view
+              position))
+
+    (ra-i64 [_ position]
+      (ra-i64 -view
+              position))
+
+    (ra-f32 [_ position]
+      (ra-f32 -view
+              position))
+
+    (ra-f64 [_ position]
+      (ra-f64 -view
+              position))
+    
+    (ra-string [_ position n-bytes]
+      (ra-string -view
+                 position
+                 n-bytes))
+
+    (ra-string [_ encoding position n-bytes]
+      (ra-string -view
+                 encoding
+                 position
+                 n-bytes))
+
+
+  IAbsoluteWriter
+
+
+    (wa-8 [this position integer]
+      (garantee this
+                1)
+      (wa-8 -view
+            position
+            integer)
+      this)
+
+    (wa-16 [this position integer]
+      (garantee this
+                2)
+      (wa-16 -view
+            position
+            integer)
+      this)
+
+    (wa-32 [this position integer]
+      (garantee this
+                4)
+      (wa-32 -view
+             position
+             integer)
+      this)
+
+    (wa-64 [this position integer]
+      (garantee this
+                8)
+      (wa-64 -view
+             position
+             integer)
+      this)
+
+    (wa-f32 [this position floating]
+      (garantee this
+                4)
+      (wa-f32 -view
+              position
+              floating)
+      this)
+
+    (wa-f64 [this position floating]
+      (garantee this
+                8)
+      (wa-f64 -view
+              position
+              floating)
+      this)
+    
+    (wa-string [_ position string]
+      (let [res (wa-string -view
+                           position
+                           string)]
+        (if (res 0)
+          res
+          (loop [written-bytes (res 1)
+                 written-chars (res 2)]
+            (let [res-next (wa-string -view
+                                      position
+                                      #?(:clj  (res 3)
+                                         :cljs (.substring string
+                                                           written-chars)))]
+              (if (res-next 0)
+                (-> res-next
+                    (update 1
+                            +
+                            written-bytes)
+                    (update 2
+                            +
+                            written-chars))
+                (recur (+ (res 1)
+                          written-bytes)
+                       (+ (res 2)
+                          written-chars))))))))
+
+
+  IEndianess
+
+  
+    (endianess [_]
+      (endianess -view))
+
+    (endianess [this new-endianess]
+      (endianess -view
+                 new-endianess)
+      this)
+
+
+  IGrowing
+
+    (garantee [this n-bytes]
+      (when-not (garanteed? -view
+                            n-bytes)
+        (let [position-saved (position -view)
+              size-minimum   (+ position-saved
+                                n-bytes)
+              buffer-new     (buffer (loop [size-next (next-size (count view))]
+                                       (if (>= size-next
+                                               size-minimum)
+                                         size-next
+                                         (recur (next-size size-next)))))]
+          (copy buffer-new
+                0
+                (to-buffer -view))
+          (set! -view
+                (view buffer-new))
+          (seek -view
+                position-saved)))
+      this)
+
+
+  IRelativeReader
+
+
+    (rr-u8 [_]
+      (rr-u8 -view))
+
+    (rr-i8 [_]
+      (rr-i8 -view))
+
+    (rr-u16 [_]
+      (rr-u16 -view))
+
+    (rr-i16 [_]
+      (rr-i16 -view))
+
+    (rr-u32 [_]
+      (rr-u32 -view))
+
+    (rr-i32 [_]
+      (rr-i32 -view))
+
+    (rr-i64 [_]
+      (rr-i64 -view))
+
+    (rr-f32 [_]
+      (rr-f32 -view))
+
+    (rr-f64 [_]
+      (rr-f64 -view))
+    
+    (rr-string [_ n-bytes]
+      (rr-string -view
+                 n-bytes))
+
+    (rr-string [_ encoding n-bytes]
+      (rr-string -view
+                 encoding
+                 n-bytes))
+
+
+  IRelativeWriter
+
+
+    (wr-8 [this integer]
+      (garantee this
+                1)
+      (wr-8 -view
+            integer)
+      this)
+
+    (wr-16 [this integer]
+      (garantee this
+                2)
+      (wr-16 -view
+            integer)
+      this)
+
+    (wr-32 [this integer]
+      (garantee this
+                4)
+      (wr-32 -view
+             integer)
+      this)
+
+    (wr-64 [this integer]
+      (garantee this
+                8)
+      (wr-64 -view
+             integer)
+      this)
+
+    (wr-f32 [this floating]
+      (garantee this
+                4)
+      (wr-f32 -view
+              floating)
+      this)
+
+    (wr-f64 [this floating]
+      (garantee this
+                8)
+      (wr-f64 -view
+              floating)
+      this)
+  
+    (wr-string [this string]
+      (let [res (wa-string this
+                           (position -view)
+                           string)]
+        (skip -view
+              (res 1))
+        res))
+
+
+    IView
+
+
+      (garanteed? [this n-bytes]
+        (garantee this
+                  n-bytes)
+        true)
+
+      (offset [_]
+        0)
+
+      (position [_]
+        (position -view))
+
+      (seek [this position-new]
+        (let [position-old (position -view)]
+          (when (> position-new
+                   position-old)
+            (garantee this
+                      (- position-new
+                         position-old))))
+        (seek -view
+              position-new))
+
+      (skip [this n-bytes]
+        (garantee this
+                  n-bytes)
+        (skip -view
+              n-bytes))
+
+      (to-buffer [_]
+        (to-buffer -view))
+
+
+    IViewBuilder
+
+      (view [_]
+        (view -view))
+
+      (view [_ offset]
+        (view -view
+              offset))
+
+      (view [_ offset size]
+        (view -view
+              offset
+              size)))
+
+
+
+(defn growing-view
+
+  ""
+
+  ([buffer]
+
+   (growing-view buffer
+                 nil))
+
+
+  ([buffer next-size]
+
+   (GrowingView. (if next-size
+                   (fn next-size-2 [size-previous]
+                     (let [size-next (next-size size-previous)]
+                       (if (> size-next
+                              size-previous)
+                         size-next
+                         (throw (ex-info "Must reallocate bigger buffer"
+                                         {::error          :reallocation
+                                          ::previous-sizes size-previous 
+                                          ::next-size      size-next})))))
+                   (fn default-reallocate [size-previous]
+                     (Math/round (* 1.5
+                                    size-previous))))
+                 (view buffer))))
+
 
 ;;;;;;;;;; Creating primitives from bytes
 
