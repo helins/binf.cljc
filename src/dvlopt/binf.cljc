@@ -324,11 +324,6 @@
       :cljs (.decode text-decoder
                      buffer))))
 
-;       :cljs (.decode text-decoder
-;                      (js/Uint8Array. buffer
-;                                      offset
-;                                      n-bytes)))))
-
 
 
 (defn text-decoder
@@ -644,12 +639,26 @@
             n-chars          (.position ^CharBuffer char-buffer)]
         (condp =
                res
-          CoderResult/UNDERFLOW [true n-bytes n-chars]
-          CoderResult/OVERFLOW  [false n-bytes n-chars char-buffer]
+          CoderResult/UNDERFLOW [true n-bytes n-chars char-buffer]
+          CoderResult/OVERFLOW  [false n-bytes n-chars]
           (throw (ex-info (str "Unable to write string: "
                                string)
                           {::error  :string-encoding
                            ::string string})))))
+
+        ;; It seems the encoder does not have to be flushed when writing UTF-8
+        ;;
+        ; (condp =
+        ;        (.flush encoder
+        ;                byte-buffer)
+        ;   CoderResult/UNDERFLOW (- (.position byte-buffer)
+        ;                            offset)
+        ;   CoderResult/OVERFLOW  (throw (ex-info "Not enough bytes to flush string encoder"
+        ;                                         {::error  :insufficient-output
+        ;                                          ::string string}))
+        ;   (throw (ex-info "Unable to flush string encoder"
+        ;                   {::error  :string-encoding
+        ;                    ::string string}))))
 
 
   IView
@@ -698,6 +707,8 @@
             (+ -offset
                offset)
             size))))
+
+
 
 
 #?(:cljs
@@ -761,6 +772,20 @@
                    position
                    little-endian?))
 
+    (ra-string [this position n-bytes]
+      (ra-string this
+                 nil
+                 position
+                 n-bytes))
+
+    (ra-string [this encoding position n-bytes]
+      (.decode (clj/or encoding
+                       -text-decoder-utf-8)
+               (js/Uint8Array. (.-buffer dataview)
+                               (+ (.-byteOffset dataview)
+                                  position)
+                               n-bytes)))
+
 
   IAbsoluteWriter
 
@@ -806,6 +831,20 @@
                    floating
                    little-endian?)
       this)
+
+    (wa-string [this position string]
+      (let [res         (.encodeInto -text-encoder
+                                     string
+                                     (js/Uint8Array. (.-buffer dataview)
+                                                     (+ (.-byteOffset dataview)
+                                                        position)
+                                                     (- (.-byteLength dataview)
+                                                        position)))
+            read-UTF-16 (.-read res)]
+        [(= (.-length string)
+            read-UTF-16)
+         (.-written res)
+         read-UTF-16]))
 
 
   IEndianess
@@ -896,6 +935,20 @@
                  8))
         ret))
 
+    (rr-string [this n-bytes]
+      (rr-string this
+                 nil
+                 n-bytes))
+
+    (rr-string [this encoding n-bytes]
+      (let [string (ra-string this
+                              encoding
+                              -position
+                              n-bytes)]
+        (skip this
+              n-bytes)
+        string))
+
 
   IRelativeWriter
     
@@ -952,6 +1005,14 @@
             (+ -position
                8))
       this)
+
+    (wr-string [this string]
+      (let [res (wa-string this
+                           -position
+                           string)]
+        (skip this
+              (res 1))
+        res))
 
 
   IView
