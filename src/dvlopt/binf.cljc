@@ -483,46 +483,52 @@
 
     (wa-8 [this position integer]
       (.put byte-buffer
-            position
+            (+ -offset
+               position)
             (unchecked-byte integer))
       this)
 
     (wa-16 [this position integer]
       (.putShort byte-buffer
-                 position
+                 (+ -offset
+                    position)
                  (unchecked-short integer))
       this)
 
     (wa-32 [this position integer]
       (.putInt byte-buffer
-               position
+               (+ -offset
+                  position)
                (unchecked-int integer))
       this)
 
     (wa-64 [this position integer]
       (.putLong byte-buffer
-                position
+                (+ -offset
+                   position)
                 integer)
       this)
 
     (wa-f32 [this position floating]
       (.putFloat byte-buffer
-                 position
+                 (+ -offset
+                    position)
                  floating)
       this)
 
     (wa-f64 [this position floating]
       (.putDouble byte-buffer
-                  position
+                  (+ -offset
+                     position)
                   floating)
       this)
 
     (wa-string [this position string]
-      (let [res (wr-string this
-                           string)]
+      (let [saved-position (.position byte-buffer)
+            res            (wr-string this
+                                      string)]
         (.position byte-buffer
-                   (- (.position byte-buffer)
-                      (res 1)))
+                   saved-position)
         res))
 
     
