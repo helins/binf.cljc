@@ -342,3 +342,82 @@
     (t/is (= (binf/position view)
              7)
           "Copy is relative")))
+
+
+;;;;;;;;;; Encoding and decoding text
+
+
+(def string
+     "²é&\"'(§è!çà)-aertyuiopqsdfhgklmwcvbnùµ,;:=")
+
+
+(t/deftest text
+
+  (t/is (= string
+           (-> string
+               binf/text-encode
+               binf/text-decode))))
+
+
+(t/deftest a-string
+  
+  (t/is (false? (first (binf/wa-string (binf/view (binf/buffer 10))
+                                       0
+                                       string)))
+        "Not enough bytes to write everything")
+
+  (let [view (binf/view (binf/buffer 1024))
+        res  (binf/wa-string view
+                             0
+                             string)]
+    (t/is (first res)
+          "Enough bytes for writing strings")
+
+    (t/is (= (count string)
+             (res 2))
+          "Char count is accurate")
+
+    (t/is (zero? (binf/position view))
+          "Write was absolute")
+
+    (t/is (= string
+             (binf/ra-string view
+                             0
+                             (res 1)))
+          "Properly decoding encoded string")
+    
+    (t/is (zero? (binf/position view))
+          "Read was absolute")))
+
+
+(t/deftest r-string
+
+  (t/is (false? (first (binf/wr-string (binf/view (binf/buffer 10))
+                                       string)))
+        "Not enough bytes to write everything")
+
+  (let [view (binf/view (binf/buffer 1024))
+        res  (binf/wr-string view
+                             string)]
+    (t/is (first res)
+          "Enough bytes for writing strings")
+
+    (t/is (= (count string)
+             (res 2))
+          "Char count is accurate")
+
+    (t/is (= (res 1)
+             (binf/position view))
+          "Write was relative")
+
+    (binf/seek view
+               0)
+
+    (t/is (= string
+             (binf/rr-string view
+                             (res 1)))
+          "Properly decoding encoded string")
+    
+    (t/is (= (res 1)
+             (binf/position view))
+          "Read was relative")))

@@ -6,7 +6,11 @@
   (:require [clojure.core :as clj])
   #?(:clj (:import clojure.lang.Counted
                    (java.nio ByteBuffer
-                             ByteOrder)))
+                             ByteOrder
+                             CharBuffer)
+                   (java.nio.charset Charset
+                                     CharsetEncoder
+                                     CoderResult)))
   ;;
   ;; <!> Attention, higly confusing if not kept in mind <!>
   ;;
@@ -17,12 +21,13 @@
 ;;;;;;;;;; Gathering declarations
 
 
-(declare u8
-         i8
-         u16
+(declare i8
          i16
-         u32
-         i32)
+         i32
+         text-decoder
+         u8
+         u16
+         u32)
 
 
 ;;;;;;;;; Aliases for bitwise operations
@@ -128,6 +133,10 @@
     "")
 
   (ra-f64 [this position]
+    "")
+  
+  (ra-string [this position n-bytes]
+             [this encoding position n-bytes]
     ""))
 
 
@@ -151,6 +160,9 @@
     "")
 
   (wa-f64 [this position floating]
+    "")
+  
+  (wa-string [this position string]
     ""))
 
 
@@ -192,6 +204,10 @@
     "")
 
   (rr-f64 [this]
+    "")
+  
+  (rr-string [this n-bytes]
+             [this encoding n-bytes]
     ""))
 
 
@@ -215,6 +231,9 @@
     "")
 
   (wr-f64 [this floating]
+    "")
+
+  (wr-string [this string]
     ""))
 
 
@@ -250,6 +269,126 @@
         [this offset]
         [this offset size]
     ""))
+
+
+;;;;;;;;;; Encoding and decoding strings
+
+
+#?(:clj
+   
+(def ^Charset -charset-utf-8
+
+  ;;
+
+  (Charset/forName "UTF-8")))
+
+
+(def ^:private -text-decoder-utf-8
+
+  ;;
+
+  #?(:clj  -charset-utf-8
+     :cljs (js/TextDecoder. "utf-8")))
+
+
+(def ^:private -text-decoders
+
+  ;;
+
+  {:iso-8859-1 #?(:clj  (Charset/forName "ISO-8859-1")
+                  :cljs (js/TextDecoder. "iso-8859-1")) 
+   :utf-8      -text-decoder-utf-8
+   :utf-16-be  #?(:clj  (Charset/forName "UTF-16BE")
+                  :cljs (js/TextDecoder. "utf-16be"))
+   :utf-16-le  #?(:clj  (Charset/forName "UTF-16LE")
+                  :cljs (js/TextDecoder. "utf-16le"))})
+
+
+
+(defn text-decode
+
+  ""
+
+  ;; TODO. Advanced compilation ?
+
+  ([buffer]
+
+   (text-decode (text-decoder)
+                buffer))
+
+
+  ([text-decoder buffer]
+
+   #?(:clj  (String. ^bytes buffer
+                     ^Charset text-decoder)
+      :cljs (.decode text-decoder
+                     buffer))))
+
+;       :cljs (.decode text-decoder
+;                      (js/Uint8Array. buffer
+;                                      offset
+;                                      n-bytes)))))
+
+
+
+(defn text-decoder
+
+  ""
+
+  ([]
+
+   -text-decoder-utf-8)
+
+
+  ([encoding]
+
+   (or (-text-decoders encoding)
+       (throw (ex-info (str "Unknown encoding: "
+                            encoding)
+                       {::encoding encoding
+                        ::error    :unknown-encoding})))))
+
+
+
+#?(:cljs
+
+(def ^:private -text-encoder
+
+  ;;
+
+  (js/TextEncoder.)))
+
+
+
+(defn text-encode
+
+  ""
+
+  [string]
+
+  #?(:clj  (.getBytes ^String string
+                      -charset-utf-8)
+     :cljs (.-buffer (.encode -text-encoder
+                              string))))
+
+
+  ; ([view string]
+
+  ;  (let [remaining (- (count buffer)
+  ;                     offset)]
+  ;    #?(
+  ;       :cljs (let [res (.encodeInto -text-encoder
+  ;                                    string
+  ;                                    (.subarray ba
+  ;                                               offset
+  ;                                               remaining))]
+  ;               (if (= (count string)
+  ;                      (.-read res))
+  ;                 (.-written res)
+  ;                 (throw (ex-info (str "Not enough bytes to write string: "
+  ;                                      string)
+  ;                                 {::error  :insufficient-output
+  ;                                  ::string string}))))))))
 
 
 ;;;;;;;;;; Types and protocol extensions
@@ -289,86 +428,109 @@
   IAbsoluteReader
 
 
-    (ra-u8 [_ offset]
+    (ra-u8 [_ position]
       (u8 (.get byte-buffer
-                ^long offset)))
+                ^long position)))
 
-    (ra-i8 [_ offset]
+    (ra-i8 [_ position]
       (.get byte-buffer
-            ^long offset))
+            ^long position))
 
 
-    (ra-u16 [_ offset]
+    (ra-u16 [_ position]
       (u16 (.getShort byte-buffer
-                      offset)))
+                      position)))
 
-    (ra-i16 [_ offset]
+    (ra-i16 [_ position]
       (.getShort byte-buffer
-                 offset))
+                 position))
 
 
-    (ra-u32 [_ offset]
+    (ra-u32 [_ position]
       (u32 (.getInt byte-buffer
-                    offset)))
+                    position)))
 
 
-    (ra-i32 [_ offset]
+    (ra-i32 [_ position]
       (.getInt byte-buffer
-               offset))
+               position))
 
 
-    (ra-i64 [_ offset]
+    (ra-i64 [_ position]
       (.getLong byte-buffer
-                offset))
+                position))
 
 
-    (ra-f32 [_ offset]
+    (ra-f32 [_ position]
       (.getFloat byte-buffer
-                 offset))
+                 position))
 
-    (ra-f64 [_ offset]
+    (ra-f64 [_ position]
       (.getDouble byte-buffer
-                  offset))
+                  position))
+
+    (ra-string [this position n-bytes]
+      (ra-string this
+                 nil
+                 position
+                 n-bytes))
+
+    (ra-string [this encoding position n-bytes]
+      (String. (.array byte-buffer)
+               ^long position
+               ^long n-bytes
+               ^Charset (clj/or encoding
+                                -charset-utf-8)))
 
 
   IAbsoluteWriter
 
 
-    (wa-8 [this offset integer]
+    (wa-8 [this position integer]
       (.put byte-buffer
-            offset
+            position
             (unchecked-byte integer))
       this)
 
-    (wa-16 [this offset integer]
+    (wa-16 [this position integer]
       (.putShort byte-buffer
-                 offset
+                 position
                  (unchecked-short integer))
       this)
 
-    (wa-32 [this offset integer]
+    (wa-32 [this position integer]
       (.putInt byte-buffer
-               offset
+               position
                (unchecked-int integer))
       this)
 
-    (wa-64 [this offset integer]
+    (wa-64 [this position integer]
       (.putLong byte-buffer
-                offset
+                position
                 integer)
       this)
 
-    (wa-f32 [this offset floating]
+    (wa-f32 [this position floating]
       (.putFloat byte-buffer
-                 offset
+                 position
                  floating)
       this)
 
-    (wa-f64 [this offset floating]
+    (wa-f64 [this position floating]
       (.putDouble byte-buffer
-                  offset
+                  position
                   floating)
       this)
+
+    (wa-string [this position string]
+      (let [res (wr-string this
+                           string)]
+        (.position byte-buffer
+                   (- (.position byte-buffer)
+                      (res 1)))
+        res))
+
+    
 
 
   IEndianess
@@ -418,6 +580,20 @@
     (rr-f64 [_]
       (.getDouble byte-buffer))
 
+    (rr-string [this n-bytes]
+      (rr-string this
+                 nil
+                 n-bytes))
+
+    (rr-string [this encoding n-bytes]
+      (let [string (ra-string this
+                              encoding
+                              (.position byte-buffer)
+                              n-bytes)]
+        (skip this
+              n-bytes)
+        string))
+
 
   IRelativeWriter
 
@@ -451,6 +627,29 @@
       (.putDouble byte-buffer
                   floating)
       this)
+
+    (wr-string [this string]
+      (let [position-current (.position byte-buffer)
+            encoder          (.newEncoder -charset-utf-8)
+            char-buffer      (if (instance? CharBuffer
+                                            string)
+                               string
+                               (CharBuffer/wrap ^String string))
+            res              (.encode encoder
+                                      char-buffer 
+                                      byte-buffer
+                                      true)
+            n-bytes          (- (.position byte-buffer)
+                                position-current)
+            n-chars          (.position ^CharBuffer char-buffer)]
+        (condp =
+               res
+          CoderResult/UNDERFLOW [true n-bytes n-chars]
+          CoderResult/OVERFLOW  [false n-bytes n-chars char-buffer]
+          (throw (ex-info (str "Unable to write string: "
+                               string)
+                          {::error  :string-encoding
+                           ::string string})))))
 
 
   IView
