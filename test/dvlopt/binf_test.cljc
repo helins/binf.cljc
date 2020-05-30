@@ -74,7 +74,7 @@
         "f32"))
 
 
-;;;;;;;;;; Views
+;;;;;;;;;; Views, primitive values
 
 
 (def offset
@@ -192,21 +192,37 @@
 
 
 
-(t/deftest view-uints
+(defn gview
+
+  []
+
+  (binf/growing-view (binf/buffer 1)
+                     (fn next-size [size]
+                       (+ size
+                          (if (< (rand)
+                                 0.5)
+                            3
+                            4)))))
+
+
+
+(defn- -view-uints
+
+  [f-view]
 
   (t/are [wa ra wr rr value]
          (and (t/is (= value
-                       (-> (view-8)
+                       (-> (f-view)
                            (wa 0
                                value)
                            (ra 0)))
-                    "Absolute")
+                    "Absolute uint")
               (t/is (= value
-                       (-> (view-8)
+                       (-> (f-view)
                            (wr value)
                            (binf/seek 0)
                            rr))
-                    "Relative"))
+                    "Relative uint"))
 
 
 
@@ -219,17 +235,94 @@
 
 
 
+(defn- -view-i64
+
+  [f-view]
+
+  (let [x #?(:clj  Long/MAX_VALUE
+             :cljs (js/BigInt js/Number.MAX_SAFE_INTEGER))]
+    (and (t/is (= x
+                 (-> (f-view)
+                     (binf/wa-64 0
+                                 x)
+                     (binf/ra-i64 0)))
+               "Absolute i64")
+         (t/is (= x
+                  (-> (f-view)
+                      (binf/wr-64 x)
+                      (binf/seek 0)
+                      (binf/rr-i64)))
+               "Relative i64"))))
+
+
+
+#?(:clj
+
+(defn- -view-f32
+
+  [f-view]
+
+  (let [x (float 42.42)]
+    (and (t/is (= x
+                  (-> (f-view)
+                      (binf/wa-f32 0
+                                   x)
+                      (binf/ra-f32 0)))
+               "Absolute f32")
+         (t/is (= x
+                  (-> (f-view)
+                      (binf/wr-f32 x)
+                      (binf/seek 0)
+                      binf/rr-f32))
+               "Relative f32")))))
+
+
+
+(defn- -view-f64
+
+  [f-view]
+
+  (let [x 42.42]
+    (and (t/is (= x
+                  (-> (f-view)
+                      (binf/wa-f64 0
+                                   x)
+                      (binf/ra-f64 0)))
+               "Absolute f64")
+         (t/is (= x
+                  (-> (f-view)
+                      (binf/wr-f64 x)
+                      (binf/seek 0)
+                      binf/rr-f64))
+               "Relative f64"))))
+
+
+
+(t/deftest view-uints
+
+  (-view-uints view-8))
+
+
+
+(t/deftest gview-uints
+
+  (-view-uints gview))
+
+
+
 (t/deftest ^:no-node view-i64
 
   ; Node, Cf. [[i64]]
 
-  (let [x #?(:clj  Long/MAX_VALUE
-             :cljs (js/BigInt js/Number.MAX_SAFE_INTEGER))]
-    (t/is (= x
-             (-> (view-8)
-                 (binf/wa-64 0
-                             x)
-                 (binf/ra-i64 0))))))
+  (-view-i64 view-8))
+
+
+
+(t/deftest ^:no-node gview-i64
+
+  ; Node, Cf. [[i64]]
+
+  (-view-i64 gview))
 
 
 
@@ -237,23 +330,27 @@
 
 (t/deftest view-f32
 
-  (let [x (float 42.42)]
-    (t/is (= x
-             (-> (view-8)
-                 (binf/wa-f32 0
-                              x)
-                 (binf/ra-f32 0)))))))
+  (-view-f32 view-8)))
+
+
+
+#?(:clj
+
+(t/deftest gview-f32
+
+  (-view-f32 gview)))
 
 
 
 (t/deftest view-f64
 
-  (let [x 42.42]
-    (t/is (= x
-             (-> (view-8)
-                 (binf/wa-f64 0
-                              x)
-                 (binf/ra-f64 0))))))
+  (-view-f64 view-8))
+
+
+
+(t/deftest gview-f64
+
+  (-view-f64 gview))
 
 
 ;;;;;;;;;; Copying
@@ -351,6 +448,7 @@
      "²é&\"'(§è!çà)-aertyuiopqsdfhgklmwcvbnùµ,;:=")
 
 
+
 (t/deftest text
 
   (t/is (= string
@@ -359,23 +457,35 @@
                binf/text-decode))))
 
 
-(t/deftest a-string
-  
-  (t/is (false? (first (binf/wa-string (binf/view (binf/buffer 10))
-                                       0
-                                       string)))
-        "Not enough bytes to write everything")
 
-  (let [view (binf/view (binf/buffer 1024))
+(defn -string
+
+  [string res]
+
+  (t/is (first res)
+        "Enough bytes for writing strings")
+
+  (t/is (= (count string)
+           (res 2))
+        "Char count is accurate")
+
+  (t/is (<= (res 2)
+            (res 1))
+        "Cannot write more chars than bytes"))
+
+
+
+(defn- -a-string
+  
+  [f-view]
+
+  (let [view (f-view)
         res  (binf/wa-string view
                              0
                              string)]
-    (t/is (first res)
-          "Enough bytes for writing strings")
 
-    (t/is (= (count string)
-             (res 2))
-          "Char count is accurate")
+    (-string string
+             res)
 
     (t/is (zero? (binf/position view))
           "Write was absolute")
@@ -390,21 +500,17 @@
           "Read was absolute")))
 
 
-(t/deftest r-string
 
-  (t/is (false? (first (binf/wr-string (binf/view (binf/buffer 10))
-                                       string)))
-        "Not enough bytes to write everything")
+(defn- -r-string
 
-  (let [view (binf/view (binf/buffer 1024))
+  [f-view]
+
+  (let [view (f-view)
         res  (binf/wr-string view
                              string)]
-    (t/is (first res)
-          "Enough bytes for writing strings")
 
-    (t/is (= (count string)
-             (res 2))
-          "Char count is accurate")
+    (-string string
+              res)
 
     (t/is (= (res 1)
              (binf/position view))
@@ -421,3 +527,52 @@
     (t/is (= (res 1)
              (binf/position view))
           "Read was relative")))
+
+
+
+
+(t/deftest a-string
+  
+  (t/is (false? (first (binf/wa-string (binf/view (binf/buffer 10))
+                                       0
+                                       string)))
+        "Not enough bytes to write everything")
+
+  (-a-string #(binf/view (binf/buffer 1024))))
+
+
+
+
+(t/deftest ga-string
+
+  (-a-string gview))
+
+
+
+
+(t/deftest r-string
+
+  (t/is (false? (first (binf/wr-string (binf/view (binf/buffer 10))
+                                       string)))
+        "Not enough bytes to write everything")
+
+  (-r-string #(binf/view (binf/buffer 1024))))
+
+
+
+(t/deftest gr-string
+
+  (-r-string gview))
+
+
+;;;;;;;;;; Growing views
+
+
+(t/deftest gseek
+
+  (let [gv (binf/growing-view (binf/buffer 10))]
+    (binf/seek gv
+               1000)
+    (t/is (= 1000
+             (binf/position gv)))))
+

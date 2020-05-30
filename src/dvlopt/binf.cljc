@@ -10,7 +10,8 @@
                              CharBuffer)
                    (java.nio.charset Charset
                                      CharsetEncoder
-                                     CoderResult)))
+                                     CoderResult
+                                     StandardCharsets)))
   ;;
   ;; <!> Attention, higly confusing if not kept in mind <!>
   ;;
@@ -137,7 +138,7 @@
     "")
   
   (ra-string [this position n-bytes]
-             [this encoding position n-bytes]
+             [this decoder position n-bytes]
     ""))
 
 
@@ -216,7 +217,7 @@
     "")
   
   (rr-string [this n-bytes]
-             [this encoding n-bytes]
+             [this decoder n-bytes]
     ""))
 
 
@@ -304,12 +305,12 @@
 
   ;;
 
-  {:iso-8859-1 #?(:clj  (Charset/forName "ISO-8859-1")
+  {:iso-8859-1 #?(:clj  StandardCharsets/ISO_8859_1
                   :cljs (js/TextDecoder. "iso-8859-1")) 
    :utf-8      -text-decoder-utf-8
-   :utf-16-be  #?(:clj  (Charset/forName "UTF-16BE")
+   :utf-16-be  #?(:clj  StandardCharsets/UTF_16BE
                   :cljs (js/TextDecoder. "utf-16be"))
-   :utf-16-le  #?(:clj  (Charset/forName "UTF-16LE")
+   :utf-16-le  #?(:clj  StandardCharsets/UTF_16LE
                   :cljs (js/TextDecoder. "utf-16le"))})
 
 
@@ -462,11 +463,11 @@
                  position
                  n-bytes))
 
-    (ra-string [this encoding position n-bytes]
+    (ra-string [this decoder position n-bytes]
       (String. (.array byte-buffer)
                ^long position
                ^long n-bytes
-               (clj/or ^Charset encoding
+               (clj/or ^Charset decoder
                        -charset-utf-8)))
 
 
@@ -576,9 +577,9 @@
                  nil
                  n-bytes))
 
-    (rr-string [this encoding n-bytes]
+    (rr-string [this decoder n-bytes]
       (let [string (ra-string this
-                              encoding
+                              decoder
                               (.position byte-buffer)
                               n-bytes)]
         (skip this
@@ -620,23 +621,25 @@
       this)
 
     (wr-string [this string]
-      (let [position-current (.position byte-buffer)
-            encoder          (.newEncoder -charset-utf-8)
-            char-buffer      (if (instance? CharBuffer
-                                            string)
-                               string
-                               (CharBuffer/wrap ^String string))
-            res              (.encode encoder
-                                      char-buffer 
-                                      byte-buffer
-                                      true)
-            n-bytes          (- (.position byte-buffer)
-                                position-current)
-            n-chars          (.position ^CharBuffer char-buffer)]
+      (let [encoder     (.newEncoder -charset-utf-8)
+            char-buffer (if (instance? CharBuffer
+                                       string)
+                          string
+                          (CharBuffer/wrap ^String string))
+            position-bb (.position byte-buffer)
+            position-cb (.position char-buffer)
+            res         (.encode encoder
+                                 char-buffer 
+                                 byte-buffer
+                                 true)
+            n-bytes     (- (.position byte-buffer)
+                           position-bb)
+            n-chars     (- (.position ^CharBuffer char-buffer)
+                           position-cb)]
         (condp =
                res
-          CoderResult/UNDERFLOW [true n-bytes n-chars char-buffer]
-          CoderResult/OVERFLOW  [false n-bytes n-chars]
+          CoderResult/UNDERFLOW [true n-bytes n-chars]
+          CoderResult/OVERFLOW  [false n-bytes n-chars char-buffer]
           (throw (ex-info (str "Unable to write string: "
                                string)
                           {::error  :string-encoding
@@ -774,8 +777,8 @@
                  position
                  n-bytes))
 
-    (ra-string [this encoding position n-bytes]
-      (.decode (clj/or encoding
+    (ra-string [this decoder position n-bytes]
+      (.decode (clj/or decoder 
                        -text-decoder-utf-8)
                (js/Uint8Array. (.-buffer dataview)
                                (+ (.-byteOffset dataview)
@@ -936,9 +939,9 @@
                  nil
                  n-bytes))
 
-    (rr-string [this encoding n-bytes]
+    (rr-string [this decoder n-bytes]
       (let [string (ra-string this
-                              encoding
+                              decoder
                               -position
                               n-bytes)]
         (skip this
@@ -1015,7 +1018,7 @@
 
 
     (garanteed? [_ n-bytes]
-      (>= (- (.byteLength dataview)
+      (>= (- (.-byteLength dataview)
              -position)
           n-bytes))
 
@@ -1157,34 +1160,34 @@
 
 
 (deftype GrowingView [next-size
-                     ; #?@(:clj  [^:unsynchronized-mutable -view])
-                     ; #?@(:cljs [^:mutable -view])
-      ^:unsynchronized-mutable -view
-                      ]
-  
+                      #?@(:clj  [^:unsynchronized-mutable -view])
+                      #?@(:cljs [^:mutable -view])]
 
 
   -IGrowing
 
   
     (-grow [this]
-      (let [buffer-new (buffer (next-size (count -view)))]
+      (let [position-saved (position -view)
+            buffer-new     (buffer (next-size (count -view)))]
         (copy buffer-new
               0
               (to-buffer -view))
         (set! -view
-              (view buffer-new)))
+              (view buffer-new))
+        (seek -view
+              position-saved))
       this)
 
-  Counted (count [_] 42)
-  ; #?(:clj  clojure.lang.Counted
-  ;    :cljs ICounted)
+
+  #?(:clj  clojure.lang.Counted
+     :cljs ICounted)
 
 
-  ; #?(:clj  (count [_]
-  ;            (count -view))
-  ;    :cljs (-count [_]
-  ;            (count -view)))
+  #?(:clj  (count [_]
+             (count -view))
+     :cljs (-count [_]
+             (count -view)))
 
 
   IAbsoluteReader
@@ -1231,9 +1234,9 @@
                  position
                  n-bytes))
 
-    (ra-string [_ encoding position n-bytes]
+    (ra-string [_ decoder position n-bytes]
       (ra-string -view
-                 encoding
+                 decoder 
                  position
                  n-bytes))
 
@@ -1289,31 +1292,15 @@
               floating)
       this)
     
-    (wa-string [_ position string]
-      (let [res (wa-string -view
-                           position
-                           string)]
-        (if (res 0)
-          res
-          (loop [written-bytes (res 1)
-                 written-chars (res 2)]
-            (let [res-next (wa-string -view
-                                      position
-                                      #?(:clj  (res 3)
-                                         :cljs (.substring string
-                                                           written-chars)))]
-              (if (res-next 0)
-                (-> res-next
-                    (update 1
-                            +
-                            written-bytes)
-                    (update 2
-                            +
-                            written-chars))
-                (recur (+ (res 1)
-                          written-bytes)
-                       (+ (res 2)
-                          written-chars))))))))
+    (wa-string [this given-position string]
+      (let [position-saved (position -view)]
+        (seek this
+              given-position)
+        (let [res (wr-string this
+                             string)]
+          (seek -view
+                position-saved)
+          res)))
 
 
   IEndianess
@@ -1336,7 +1323,7 @@
         (let [position-saved (position -view)
               size-minimum   (+ position-saved
                                 n-bytes)
-              buffer-new     (buffer (loop [size-next (next-size (count view))]
+              buffer-new     (buffer (loop [size-next (next-size (count -view))]
                                        (if (>= size-next
                                                size-minimum)
                                          size-next
@@ -1385,9 +1372,9 @@
       (rr-string -view
                  n-bytes))
 
-    (rr-string [_ encoding n-bytes]
+    (rr-string [_ decoder n-bytes]
       (rr-string -view
-                 encoding
+                 decoder
                  n-bytes))
 
 
@@ -1437,12 +1424,32 @@
       this)
   
     (wr-string [this string]
-      (let [res (wa-string this
-                           (position -view)
+      (let [res (wr-string -view
                            string)]
-        (skip -view
-              (res 1))
-        res))
+        (if (res 0)
+          res
+          (loop [res-2         res
+                 written-bytes (res 1)
+                 written-chars (res 2)]
+            (-grow this)
+            (let [res-next (wr-string -view
+                                      #?(:clj  (res-2 3)
+                                         :cljs (.substring string
+                                                           written-chars)))]
+              (if (res-next 0)
+                (-> res-next
+                    (update 1
+                            +
+                            written-bytes)
+                    (update 2
+                            +
+                            written-chars))
+                (do
+                  (recur res-next
+                         (+ (res-next 1)
+                            written-bytes)
+                         (+ (res-next 2)
+                            written-chars)))))))))
 
 
     IView
