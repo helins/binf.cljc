@@ -4,6 +4,7 @@
 
   {:author "Adam Helinski"}
   (:require [clojure.core :as clj])
+  #?(:cljs (:require-macros [dvlopt.binf]))
   #?(:clj (:import clojure.lang.Counted
                    (java.nio ByteBuffer
                              ByteOrder
@@ -1190,6 +1191,27 @@
 
 #?(:clj
 
+(defmacro buffer*
+
+  ""
+
+  [& b8s]
+
+  (let [sym-buffer (gensym)
+        sym-view   (gensym)
+        n          (count b8s)]
+    `(let [~sym-buffer (buffer ~n)
+           ~sym-view   (view ~sym-buffer)]
+       ~@(map (fn set-b8 [b]
+                `(wr-b8 ~sym-view
+                        ~b))
+              b8s)
+       ~sym-buffer))))
+
+
+
+#?(:clj
+
 (extend-protocol IViewBuilder
 
   (Class/forName "[B")
@@ -1255,7 +1277,7 @@
   ISeqable
 
     (-seq [this]
-      (array-seq (js/Uint8Array. this)))))
+      (array-seq (js/Int8Array. this)))))
 
 
 

@@ -19,7 +19,6 @@ package-lock.json
 tests.edn
 out
 
-
 // Shadow-cljs
 
 .shadow-cljs/

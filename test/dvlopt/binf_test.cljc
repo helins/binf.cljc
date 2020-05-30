@@ -6,6 +6,14 @@
             [dvlopt.binf  :as binf]))
 
 
+;;;;;;;;;;
+
+
+(t/deftest buffer*
+  
+  (t/is (= (range -3
+                  4)
+           (seq (binf/buffer* -3 -2 -1 0 1 2 3)))))
 
 
 ;;;;;;;;;; Primitive conversions
