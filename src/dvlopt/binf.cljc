@@ -146,16 +146,16 @@
 
   ""
   
-  (wa-8 [this position integer]
+  (wa-b8 [this position integer]
     "")
 
-  (wa-16 [this position integer]
+  (wa-b16 [this position integer]
     "")
 
-  (wa-32 [this position integer]
+  (wa-b32 [this position integer]
     "")
 
-  (wa-64 [this position integer]
+  (wa-b64 [this position integer]
     "")
 
   (wa-f32 [this position floating]
@@ -225,16 +225,16 @@
 
   ""
 
-  (wr-8 [this integer]
+  (wr-b8 [this integer]
     "")
 
-  (wr-16 [this integer]
+  (wr-b16 [this integer]
     "")
 
-  (wr-32 [this integer]
+  (wr-b32 [this integer]
     "")
 
-  (wr-64 [this integer]
+  (wr-b64 [this integer]
     "")
 
   (wr-f32 [this floating]
@@ -486,28 +486,28 @@
   IAbsoluteWriter
 
 
-    (wa-8 [this position integer]
+    (wa-b8 [this position integer]
       (.put byte-buffer
             (+ -offset
                position)
             (unchecked-byte integer))
       this)
 
-    (wa-16 [this position integer]
+    (wa-b16 [this position integer]
       (.putShort byte-buffer
                  (+ -offset
                     position)
                  (unchecked-short integer))
       this)
 
-    (wa-32 [this position integer]
+    (wa-b32 [this position integer]
       (.putInt byte-buffer
                (+ -offset
                   position)
                (unchecked-int integer))
       this)
 
-    (wa-64 [this position integer]
+    (wa-b64 [this position integer]
       (.putLong byte-buffer
                 (+ -offset
                    position)
@@ -602,22 +602,22 @@
   IRelativeWriter
 
 
-    (wr-8 [this integer]
+    (wr-b8 [this integer]
       (.put byte-buffer
             (unchecked-byte integer))
       this)
 
-    (wr-16 [this integer]
+    (wr-b16 [this integer]
       (.putShort byte-buffer
                  (unchecked-short integer))
       this)
 
-    (wr-32 [this integer]
+    (wr-b32 [this integer]
       (.putInt byte-buffer
                (unchecked-int integer))
       this)
 
-    (wr-64 [this integer]
+    (wr-b64 [this integer]
       (.putLong byte-buffer
                 integer)
       this)
@@ -639,7 +639,7 @@
                           string
                           (CharBuffer/wrap ^String string))
             position-bb (.position byte-buffer)
-            position-cb (.position char-buffer)
+            position-cb (.position ^CharBuffer char-buffer)
             res         (.encode encoder
                                  char-buffer 
                                  byte-buffer
@@ -850,28 +850,28 @@
   IAbsoluteWriter
 
 
-    (wa-8 [this position integer]
+    (wa-b8 [this position integer]
        (.setUint8 dataview
                   position
                   integer
                   little-endian?)
         this)
 
-    (wa-16 [this position integer]
-      (.setInt16 dataview
-                 position
-                 integer
-                 little-endian?)
+    (wa-b16 [this position integer]
+      (.setUint16 dataview
+                  position
+                  integer
+                  little-endian?)
       this)
 
-    (wa-32 [this position integer]
-      (.setInt32 dataview
-                 position
-                 integer
-                 little-endian?)
+    (wa-b32 [this position integer]
+      (.setUint32 dataview
+                  position
+                  integer
+                  little-endian?)
       this)
 
-    (wa-64 [this position integer]
+    (wa-b64 [this position integer]
       (.setBigInt64 dataview
                     position
                     integer
@@ -1013,36 +1013,36 @@
   IRelativeWriter
     
 
-    (wr-8 [this integer]
-      (wa-8 this
-            -position
-            integer)
+    (wr-b8 [this integer]
+      (wa-b8 this
+             -position
+             integer)
       (set! -position
             (inc -position))
       this)
 
-    (wr-16 [this integer]
-      (wa-16 this
-             -position
-             integer)
+    (wr-b16 [this integer]
+      (wa-b16 this
+              -position
+              integer)
       (set! -position
             (+ -position
                2))
       this)
 
-    (wr-32 [this integer]
-      (wa-32 this
-             -position
-             integer)
+    (wr-b32 [this integer]
+      (wa-b32 this
+              -position
+              integer)
       (set! -position
             (+ -position
                4))
       this)
 
-    (wr-64 [this integer]
-      (wa-64 this
-             -position
-             integer)
+    (wr-b64 [this integer]
+      (wa-b64 this
+              -position
+              integer)
       (set! -position
             (+ -position
                8))
@@ -1356,36 +1356,36 @@
   IAbsoluteWriter
 
 
-    (wa-8 [this position integer]
+    (wa-b8 [this position integer]
       (garantee this
                 1)
-      (wa-8 -view
-            position
-            integer)
+      (wa-b8 -view
+             position
+             integer)
       this)
 
-    (wa-16 [this position integer]
+    (wa-b16 [this position integer]
       (garantee this
                 2)
-      (wa-16 -view
-            position
-            integer)
+      (wa-b16 -view
+             position
+             integer)
       this)
 
-    (wa-32 [this position integer]
+    (wa-b32 [this position integer]
       (garantee this
                 4)
-      (wa-32 -view
-             position
-             integer)
+      (wa-b32 -view
+              position
+              integer)
       this)
 
-    (wa-64 [this position integer]
+    (wa-b64 [this position integer]
       (garantee this
                 8)
-      (wa-64 -view
-             position
-             integer)
+      (wa-b64 -view
+              position
+              integer)
       this)
 
     (wa-f32 [this position floating]
@@ -1493,31 +1493,31 @@
   IRelativeWriter
 
 
-    (wr-8 [this integer]
+    (wr-b8 [this integer]
       (garantee this
                 1)
-      (wr-8 -view
+      (wr-b8 -view
             integer)
       this)
 
-    (wr-16 [this integer]
+    (wr-b16 [this integer]
       (garantee this
                 2)
-      (wr-16 -view
+      (wr-b16 -view
             integer)
       this)
 
-    (wr-32 [this integer]
+    (wr-b32 [this integer]
       (garantee this
                 4)
-      (wr-32 -view
+      (wr-b32 -view
              integer)
       this)
 
-    (wr-64 [this integer]
+    (wr-b64 [this integer]
       (garantee this
                 8)
-      (wr-64 -view
+      (wr-b64 -view
              integer)
       this)
 
@@ -1725,8 +1725,8 @@
 
   #?(:clj  (unchecked-byte u8)
      :cljs (-> -conv-view
-               (wa-8 0
-                     u8)
+               (wa-b8 0
+                      u8)
                (ra-i8 0))))
 
 
@@ -1741,11 +1741,11 @@
         i16))
 
 
-  ([i8-1 i8-2]
+  ([b8-1 b8-2]
 
-   (u16 (or (<< i8-1
+   (u16 (or (<< b8-1
                 8)
-            i8-2))))
+            b8-2))))
 
 
 
@@ -1757,15 +1757,15 @@
 
    #?(:clj  (unchecked-short u16)
       :cljs (-> -conv-view
-                (wa-16 0
-                       u16)
+                (wa-b16 0
+                        u16)
                 (ra-i16 0))))
 
 
-  ([i8-1 i8-2]
+  ([b8-1 b8-2]
 
-   (i16 (u16 i8-1
-             i8-2))))
+   (i16 (u16 b8-1
+             b8-2))))
 
 
 
@@ -1779,19 +1779,19 @@
                  i32)
       ;; Because bitwise operations in JS are 32 bits, bit-and'ing does not work in this case.
       :cljs (-> -conv-view
-                (wa-32 0
-                       i32)
+                (wa-b32 0
+                        i32)
                 (ra-u32 0))))
 
-  ([i8-1 i8-2 i8-3 i8-4]
+  ([b8-1 b8-2 b8-3 b8-4]
 
-   (u32 (or (<< i8-1
+   (u32 (or (<< b8-1
                 24)
-            (<< i8-2
+            (<< b8-2
                 16)
-            (<< i8-3
+            (<< b8-3
                 8)
-            i8-4))))
+            b8-4))))
 
 
 
@@ -1803,16 +1803,16 @@
 
    #?(:clj  (unchecked-int u32)
       :cljs (-> -conv-view
-                (wa-32 0
-                       u32)
+                (wa-b32 0
+                        u32)
                 (ra-i32 0))))
 
-  ([i8-1 i8-2 i8-3 i8-4]
+  ([b8-1 b8-2 b8-3 b8-4]
 
-   (i32 (u32 i8-1
-             i8-2
-             i8-3
-             i8-4))))
+   (i32 (u32 b8-1
+             b8-2
+             b8-3
+             b8-4))))
 
 
 
@@ -1820,23 +1820,23 @@
 
   ""
 
-  [i8-1 i8-2 i8-3 i8-4 i8-5 i8-6 i8-7 i8-8]
+  [b8-1 b8-2 b8-3 b8-4 b8-5 b8-6 b8-7 b8-8]
 
-  (or (<< i8-1
+  (or (<< b8-1
           56)
-      (<< i8-2
+      (<< b8-2
           48)
-      (<< i8-3
+      (<< b8-3
           40)
-      (<< i8-4
+      (<< b8-4
           32)
-      (<< i8-5
+      (<< b8-5
           24)
-      (<< i8-6
+      (<< b8-6
           16)
-      (<< i8-7
+      (<< b8-7
           8)
-      i8-8))
+      b8-8))
 
 
 
@@ -1848,17 +1848,17 @@
 
    #?(:clj  (Float/intBitsToFloat integer)
       :cljs (-> -conv-view
-                (wa-32 0
-                       integer)
+                (wa-b32 0
+                        integer)
                 (ra-f32 0))))
 
 
-  ([i8-1 i8-2 i8-3 i8-4]
+  ([b8-1 b8-2 b8-3 b8-4]
 
-   (f32 (u32 i8-1
-             i8-2
-             i8-3
-             i8-4))))
+   (f32 (u32 b8-1
+             b8-2
+             b8-3
+             b8-4))))
 
 
 
@@ -1870,21 +1870,21 @@
 
    #?(:clj  (Double/longBitsToDouble integer)
       :cljs (-> -conv-view
-                (wa-64 0
-                       integer)
+                (wa-b64 0
+                        integer)
                 (ra-f64 0))))
 
 
-  ([i8-1 i8-2 i8-3 i8-4 i8-5 i8-6 i8-7 i8-8]
+  ([b8-1 b8-2 b8-3 b8-4 b8-5 b8-6 b8-7 b8-8]
 
-   (f64 (i64 i8-1
-             i8-2
-             i8-3
-             i8-4
-             i8-5
-             i8-6
-             i8-7
-             i8-8))))
+   (f64 (i64 b8-1
+             b8-2
+             b8-3
+             b8-4
+             b8-5
+             b8-6
+             b8-7
+             b8-8))))
 
 
 

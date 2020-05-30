@@ -71,7 +71,7 @@
 
   (t/is (= 42.42
            (binf/f64 (binf/bits-f64 42.42)))
-        "f32"))
+        "f64"))
 
 
 ;;;;;;;;;; Views, primitive values
@@ -226,12 +226,12 @@
 
 
 
-    binf/wa-8  binf/ra-u8  binf/wr-8  binf/rr-u8  (binf/integer (dec (Math/pow 2 8)))
-    binf/wa-8  binf/ra-i8  binf/wr-8  binf/rr-i8  -1
-    binf/wa-16 binf/ra-u16 binf/wr-16 binf/rr-u16 (binf/integer (dec (Math/pow 2 16)))
-    binf/wa-16 binf/ra-i16 binf/wr-16 binf/rr-i16 -1
-    binf/wa-32 binf/ra-u32 binf/wr-32 binf/rr-u32 (binf/integer (dec (Math/pow 2 32)))
-    binf/wa-32 binf/ra-i32 binf/wr-32 binf/rr-i32 -1))
+    binf/wa-b8  binf/ra-u8  binf/wr-b8  binf/rr-u8  (binf/integer (dec (Math/pow 2 8)))
+    binf/wa-b8  binf/ra-i8  binf/wr-b8  binf/rr-i8  -1
+    binf/wa-b16 binf/ra-u16 binf/wr-b16 binf/rr-u16 (binf/integer (dec (Math/pow 2 16)))
+    binf/wa-b16 binf/ra-i16 binf/wr-b16 binf/rr-i16 -1
+    binf/wa-b32 binf/ra-u32 binf/wr-b32 binf/rr-u32 (binf/integer (dec (Math/pow 2 32)))
+    binf/wa-b32 binf/ra-i32 binf/wr-b32 binf/rr-i32 -1))
 
 
 
@@ -243,13 +243,13 @@
              :cljs (js/BigInt js/Number.MAX_SAFE_INTEGER))]
     (and (t/is (= x
                  (-> (f-view)
-                     (binf/wa-64 0
-                                 x)
+                     (binf/wa-b64 0
+                                  x)
                      (binf/ra-i64 0)))
                "Absolute i64")
          (t/is (= x
                   (-> (f-view)
-                      (binf/wr-64 x)
+                      (binf/wr-b64 x)
                       (binf/seek 0)
                       (binf/rr-i64)))
                "Relative i64"))))
@@ -362,8 +362,8 @@
 
   (let [view (binf/view (binf/buffer 5))]
     (dotimes [_ 5]
-      (binf/wr-8 view
-                 1))
+      (binf/wr-b8 view
+                  1))
     view))
 
 
