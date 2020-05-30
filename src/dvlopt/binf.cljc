@@ -251,6 +251,16 @@
 
   ""
 
+  (copya [this position buffer]
+         [this position buffer offset]
+         [this position buffer offset n-bytes]
+    "")
+
+  (copyr [this buffer]
+         [this buffer offset]
+         [this buffer offset n-bytes]
+    "")
+
   (garanteed? [this n-bytes]
     "")
 
@@ -290,7 +300,8 @@
 
   ;;
 
-  (Charset/forName "UTF-8")))
+  StandardCharsets/UTF_8))
+
 
 
 (def ^:private -text-decoder-utf-8
@@ -299,6 +310,7 @@
 
   #?(:clj  -charset-utf-8
      :cljs (js/TextDecoder. "utf-8")))
+
 
 
 (def ^:private -text-decoders
@@ -534,7 +546,7 @@
         ByteOrder/BIG_ENDIAN    :big-endian
         ByteOrder/LITTLE_ENDIAN :little-endian))
 
-    (endianess [this new-endianess ]
+    (endianess [this new-endianess]
       (.order byte-buffer
               (case new-endianess
                 :big-endian    ByteOrder/BIG_ENDIAN
@@ -662,6 +674,55 @@
 
   IView
 
+
+    (copya [this position buffer]
+      (copya this
+             position
+             buffer
+             nil))
+
+    (copya [this position buffer offset]
+      (copya this
+             position
+             buffer
+             offset
+             nil))
+
+    (copya [this position buffer offset n-bytes]
+      (copy (to-buffer this)
+            (+ -offset
+               position)
+            buffer
+            offset
+            n-bytes)
+      this)
+
+    (copyr [this buffer]
+      (copyr this
+             buffer
+             nil))
+
+    (copyr [this buffer offset]
+      (copyr this
+             buffer
+             offset
+             nil))
+
+    (copyr [this buffer offset n-bytes]
+      (let [offset-2  (clj/or offset 
+                              0)
+            n-bytes-2 (clj/or n-bytes
+                              (- (count buffer)
+                                 offset-2))]
+        (copy (to-buffer this)
+              (+ -offset
+                 (position this))
+              buffer
+              offset-2
+              n-bytes-2)
+        (skip this
+              n-bytes-2))
+      this)
 
     (garanteed? [_ n-bytes]
       (>= (- (.limit byte-buffer)
@@ -1016,6 +1077,57 @@
 
   IView
 
+    ;; [START] Copied from CLJ implementation
+
+    (copya [this position buffer]
+      (copya this
+             position
+             buffer
+             nil))
+
+    (copya [this position buffer offset]
+      (copya this
+             position
+             buffer
+             offset
+             nil))
+
+    (copya [this position buffer offset n-bytes]
+      (copy (to-buffer this)
+            (+ (.-byteOffset dataview)
+               position)
+            buffer
+            offset
+            n-bytes)
+      this)
+
+    (copyr [this buffer]
+      (copyr this
+             buffer
+             nil))
+
+    (copyr [this buffer offset]
+      (copyr this
+             buffer
+             offset
+             nil))
+
+    (copyr [this buffer offset n-bytes]
+      (let [offset-2  (clj/or offset 
+                              0)
+            n-bytes-2 (clj/or n-bytes
+                              (- (count buffer)
+                                 offset-2))]
+        (copy (to-buffer this)
+              (position this)
+              buffer
+              offset-2
+              n-bytes-2)
+        (skip this
+              n-bytes-2))
+      this)
+
+    ;; [END] Copied from CLJ implementation
 
     (garanteed? [_ n-bytes]
       (>= (- (.-byteLength dataview)
@@ -1454,6 +1566,63 @@
 
     IView
 
+      (copya [this position buffer]
+        (copya this
+               position
+               buffer
+               nil))
+
+      (copya [this position buffer offset]
+        (copya this
+               position
+               buffer
+               offset
+               nil))
+
+      (copya [this given-position buffer offset n-bytes]
+        (let [offset-2  (clj/or offset 
+                                0)
+              n-bytes-2 (clj/or n-bytes
+                                (- (count buffer)
+                                   offset-2))]
+          (garantee this
+                    (- (+ given-position
+                          n-bytes-2)
+                       (position this)))
+          (copy (to-buffer this)
+                given-position
+                buffer
+                offset-2
+                n-bytes-2))
+        this)
+
+      (copyr [this buffer]
+        (copyr this
+               buffer
+               nil))
+
+      (copyr [this buffer offset]
+        (copyr this
+               buffer
+               offset
+               nil))
+
+      (copyr [this buffer offset n-bytes]
+        (let [offset-2  (clj/or offset 
+                                0)
+              n-bytes-2 (clj/or n-bytes
+                                (- (count buffer)
+                                   offset-2))]
+          (garantee this
+                    n-bytes-2)
+          (copy (to-buffer this)
+                (position this)
+                buffer
+                offset-2
+                n-bytes-2)
+          (skip this
+                n-bytes-2))
+        this)
 
       (garanteed? [this n-bytes]
         (garantee this
@@ -1798,77 +1967,6 @@
                                   n-bytes-2)
                   dest-offset)))
    dest-buffer))
-
-
-
-(defn acopy
-
-  ""
-
-  ([dest-view dest-position src-buffer]
-
-   (acopy dest-view
-          dest-position
-          src-buffer
-          nil
-          nil))
-
-
-  ([dest-view dest-position src-buffer src-offset]
-
-   (acopy dest-view
-          dest-position
-          src-buffer
-          src-offset
-          nil))
-
-
-  ([dest-view dest-position src-buffer src-offset n-bytes]
-
-   (copy (to-buffer dest-view)
-         (+ dest-position
-            (offset dest-view))
-         src-buffer
-         src-offset
-         n-bytes)
-   dest-view))
-
-
-
-(defn rcopy
-
-  ""
-
-  ([dest-view src-buffer]
-
-   (rcopy dest-view
-          src-buffer
-          nil
-          nil))
-
-  ([dest-view src-buffer src-offset]
-
-   (rcopy dest-view
-          src-buffer
-          src-offset
-          nil))
-
-
-  ([dest-view src-buffer src-offset n-bytes]
-
-   (let [src-offset-2 (clj/or src-offset
-                              0)
-         n-bytes-2    (clj/or n-bytes
-                              (- (count src-buffer)
-                                 src-offset-2))]
-     (copy (to-buffer dest-view)
-           (position dest-view)
-           src-buffer
-           src-offset-2
-           n-bytes-2)
-     (skip dest-view
-           n-bytes-2))
-   dest-view))
 
 
 

@@ -410,35 +410,65 @@
 
 
 
-(t/deftest acopy
+(defn- -copya
 
-  (let [view (binf/view (binf/buffer 10))]
-    (t/is (= cp-target
-             (seq (binf/to-buffer (binf/acopy view
-                                              5
-                                              (binf/to-buffer (cp-view))
-                                              2
-                                              2))))
-          "Absolute copying to view")
-    (t/is (zero? (binf/position view))
-          "Copy is absolute")))
+  [view]
+
+  (t/is (= (take 7
+                 cp-target)
+           (take 7
+                 (seq (binf/to-buffer (binf/copya view
+                                                  5
+                                                  (binf/to-buffer (cp-view))
+                                                  2
+                                                  2)))))
+        "Absolute copying to view")
+  (t/is (zero? (binf/position view))
+        "Copy is absolute"))
 
 
 
-(t/deftest rcopy
+(defn- -copyr
 
-  (let [view (binf/view (binf/buffer 10))]
-    (binf/skip view
-               5)
-    (t/is (= cp-target
-             (seq (binf/to-buffer (binf/rcopy view
-                                              (binf/to-buffer (cp-view))
-                                              2
-                                              2))))
-          "Relative copying to view")
-    (t/is (= (binf/position view)
-             7)
-          "Copy is relative")))
+  [view]
+
+  (binf/skip view
+             5)
+  (t/is (= (take 7
+                 cp-target)
+           (take 7
+                 (seq (binf/to-buffer (binf/copyr view
+                                                  (binf/to-buffer (cp-view))
+                                                  2
+                                                  2)))))
+        "Relative copying to view")
+  (t/is (= (binf/position view)
+           7)
+        "Copy is relative"))
+
+
+
+(t/deftest copya
+
+  (-copya (binf/view (binf/buffer 10))))
+
+
+
+(t/deftest copyr
+
+  (-copyr (binf/view (binf/buffer 10))))
+
+
+
+(t/deftest gcopya
+
+  (-copya (binf/growing-view (binf/buffer 2))))
+
+
+
+(t/deftest gcopyr
+
+  (-copyr (binf/growing-view (binf/buffer 2))))
 
 
 ;;;;;;;;;; Encoding and decoding text
