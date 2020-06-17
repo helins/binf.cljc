@@ -20,8 +20,14 @@ tests.edn
 out
 
 // Shadow-cljs
-
+.cljs
 .shadow-cljs/
+node_modules/
+out
 package.json
+package-lock.json
 resources/
-test_shadow/
+/public/*
+!/public/index.html
+chui/*
+!/chui/index.html

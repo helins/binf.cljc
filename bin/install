@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+
+
+clojure -A:jar && clojure -A:install && rm binf.jar
