@@ -1246,20 +1246,20 @@
 
       ([this]
        (View. (js/DataView. this)
-              true
+              false
               0))
 
       ([this offset]
        (View. (js/DataView. this
                             offset)
-              true
+              false
               0))
 
       ([this offset size]
        (View. (js/DataView. this
                             offset
                             size)
-              true
+              false
               0)))))
 
 
