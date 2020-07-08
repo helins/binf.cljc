@@ -332,8 +332,6 @@
 
   ""
 
-  ;; TODO. Advanced compilation ?
-
   ([buffer]
 
    (text-decode (text-decoder)

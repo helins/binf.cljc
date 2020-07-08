@@ -37,9 +37,7 @@
 
 
 
-(t/deftest ^:no-node i64
-
-  ; Fails on Node because it has no concept of BigInt as the browser (where ints are actually doubles < 64 bits).
+(t/deftest i64
 
   (let [value (binf/integer (Math/pow 2
                                       7))]
@@ -73,9 +71,7 @@
         "f32")))
 
 
-(t/deftest ^:no-node f64
-
-  ; Fails on Node, cf `i64`.
+(t/deftest f64
 
   (t/is (= 42.42
            (binf/f64 (binf/bits-f64 42.42)))
@@ -318,17 +314,13 @@
 
 
 
-(t/deftest ^:no-node view-i64
-
-  ; Node, Cf. [[i64]]
+(t/deftest view-i64
 
   (-view-i64 view-8))
 
 
 
-(t/deftest ^:no-node gview-i64
-
-  ; Node, Cf. [[i64]]
+(t/deftest gview-i64
 
   (-view-i64 gview))
 
