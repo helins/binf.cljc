@@ -1,6 +1,8 @@
 (ns dvlopt.binf
 
-  ""
+  "Uninhibited library for any binary protocols.
+  
+   See README for an overview."
 
   {:author "Adam Helinski"}
   (:require [clojure.core :as clj])
@@ -40,7 +42,7 @@
   
   <<
 
-  ""
+  "Alias for `bit-shift-left`."
 
   bit-shift-left)
 
@@ -50,7 +52,7 @@
  
   >>
 
-  ""
+  "Alias for `bit-shift-right`."
 
   bit-shift-right)
 
@@ -60,7 +62,7 @@
  
   >>>
 
-  ""
+  "Alias for `unsigned-bit-shift-right`.'"
 
   unsigned-bit-shift-right)
 
@@ -71,7 +73,7 @@
       
   and
 
-  ""
+  "Alias for `bit-and`."
 
   bit-and)
 
@@ -82,7 +84,7 @@
 
   or
 
-  ""
+  "Alias for `bit-or`."
 
   bit-or)
 
@@ -92,7 +94,7 @@
 
   xor
 
-  ""
+  "Alias for `bit-xor`."
 
   bit-xor)
 
@@ -100,6 +102,8 @@
 (def ^{:arglists '([x])}
 
   !
+  
+  "Alias for `bit-not`."
 
   bit-not)
 
@@ -109,187 +113,246 @@
 
 (defprotocol IAbsoluteReader
 
-  ""
+  "Reading primitive values at an absolute position, without disturbing the current one."
   
   (ra-u8 [this position]
-    "")
+    "Reads an unsigned 8-bit interger from an absolute `position`.")
 
   (ra-i8 [this position]
-    "")
+    "Reads a signed 8-bit integer from an absolute `position`.")
 
   (ra-u16 [this position]
-    "")
+    "Reads an unsigned 16-bit integer from an absolute `position`.")
 
   (ra-i16 [this position]
-    "")
+    "Reads a signed 16-bit integer from an absolute `position`.")
 
   (ra-u32 [this position]
-    "")
+    "Reads an unsigned 32-bit integer from an absolute `position`.")
 
   (ra-i32 [this position]
-    "")
+    "Reads a signed 32-bit integer from an absolute `position`.")
 
   (ra-i64 [this position]
-    "")
+    "Reads a signed 64-bit integer from an absolute `position`.")
 
   (ra-f32 [this position]
-    "")
+    "Reads a 32-bit float at from absolute `position`.")
 
   (ra-f64 [this position]
-    "")
+    "Reads a 64-bit float at from absolute `position`.")
   
   (ra-string [this position n-bytes]
              [this decoder position n-bytes]
-    ""))
+    "Reads a string consisting of `n-bytes` bytes from an absolute `position`.
+    
+     A decoder may be provided (default is UTF-8).
+    
+     Cf. [[text-decoder]]"))
 
 
 (defprotocol IAbsoluteWriter
 
-  ""
+  "Writing primitive values at an absolute position, without disturbing the current one.
+  
+   When writing integers, sign is irrelevant and truncation is automatic."
   
   (wa-b8 [this position integer]
-    "")
+    "Writes an 8-bit integer to an absolute position.")
 
   (wa-b16 [this position integer]
-    "")
+    "Writes a 16-bit integer to an absolute `position`.")
 
   (wa-b32 [this position integer]
-    "")
+    "Writes a 32-bit integer to an absolute `position`.")
 
   (wa-b64 [this position integer]
-    "")
+    "Writes a 64-bit integer to an absolute `position`.")
 
   (wa-f32 [this position floating]
-    "")
+    "Writes a 32-bit float to an absolute `position`.")
 
   (wa-f64 [this position floating]
-    "")
+    "Writes a 64-bit float to an absolute `position`.")
   
   (wa-string [this position string]
-    ""))
+    "Writes a string to an absolute `position`, encoded as UTF-8.
+    
+     Unlike other functions which are implemented as a fluent interface, this function returns
+     a tuple indicating how many bytes and chars have been written, and if the process is finished:
+     `[finished? n-bytes n-chars]`.
+    
+     With that information, the user can continue writing if needed. On the JVM, the tuple contains a 4th
+     item which is a `CharBuffer` containing the rest of the unwritten string which can be passed in place
+     of the `string` argument.
+    
+     Growing views will automatically grow and only one call will be sufficient."))
 
 
 (defprotocol IEndianess
 
-  ""
+  "Retrieving or modifying the endianess."
   
   (endianess [this]
              [this new-endianess]
-    ""))
+    "Arity 1 returns the current endianess, arity 2 sets it.
+    
+     Accepted values are `:little-endian` and `:big-endian`."))
 
 
 (defprotocol IGrowing
 
-  ""
+  "Only applicable to `growing views` which are capable of growing size dynamically.
+  
+   Cf. [[growing-view]]"
 
   (garantee [this n-bytes]
-    ""))
+    "Garantees that at least `n-bytes` bytes can be written.
+    
+     The growing view will automatically grow its size if needed.
+    
+     This function is rather a lower-level one, the common user will probably never use it directly."))
 
 
 (defprotocol IRelativeReader
 
-  ""
+  "Reading primitive values from the current position, advancing it as needed. For instance,
+   reading a 32-bit integer will advance the current position by 4 bytes."
 
   (rr-u8 [this]
-    "")
+    "Reads an unsigned 8-bit integer from the current position.")
 
   (rr-i8 [this]
-    "")
+    "Reads a signed 8-bit integer from the current position.")
 
   (rr-u16 [this]
-    "")
+    "Reads an unsigned 16-bit integer from the current position.")
 
   (rr-i16 [this]
-    "")
+    "Reads a signed 16-bit integer from the current position.")
 
   (rr-u32 [this]
-    "")
+    "Reads an unsigned 32-bit integer from the current position.")
 
   (rr-i32 [this]
-    "")
+    "Reads a signed 32-bit integer from the current position.")
 
   (rr-i64 [this]
-    "")
+    "Reads a signed 64-bit integer from the current position.")
 
   (rr-f32 [this]
-    "")
+    "Reads a 32-bit float from the current position.")
 
   (rr-f64 [this]
-    "")
+    "Reads a 64-bit float from the current position.")
   
   (rr-string [this n-bytes]
              [this decoder n-bytes]
-    ""))
+    "Reads a string consisting of `n-bytes` from the current position.
+
+     A decoder may be provided (default is UTF-8).
+    
+     Cf. [[text-decoder]]"))
 
 
 (defprotocol IRelativeWriter
 
-  ""
+  "Writing primitive values to the current position, advancing it as needed. For instance,
+   reading a 64-bit float will advance the current position by 8 bytes.
+
+   When writing integers, sign is irrelevant and truncation is automatic."
 
   (wr-b8 [this integer]
-    "")
+    "Writes an 8-bit integer to the current position.")
 
   (wr-b16 [this integer]
-    "")
+    "Writes a 16-bit integer to the current position.")
 
   (wr-b32 [this integer]
-    "")
+    "Writes a 32-bit integer to the current position.")
 
   (wr-b64 [this integer]
-    "")
+    "Writes a 64-bit integer to the current position.")
 
   (wr-f32 [this floating]
-    "")
+    "Writes a 32-bit float to the current position.")
 
   (wr-f64 [this floating]
-    "")
+    "Writes a 64-bit float to the current position.")
 
   (wr-string [this string]
-    ""))
+    "Writes a string to the current position, encoded at UTF-8.
+    
+     Cf. [[wa-string]] about the returned value"))
 
 
 (defprotocol IView
 
-  ""
+  "Additional functions related to views (growing ones as well)."
 
   (copya [this position buffer]
          [this position buffer offset]
          [this position buffer offset n-bytes]
-    "")
+    "Copies the given `buffer` to an absolute `position`.
+    
+     An `offset` in the buffer as well as a number of bytes to copy (`n-bytes`) may be provided.")
 
   (copyr [this buffer]
          [this buffer offset]
          [this buffer offset n-bytes]
-    "")
+    "Copies the given `buffer` to the current position.
+
+     An `offset` in the buffer as well as a number of bytes to copy (`n-bytes`) may be provided.")
 
   (garanteed? [this n-bytes]
-    "")
+    "Is it possible to write at least `n-bytes` bytes?
+    
+     Growing views always return true.")
 
   (offset [this]
-    "")
+    "Returns the offset in the original buffer (returned by [[to-buffer]]).")
 
   (position [this]
 
-    "")
+    "Current the current position.")
 
   (seek [this position]
-    "")
+    "Modifies the current position.")
   
   (skip [this n-bytes]
-    "")
+    "Skips `n-bytes` bytes.")
 
   (to-buffer [this]
-    ""))
+    "Returns the buffer wrapped by the view."))
 
 
 (defprotocol IViewBuilder
 
-  ""
+  "Building a new view."
 
   (view [this]
         [this offset]
-        [this offset size]
-    ""))
+        [this offset n-bytes]
+    "A view can be created from a buffer (see [[buffer]]) or from another view.
+    
+     An `offset` as well as a size (`n-bytes`) may be provided.
+    
+     ```clojure
+     (def my-buffer
+          (binf/buffer 100))
+
+     ;; View with an offset of 50 bytes, 40 bytes long
+     (def my-view
+          (binf/view my-buffer
+                     50
+                     40))
+
+     ;; View from a view, offset of 60 bytes from the original buffer, 20 bytes long
+     (def inner-view
+          (binf/view my-view
+                     10
+                     20))
+     ```"))
 
 
 ;;;;;;;;;; Encoding and decoding strings
@@ -299,7 +362,7 @@
    
 (def ^Charset -charset-utf-8
 
-  ;;
+  ;; UTF charset on the JVM.
 
   StandardCharsets/UTF_8))
 
@@ -307,7 +370,7 @@
 
 (def ^:private -text-decoder-utf-8
 
-  ;;
+  ;; Crossplatform UTF-8 decoding.
 
   #?(:clj  -charset-utf-8
      :cljs (js/TextDecoder. "utf-8")))
@@ -316,7 +379,7 @@
 
 (def ^:private -text-decoders
 
-  ;;
+  ;; Available decoders by encoding.
 
   {:iso-8859-1 #?(:clj  StandardCharsets/ISO_8859_1
                   :cljs (js/TextDecoder. "iso-8859-1")) 
@@ -330,7 +393,9 @@
 
 (defn text-decode
 
-  ""
+  "Interprets the given `buffer` as a string.
+  
+   A decoder may be provided (see [[text-decoder]])."
 
   ([buffer]
 
@@ -349,7 +414,11 @@
 
 (defn text-decoder
 
-  ""
+  "Some functions accepts a text decoder.
+  
+   Available encodings are: `:iso-8859-1`, `:utf-8`, `:utf-16-be`, `:utf-16-le`
+  
+   Default is UTF-8, but argument is non-nilable."
 
   ([]
 
@@ -370,7 +439,7 @@
 
 (def ^:private -text-encoder
 
-  ;;
+  ;; UTF-8 encoder.
 
   (js/TextEncoder.)))
 
@@ -378,7 +447,7 @@
 
 (defn text-encode
 
-  ""
+  "Returns a buffer containing the given `string` encoded in UTF-8."
 
   [string]
 
@@ -386,25 +455,6 @@
                       -charset-utf-8)
      :cljs (.-buffer (.encode -text-encoder
                               string))))
-
-
-  ; ([view string]
-
-  ;  (let [remaining (- (count buffer)
-  ;                     offset)]
-  ;    #?(
-  ;       :cljs (let [res (.encodeInto -text-encoder
-  ;                                    string
-  ;                                    (.subarray ba
-  ;                                               offset
-  ;                                               remaining))]
-  ;               (if (= (count string)
-  ;                      (.-read res))
-  ;                 (.-written res)
-  ;                 (throw (ex-info (str "Not enough bytes to write string: "
-  ;                                      string)
-  ;                                 {::error  :insufficient-output
-  ;                                  ::string string}))))))))
 
 
 ;;;;;;;;;; Types and protocol extensions
@@ -1178,12 +1228,17 @@
 
 (defn buffer
 
-  ""
+  "Creates a new buffer having `n-bytes` bytes.
+  
+   In JS, corresponds to an `ArrayBuffer`.
+   On the JVM, corresponds to a plain byte array.
+  
+   In order to do anything interesting with this library, it needs to be wrapped in a [[view]]."
 
-  [n]
+  [n-bytes]
 
-  #?(:clj  (byte-array n)
-     :cljs (js/ArrayBuffer. n)))
+  #?(:clj  (byte-array n-bytes)
+     :cljs (js/ArrayBuffer. n-bytes)))
 
 
 
@@ -1191,7 +1246,9 @@
 
 (defmacro buffer*
 
-  ""
+  "Creates a new buffers from the given byte values.
+  
+   Cf. [[buffer]]"
 
   [& b8s]
 
@@ -1283,10 +1340,10 @@
 
 (defprotocol ^:private -IGrowing
 
-  ;;
+  ;; Private protocol for growing views.
 
   (-grow [this]
-    ;;
+    ;; Grows the size of the growing view.
     ))
 
 
@@ -1693,7 +1750,15 @@
 
 (defn growing-view
 
-  ""
+  "Creates a growing view, starting with the given buffer.
+  
+   A growing view will reallocate a bigger buffer everytime it reaches the end of the current one.
+  
+   This is a simple strategy for when the size is unknown in advance, but it has proven to be rather optimal
+   and ultimately efficient for the most common use cases. Even more so it the size can be roughly estimated.
+  
+   The size of the bigger buffer is decided by calling `next-size` which is a function `old-size` -> `new-size`.
+   Thus the user can be in full control of the process. When not provided, size is always multiplied by 1.5."
 
   ([buffer]
 
@@ -1728,18 +1793,18 @@
 
 (defn u8
 
-  ""
+  "Converts an integer to an unsigned 8-bit integer."
 
-  [i8]
+  [integer]
 
   (and 0xff
-       i8))
+       integer))
 
 
 
 (defn i8
 
-  ""
+  "Converts an unsigned 8-bit integer to signed one."
 
   [u8]
 
@@ -1910,7 +1975,7 @@
 
 (defn integer
 
-  ""
+  "Converts a float value to an integer (eg. `42.0` to `42`)."
 
   [floating]
 
@@ -1920,7 +1985,7 @@
 
 (defn bits-f32
 
-  ""
+  "Converts a 32-bit float to an integer preserving the bit pattern."
 
   [f32]
 
@@ -1934,7 +1999,7 @@
 
 (defn bits-f64
 
-  ""
+  "Converts a 64-bit float to an integer preserving the bit pattern."
 
   [f64]
 
@@ -1950,7 +2015,7 @@
 
 (defn copy
 
-  ""
+  "Copies a buffer to another buffer."
 
   ([dest-buffer dest-offset src-buffer]
 
@@ -1992,7 +2057,10 @@
 
 (defn remaining
 
-  ""
+  "Returns the number of bytes remaining until the end of the view is reached.
+  
+   In the context of a growing view, this value means the number of byte that can be written before
+   reallocating a bigger buffer."
 
   [view]
 
