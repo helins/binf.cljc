@@ -460,16 +460,18 @@
 
     (wa-buffer [this position buffer]
       (wa-buffer this
-             position
-             buffer
-             nil))
+                 position
+                 buffer
+                 offset
+                 (count buffer)))
 
     (wa-buffer [this position buffer offset]
       (wa-buffer this
-             position
-             buffer
-             offset
-             nil))
+                 position
+                 buffer
+                 offset
+                 (- (count buffer)
+                    offset)))
 
     (wa-buffer [this position buffer offset n-bytes]
       (copy (to-buffer this)
@@ -598,29 +600,26 @@
 
     (wr-buffer [this buffer]
       (wr-buffer this
-             buffer
-             nil))
+                 buffer
+                 0
+                 (count buffer)))
 
     (wr-buffer [this buffer offset]
       (wr-buffer this
-             buffer
-             offset
-             nil))
+                 buffer
+                 offset
+                 (- (count buffer)
+                    offset)))
 
     (wr-buffer [this buffer offset n-bytes]
-      (let [offset-2  (or offset 
-                          0)
-            n-bytes-2 (or n-bytes
-                          (- (count buffer)
-                             offset-2))]
-        (copy (to-buffer this)
-              (+ -offset
-                 (position this))
-              buffer
-              offset-2
-              n-bytes-2)
-        (skip this
-              n-bytes-2))
+      (copy (to-buffer this)
+            (+ -offset
+               (position this))
+            buffer
+            offset
+            n-bytes)
+      (skip this
+            n-bytes)
       this)
 
     (wr-b8 [this integer]
@@ -822,16 +821,18 @@
 
     (wa-buffer [this position buffer]
       (wa-buffer this
-             position
-             buffer
-             nil))
+                 position
+                 buffer
+                 0
+                 (count buffer)))
 
     (wa-buffer [this position buffer offset]
       (wa-buffer this
-             position
-             buffer
-             offset
-             nil))
+                 position
+                 buffer
+                 offset
+                 (- (count buffer)
+                    offset)))
 
     (wa-buffer [this position buffer offset n-bytes]
       (copy (to-buffer this)
@@ -1006,28 +1007,25 @@
     
     (wr-buffer [this buffer]
       (wr-buffer this
-             buffer
-             nil))
+                 buffer
+                 0
+                 (count buffer)))
 
     (wr-buffer [this buffer offset]
       (wr-buffer this
              buffer
              offset
-             nil))
+             (- (count buffer)
+                offset)))
 
     (wr-buffer [this buffer offset n-bytes]
-      (let [offset-2  (or offset 
-                          0)
-            n-bytes-2 (or n-bytes
-                          (- (count buffer)
-                             offset-2))]
-        (copy (to-buffer this)
-              (position this)
-              buffer
-              offset-2
-              n-bytes-2)
-        (skip this
-              n-bytes-2))
+      (copy (to-buffer this)
+            (position this)
+            buffer
+            offset
+            n-bytes)
+      (skip this
+            n-bytes)
       this)
 
     (wr-b8 [this integer]
@@ -1352,32 +1350,29 @@
 
     (wa-buffer [this position buffer]
       (wa-buffer this
-             position
-             buffer
-             nil))
+                 position
+                 buffer
+                 0
+                 (count buffer)))
 
     (wa-buffer [this position buffer offset]
       (wa-buffer this
-             position
-             buffer
-             offset
-             nil))
+                 position
+                 buffer
+                 offset
+                 (- (count buffer)
+                    offset)))
 
     (wa-buffer [this given-position buffer offset n-bytes]
-      (let [offset-2  (or offset 
-                          0)
-            n-bytes-2 (or n-bytes
-                          (- (count buffer)
-                             offset-2))]
-        (garantee this
-                  (- (+ given-position
-                        n-bytes-2)
-                     (position this)))
-        (copy (to-buffer this)
-              given-position
-              buffer
-              offset-2
-              n-bytes-2))
+      (garantee this
+                (- (+ given-position
+                      n-bytes)
+                   (position this)))
+      (copy (to-buffer this)
+            given-position
+            buffer
+            offset
+            n-bytes)
       this)
 
 
@@ -1519,30 +1514,27 @@
 
     (wr-buffer [this buffer]
       (wr-buffer this
-             buffer
-             nil))
+                 buffer
+                 0
+                 (count buffer)))
 
     (wr-buffer [this buffer offset]
       (wr-buffer this
-             buffer
-             offset
-             nil))
+                 buffer
+                 offset
+                 (- (count buffer)
+                    offset)))
 
     (wr-buffer [this buffer offset n-bytes]
-      (let [offset-2  (or offset 
-                          0)
-            n-bytes-2 (or n-bytes
-                          (- (count buffer)
-                             offset-2))]
-        (garantee this
-                  n-bytes-2)
-        (copy (to-buffer this)
-              (position this)
-              buffer
-              offset-2
-              n-bytes-2)
-        (skip this
-              n-bytes-2))
+      (garantee this
+                n-bytes)
+      (copy (to-buffer this)
+            (position this)
+            buffer
+            offset
+            n-bytes)
+      (skip this
+            n-bytes)
       this)
 
     (wr-b8 [this integer]
