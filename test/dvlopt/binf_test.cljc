@@ -3,7 +3,8 @@
   {:author "Adam Helinski"}
 
   (:require [clojure.test :as t]
-            [dvlopt.binf  :as binf]))
+            [dvlopt.binf  :as binf])
+  (:refer-clojure :rename {bit-shift-right >>}))
 
 
 ;;;;;;;;;;
@@ -42,20 +43,20 @@
   (let [value (binf/integer (Math/pow 2
                                       7))]
     (t/is (= value
-             (binf/i64 (binf/u8 (binf/>> value
-                                         56))
-                       (binf/u8 (binf/>> value
-                                         48))
-                       (binf/u8 (binf/>> value
-                                         40))
-                       (binf/u8 (binf/>> value
-                                         32))
-                       (binf/u8 (binf/>> value
-                                         24))
-                       (binf/u8 (binf/>> value
-                                         16))
-                       (binf/u8 (binf/>> value
-                                         8))
+             (binf/i64 (binf/u8 (>> value
+                                    56))
+                       (binf/u8 (>> value
+                                    48))
+                       (binf/u8 (>> value
+                                    40))
+                       (binf/u8 (>> value
+                                    32))
+                       (binf/u8 (>> value
+                                    24))
+                       (binf/u8 (>> value
+                                    16))
+                       (binf/u8 (>> value
+                                    8))
                        (binf/u8 value))))))
 
 

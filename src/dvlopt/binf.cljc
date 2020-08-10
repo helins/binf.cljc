@@ -15,14 +15,9 @@
                                      CharsetEncoder
                                      CoderResult
                                      StandardCharsets)))
-  ;;
-  ;; <!> Attention, higly confusing if not kept in mind <!>
-  ;;
-  (:refer-clojure :exclude [and
-                            or]))
-
-
-;;;;;;;;;; Gathering declarations
+  (:refer-clojure :rename {bit-shift-left           <<
+                           bit-shift-right          >>
+                           unsigned-bit-shift-right >>>}))
 
 
 (declare copy
@@ -33,79 +28,6 @@
          u8
          u16
          u32)
-
-
-;;;;;;;;; Aliases for bitwise operations
-
-
-(def ^{:arglists '([x n])}
-  
-  <<
-
-  "Alias for `bit-shift-left`."
-
-  bit-shift-left)
-
-
-
-(def ^{:arglists '([x n])}
- 
-  >>
-
-  "Alias for `bit-shift-right`."
-
-  bit-shift-right)
-
-
-
-(def ^{:arglists '([x n])}
- 
-  >>>
-
-  "Alias for `unsigned-bit-shift-right`.'"
-
-  unsigned-bit-shift-right)
-
-
-
-(def ^{:arglists '([x y]
-                   [x y & more])}
-      
-  and
-
-  "Alias for `bit-and`."
-
-  bit-and)
-
-
-
-(def ^{:arglists '([x y]
-                   [x y & more])}
-
-  or
-
-  "Alias for `bit-or`."
-
-  bit-or)
-
-
-(def ^{:arglist '([x y]
-                  [x y & more])}
-
-  xor
-
-  "Alias for `bit-xor`."
-
-  bit-xor)
-
-
-(def ^{:arglists '([x])}
-
-  !
-  
-  "Alias for `bit-not`."
-
-  bit-not)
 
 
 ;;;;;;;;;; Protocols
@@ -528,8 +450,8 @@
       (String. (.array byte-buffer)
                ^long position
                ^long n-bytes
-               (clj/or ^Charset decoder
-                       -charset-utf-8)))
+               (or ^Charset decoder
+                   -charset-utf-8)))
 
 
   IAbsoluteWriter
@@ -758,11 +680,11 @@
              nil))
 
     (copyr [this buffer offset n-bytes]
-      (let [offset-2  (clj/or offset 
-                              0)
-            n-bytes-2 (clj/or n-bytes
-                              (- (count buffer)
-                                 offset-2))]
+      (let [offset-2  (or offset 
+                          0)
+            n-bytes-2 (or n-bytes
+                          (- (count buffer)
+                             offset-2))]
         (copy (to-buffer this)
               (+ -offset
                  (position this))
@@ -888,8 +810,8 @@
                  n-bytes))
 
     (ra-string [this decoder position n-bytes]
-      (.decode (clj/or decoder 
-                       -text-decoder-utf-8)
+      (.decode (or decoder 
+                   -text-decoder-utf-8)
                (js/Uint8Array. (.-buffer dataview)
                                (+ (.-byteOffset dataview)
                                   position)
@@ -1162,11 +1084,11 @@
              nil))
 
     (copyr [this buffer offset n-bytes]
-      (let [offset-2  (clj/or offset 
-                              0)
-            n-bytes-2 (clj/or n-bytes
-                              (- (count buffer)
-                                 offset-2))]
+      (let [offset-2  (or offset 
+                          0)
+            n-bytes-2 (or n-bytes
+                          (- (count buffer)
+                             offset-2))]
         (copy (to-buffer this)
               (position this)
               buffer
@@ -1657,11 +1579,11 @@
                nil))
 
       (copya [this given-position buffer offset n-bytes]
-        (let [offset-2  (clj/or offset 
-                                0)
-              n-bytes-2 (clj/or n-bytes
-                                (- (count buffer)
-                                   offset-2))]
+        (let [offset-2  (or offset 
+                            0)
+              n-bytes-2 (or n-bytes
+                            (- (count buffer)
+                               offset-2))]
           (garantee this
                     (- (+ given-position
                           n-bytes-2)
@@ -1685,11 +1607,11 @@
                nil))
 
       (copyr [this buffer offset n-bytes]
-        (let [offset-2  (clj/or offset 
-                                0)
-              n-bytes-2 (clj/or n-bytes
-                                (- (count buffer)
-                                   offset-2))]
+        (let [offset-2  (or offset 
+                            0)
+              n-bytes-2 (or n-bytes
+                            (- (count buffer)
+                               offset-2))]
           (garantee this
                     n-bytes-2)
           (copy (to-buffer this)
@@ -1797,8 +1719,8 @@
 
   [integer]
 
-  (and 0xff
-       integer))
+  (bit-and 0xff
+           integer))
 
 
 
@@ -1822,15 +1744,15 @@
 
   ([i16]
 
-   (and 0xffff
-        i16))
+   (bit-and 0xffff
+            i16))
 
 
   ([b8-1 b8-2]
 
-   (u16 (or (<< b8-1
-                8)
-            b8-2))))
+   (u16 (bit-or (<< b8-1
+                    8)
+                b8-2))))
 
 
 
@@ -1860,8 +1782,8 @@
 
   ([i32]
 
-   #?(:clj  (and 0xffffffff
-                 i32)
+   #?(:clj  (bit-and 0xffffffff
+                     i32)
       ;; Because bitwise operations in JS are 32 bits, bit-and'ing does not work in this case.
       :cljs (-> -conv-view
                 (wa-b32 0
@@ -1870,13 +1792,13 @@
 
   ([b8-1 b8-2 b8-3 b8-4]
 
-   (u32 (or (<< b8-1
-                24)
-            (<< b8-2
-                16)
-            (<< b8-3
-                8)
-            b8-4))))
+   (u32 (bit-or (<< b8-1
+                    24)
+                (<< b8-2
+                    16)
+                (<< b8-3
+                    8)
+                b8-4))))
 
 
 
@@ -1907,21 +1829,21 @@
 
   [b8-1 b8-2 b8-3 b8-4 b8-5 b8-6 b8-7 b8-8]
 
-  (or (<< b8-1
-          56)
-      (<< b8-2
-          48)
-      (<< b8-3
-          40)
-      (<< b8-4
-          32)
-      (<< b8-5
-          24)
-      (<< b8-6
-          16)
-      (<< b8-7
-          8)
-      b8-8))
+  (bit-or (<< b8-1
+              56)
+          (<< b8-2
+              48)
+          (<< b8-3
+              40)
+          (<< b8-4
+              32)
+          (<< b8-5
+              24)
+          (<< b8-6
+              16)
+          (<< b8-7
+              8)
+          b8-8))
 
 
 
