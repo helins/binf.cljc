@@ -79,6 +79,13 @@
   
    When writing integers, sign is irrelevant and truncation is automatic."
   
+  (wa-buffer [this position buffer]
+             [this position buffer offset]
+             [this position buffer offset n-bytes]
+    "Copies the given `buffer` to an absolute `position`.
+    
+     An `offset` in the buffer as well as a number of bytes to copy (`n-bytes`) may be provided.")
+
   (wa-b8 [this position integer]
     "Writes an 8-bit integer to an absolute position.")
 
@@ -184,6 +191,13 @@
 
    When writing integers, sign is irrelevant and truncation is automatic."
 
+  (wr-buffer [this buffer]
+             [this buffer offset]
+             [this buffer offset n-bytes]
+    "Copies the given `buffer` to the current position.
+
+     An `offset` in the buffer as well as a number of bytes to copy (`n-bytes`) may be provided.")
+  
   (wr-b8 [this integer]
     "Writes an 8-bit integer to the current position.")
 
@@ -211,20 +225,6 @@
 (defprotocol IView
 
   "Additional functions related to views (growing ones as well)."
-
-  (copya [this position buffer]
-         [this position buffer offset]
-         [this position buffer offset n-bytes]
-    "Copies the given `buffer` to an absolute `position`.
-    
-     An `offset` in the buffer as well as a number of bytes to copy (`n-bytes`) may be provided.")
-
-  (copyr [this buffer]
-         [this buffer offset]
-         [this buffer offset n-bytes]
-    "Copies the given `buffer` to the current position.
-
-     An `offset` in the buffer as well as a number of bytes to copy (`n-bytes`) may be provided.")
 
   (garanteed? [this n-bytes]
     "Is it possible to write at least `n-bytes` bytes?
@@ -425,16 +425,13 @@
       (u32 (.getInt byte-buffer
                     position)))
 
-
     (ra-i32 [_ position]
       (.getInt byte-buffer
                position))
 
-
     (ra-i64 [_ position]
       (.getLong byte-buffer
                 position))
-
 
     (ra-f32 [_ position]
       (.getFloat byte-buffer
@@ -460,6 +457,28 @@
 
   IAbsoluteWriter
 
+
+    (wa-buffer [this position buffer]
+      (wa-buffer this
+             position
+             buffer
+             nil))
+
+    (wa-buffer [this position buffer offset]
+      (wa-buffer this
+             position
+             buffer
+             offset
+             nil))
+
+    (wa-buffer [this position buffer offset n-bytes]
+      (copy (to-buffer this)
+            (+ -offset
+               position)
+            buffer
+            offset
+            n-bytes)
+      this)
 
     (wa-b8 [this position integer]
       (.put byte-buffer
@@ -577,6 +596,33 @@
   IRelativeWriter
 
 
+    (wr-buffer [this buffer]
+      (wr-buffer this
+             buffer
+             nil))
+
+    (wr-buffer [this buffer offset]
+      (wr-buffer this
+             buffer
+             offset
+             nil))
+
+    (wr-buffer [this buffer offset n-bytes]
+      (let [offset-2  (or offset 
+                          0)
+            n-bytes-2 (or n-bytes
+                          (- (count buffer)
+                             offset-2))]
+        (copy (to-buffer this)
+              (+ -offset
+                 (position this))
+              buffer
+              offset-2
+              n-bytes-2)
+        (skip this
+              n-bytes-2))
+      this)
+
     (wr-b8 [this integer]
       (.put byte-buffer
             (unchecked-byte integer))
@@ -648,56 +694,6 @@
 
 
   IView
-
-
-    (copya [this position buffer]
-      (copya this
-             position
-             buffer
-             nil))
-
-    (copya [this position buffer offset]
-      (copya this
-             position
-             buffer
-             offset
-             nil))
-
-    (copya [this position buffer offset n-bytes]
-      (copy (to-buffer this)
-            (+ -offset
-               position)
-            buffer
-            offset
-            n-bytes)
-      this)
-
-    (copyr [this buffer]
-      (copyr this
-             buffer
-             nil))
-
-    (copyr [this buffer offset]
-      (copyr this
-             buffer
-             offset
-             nil))
-
-    (copyr [this buffer offset n-bytes]
-      (let [offset-2  (or offset 
-                          0)
-            n-bytes-2 (or n-bytes
-                          (- (count buffer)
-                             offset-2))]
-        (copy (to-buffer this)
-              (+ -offset
-                 (position this))
-              buffer
-              offset-2
-              n-bytes-2)
-        (skip this
-              n-bytes-2))
-      this)
 
     (garanteed? [_ n-bytes]
       (>= (- (.limit byte-buffer)
@@ -824,6 +820,27 @@
 
   IAbsoluteWriter
 
+    (wa-buffer [this position buffer]
+      (wa-buffer this
+             position
+             buffer
+             nil))
+
+    (wa-buffer [this position buffer offset]
+      (wa-buffer this
+             position
+             buffer
+             offset
+             nil))
+
+    (wa-buffer [this position buffer offset n-bytes]
+      (copy (to-buffer this)
+            (+ (.-byteOffset dataview)
+               position)
+            buffer
+            offset
+            n-bytes)
+      this)
 
     (wa-b8 [this position integer]
        (.setUint8 dataview
@@ -987,6 +1004,31 @@
 
   IRelativeWriter
     
+    (wr-buffer [this buffer]
+      (wr-buffer this
+             buffer
+             nil))
+
+    (wr-buffer [this buffer offset]
+      (wr-buffer this
+             buffer
+             offset
+             nil))
+
+    (wr-buffer [this buffer offset n-bytes]
+      (let [offset-2  (or offset 
+                          0)
+            n-bytes-2 (or n-bytes
+                          (- (count buffer)
+                             offset-2))]
+        (copy (to-buffer this)
+              (position this)
+              buffer
+              offset-2
+              n-bytes-2)
+        (skip this
+              n-bytes-2))
+      this)
 
     (wr-b8 [this integer]
       (wa-b8 this
@@ -1052,57 +1094,6 @@
 
   IView
 
-    ;; [START] Copied from CLJ implementation
-
-    (copya [this position buffer]
-      (copya this
-             position
-             buffer
-             nil))
-
-    (copya [this position buffer offset]
-      (copya this
-             position
-             buffer
-             offset
-             nil))
-
-    (copya [this position buffer offset n-bytes]
-      (copy (to-buffer this)
-            (+ (.-byteOffset dataview)
-               position)
-            buffer
-            offset
-            n-bytes)
-      this)
-
-    (copyr [this buffer]
-      (copyr this
-             buffer
-             nil))
-
-    (copyr [this buffer offset]
-      (copyr this
-             buffer
-             offset
-             nil))
-
-    (copyr [this buffer offset n-bytes]
-      (let [offset-2  (or offset 
-                          0)
-            n-bytes-2 (or n-bytes
-                          (- (count buffer)
-                             offset-2))]
-        (copy (to-buffer this)
-              (position this)
-              buffer
-              offset-2
-              n-bytes-2)
-        (skip this
-              n-bytes-2))
-      this)
-
-    ;; [END] Copied from CLJ implementation
 
     (garanteed? [_ n-bytes]
       (>= (- (.-byteLength dataview)
@@ -1359,6 +1350,36 @@
 
   IAbsoluteWriter
 
+    (wa-buffer [this position buffer]
+      (wa-buffer this
+             position
+             buffer
+             nil))
+
+    (wa-buffer [this position buffer offset]
+      (wa-buffer this
+             position
+             buffer
+             offset
+             nil))
+
+    (wa-buffer [this given-position buffer offset n-bytes]
+      (let [offset-2  (or offset 
+                          0)
+            n-bytes-2 (or n-bytes
+                          (- (count buffer)
+                             offset-2))]
+        (garantee this
+                  (- (+ given-position
+                        n-bytes-2)
+                     (position this)))
+        (copy (to-buffer this)
+              given-position
+              buffer
+              offset-2
+              n-bytes-2))
+      this)
+
 
     (wa-b8 [this position integer]
       (garantee this
@@ -1496,6 +1517,33 @@
 
   IRelativeWriter
 
+    (wr-buffer [this buffer]
+      (wr-buffer this
+             buffer
+             nil))
+
+    (wr-buffer [this buffer offset]
+      (wr-buffer this
+             buffer
+             offset
+             nil))
+
+    (wr-buffer [this buffer offset n-bytes]
+      (let [offset-2  (or offset 
+                          0)
+            n-bytes-2 (or n-bytes
+                          (- (count buffer)
+                             offset-2))]
+        (garantee this
+                  n-bytes-2)
+        (copy (to-buffer this)
+              (position this)
+              buffer
+              offset-2
+              n-bytes-2)
+        (skip this
+              n-bytes-2))
+      this)
 
     (wr-b8 [this integer]
       (garantee this
@@ -1570,63 +1618,6 @@
 
     IView
 
-      (copya [this position buffer]
-        (copya this
-               position
-               buffer
-               nil))
-
-      (copya [this position buffer offset]
-        (copya this
-               position
-               buffer
-               offset
-               nil))
-
-      (copya [this given-position buffer offset n-bytes]
-        (let [offset-2  (or offset 
-                            0)
-              n-bytes-2 (or n-bytes
-                            (- (count buffer)
-                               offset-2))]
-          (garantee this
-                    (- (+ given-position
-                          n-bytes-2)
-                       (position this)))
-          (copy (to-buffer this)
-                given-position
-                buffer
-                offset-2
-                n-bytes-2))
-        this)
-
-      (copyr [this buffer]
-        (copyr this
-               buffer
-               nil))
-
-      (copyr [this buffer offset]
-        (copyr this
-               buffer
-               offset
-               nil))
-
-      (copyr [this buffer offset n-bytes]
-        (let [offset-2  (or offset 
-                            0)
-              n-bytes-2 (or n-bytes
-                            (- (count buffer)
-                               offset-2))]
-          (garantee this
-                    n-bytes-2)
-          (copy (to-buffer this)
-                (position this)
-                buffer
-                offset-2
-                n-bytes-2)
-          (skip this
-                n-bytes-2))
-        this)
 
       (garanteed? [this n-bytes]
         (garantee this

@@ -415,25 +415,25 @@
 
 
 
-(defn- -copya
+(defn- -wa-buffer
 
   [view]
 
   (t/is (= (take 7
                  cp-target)
            (take 7
-                 (seq (binf/to-buffer (binf/copya view
-                                                  5
-                                                  (binf/to-buffer (cp-view))
-                                                  2
-                                                  2)))))
+                 (seq (binf/to-buffer (binf/wa-buffer view
+                                                      5
+                                                      (binf/to-buffer (cp-view))
+                                                      2
+                                                      2)))))
         "Absolute copying to view")
   (t/is (zero? (binf/position view))
         "Copy is absolute"))
 
 
 
-(defn- -copyr
+(defn- -wr-buffer
 
   [view]
 
@@ -442,10 +442,10 @@
   (t/is (= (take 7
                  cp-target)
            (take 7
-                 (seq (binf/to-buffer (binf/copyr view
-                                                  (binf/to-buffer (cp-view))
-                                                  2
-                                                  2)))))
+                 (seq (binf/to-buffer (binf/wr-buffer view
+                                                      (binf/to-buffer (cp-view))
+                                                      2
+                                                      2)))))
         "Relative copying to view")
   (t/is (= (binf/position view)
            7)
@@ -453,27 +453,27 @@
 
 
 
-(t/deftest copya
+(t/deftest wa-buffer
 
-  (-copya (binf/view (binf/buffer 10))))
-
-
-
-(t/deftest copyr
-
-  (-copyr (binf/view (binf/buffer 10))))
+  (-wa-buffer (binf/view (binf/buffer 10))))
 
 
 
-(t/deftest gcopya
+(t/deftest wr-buffer
 
-  (-copya (binf/growing-view (binf/buffer 2))))
+  (-wr-buffer (binf/view (binf/buffer 10))))
 
 
 
-(t/deftest gcopyr
+(t/deftest gwa-buffer
 
-  (-copyr (binf/growing-view (binf/buffer 2))))
+  (-wa-buffer (binf/growing-view (binf/buffer 2))))
+
+
+
+(t/deftest gwr-buffer
+
+  (-wr-buffer (binf/growing-view (binf/buffer 2))))
 
 
 ;;;;;;;;;; Encoding and decoding text
