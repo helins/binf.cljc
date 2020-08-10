@@ -378,6 +378,10 @@
 
 (t/deftest copy
 
+  (t/is (= (seq (binf/to-buffer (cp-view)))
+           (seq (binf/copy (binf/to-buffer (cp-view)))))
+        "Cloning")
+
   (t/is (= (concat (repeat 5
                            0)
                    (repeat 5

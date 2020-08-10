@@ -2017,6 +2017,16 @@
 
   "Copies a buffer to another buffer."
 
+  ([src-buffer]
+
+   (let [n-bytes (count src-buffer)]
+     (copy (buffer n-bytes)
+           0
+           src-buffer
+           0
+           n-bytes)))
+
+
   ([dest-buffer dest-offset src-buffer]
 
    (copy dest-buffer
@@ -2059,7 +2069,7 @@
 
   "Returns the number of bytes remaining until the end of the view is reached.
   
-   In the context of a growing view, this value means the number of byte that can be written before
+   In the context of a growing view, this value means the number of bytes that can be written before
    reallocating a bigger buffer."
 
   [view]
