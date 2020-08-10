@@ -667,12 +667,11 @@
                     offset)))
 
     (wr-buffer [this buffer offset n-bytes]
-      (copy (to-buffer this)
-            (+ -offset
-               (position this))
-            buffer
-            offset
-            n-bytes)
+      (wa-buffer this
+                 (position this)
+                 buffer
+                 offset
+                 n-bytes)
       (skip this
             n-bytes)
       this)
@@ -1119,11 +1118,11 @@
                 offset)))
 
     (wr-buffer [this buffer offset n-bytes]
-      (copy (to-buffer this)
-            (position this)
-            buffer
-            offset
-            n-bytes)
+      (wa-buffer this
+                 (position this)
+                 buffer
+                 offset
+                 n-bytes)
       (skip this
             n-bytes)
       this)
