@@ -20,7 +20,8 @@
                            unsigned-bit-shift-right >>>}))
 
 
-(declare copy
+(declare buffer
+         copy
          i8
          i16
          i32
@@ -37,6 +38,12 @@
 
   "Reading primitive values at an absolute position, without disturbing the current one."
   
+  (ra-buffer [this position n-bytes]
+             [this position n-bytes buffer]
+             [this position n-bytes buffer offset]
+    "Reads n-bytes from an absolute `position` and returns them in a new buffer or in the
+     given one at the specified `offset` (or 0).")
+
   (ra-u8 [this position]
     "Reads an unsigned 8-bit interger from an absolute `position`.")
 
@@ -147,6 +154,11 @@
 
   "Reading primitive values from the current position, advancing it as needed. For instance,
    reading a 32-bit integer will advance the current position by 4 bytes."
+
+  (rr-buffer [this n-bytes]
+             [this n-bytes buffer]
+             [this n-bytes buffer offset]
+    "Reads n-bytes and returns them in a new buffer or in the given one at the specified `offset` (or 0).")
 
   (rr-u8 [this]
     "Reads an unsigned 8-bit integer from the current position.")
@@ -402,6 +414,27 @@
 
   IAbsoluteReader
 
+    (ra-buffer [this position n-bytes]
+      (ra-buffer this
+                 position
+                 n-bytes
+                 (buffer n-bytes)
+                 0))
+
+    (ra-buffer [this position n-bytes buffer]
+      (ra-buffer this
+                 position
+                 n-bytes
+                 buffer
+                 0))
+
+    (ra-buffer [this position n-bytes buffer offset]
+      (copy buffer
+            offset
+            (to-buffer this)
+            (+ -offset
+               position)
+            n-bytes))
 
     (ra-u8 [_ position]
       (u8 (.get byte-buffer
@@ -553,6 +586,28 @@
   IRelativeReader
 
     
+    (rr-buffer [this n-bytes]
+      (rr-buffer this
+                 n-bytes
+                 (buffer n-bytes)
+                 0))
+
+    (rr-buffer [this n-bytes buffer]
+      (rr-buffer this
+                 n-bytes
+                 buffer
+                 0))
+
+    (rr-buffer [this n-bytes buffer offset]
+      (let [b (ra-buffer this
+                         (position this)
+                         n-bytes
+                         buffer
+                         offset)]
+        (skip this
+              n-bytes)
+        b))
+
     (rr-u8 [_]
       (u8 (.get byte-buffer)))
 
@@ -740,6 +795,7 @@
 
 
 
+;; Copying in CLJS is almost exactly the same as in CLJ
 
 #?(:cljs
 
@@ -756,6 +812,27 @@
 
   IAbsoluteReader
 
+    (ra-buffer [this position n-bytes]
+      (ra-buffer this
+                 position
+                 n-bytes
+                 (buffer n-bytes)
+                 0))
+
+    (ra-buffer [this position n-bytes buffer]
+      (ra-buffer this
+                 position
+                 n-bytes
+                 buffer
+                 0))
+
+    (ra-buffer [this position n-bytes buffer offset]
+      (copy buffer
+            offset
+            (to-buffer this)
+            (+ (.-byteOffset dataview)
+               position)
+            n-bytes))
 
     (ra-u8 [_ position]
       (.getUint8 dataview
@@ -917,6 +994,29 @@
 
 
   IRelativeReader
+
+
+    (rr-buffer [this n-bytes]
+      (rr-buffer this
+                 n-bytes
+                 (buffer n-bytes)
+                 0))
+
+    (rr-buffer [this n-bytes buffer]
+      (rr-buffer this
+                 n-bytes
+                 buffer
+                 0))
+
+    (rr-buffer [this n-bytes buffer offset]
+      (let [b (ra-buffer this
+                         (position this)
+                         n-bytes
+                         buffer
+                         offset)]
+        (skip this
+              n-bytes)
+        b))
 
     (rr-u8 [this]
       (let [ret (ra-u8 this
@@ -1297,6 +1397,30 @@
 
   IAbsoluteReader
 
+    (ra-buffer [this position n-bytes]
+      (ra-buffer this
+                 position
+                 n-bytes
+                 (buffer n-bytes)
+                 0))
+
+    (ra-buffer [this position n-bytes buffer]
+      (ra-buffer this
+                 position
+                 n-bytes
+                 buffer
+                 0))
+
+    (ra-buffer [this position-given n-bytes buffer offset]
+      (garantee this
+                (- (+ position-given
+                      n-bytes)
+                   (position this)))
+      (copy buffer
+            offset
+            (to-buffer this)
+            position-given
+            n-bytes))
 
     (ra-u8 [_ position]
       (ra-u8 -view
@@ -1363,13 +1487,13 @@
                  (- (count buffer)
                     offset)))
 
-    (wa-buffer [this given-position buffer offset n-bytes]
+    (wa-buffer [this position-given buffer offset n-bytes]
       (garantee this
-                (- (+ given-position
+                (- (+ position-given
                       n-bytes)
                    (position this)))
       (copy (to-buffer this)
-            given-position
+            position-given
             buffer
             offset
             n-bytes)
@@ -1472,6 +1596,28 @@
 
   IRelativeReader
 
+
+    (rr-buffer [this n-bytes]
+      (rr-buffer this
+                 n-bytes
+                 (buffer n-bytes)
+                 0))
+
+    (rr-buffer [this n-bytes buffer]
+      (rr-buffer this
+                 n-bytes
+                 buffer
+                 0))
+
+    (rr-buffer [this n-bytes buffer offset]
+      (let [b (ra-buffer this
+                         (position this)
+                         n-bytes
+                         buffer
+                         offset)]
+        (skip this
+              n-bytes)
+        b))
 
     (rr-u8 [_]
       (rr-u8 -view))
