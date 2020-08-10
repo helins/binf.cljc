@@ -2006,6 +2006,17 @@
 
 
 
+(defn growing?
+
+  ""
+
+  [x]
+
+  (satisfies? IGrowing
+              x))
+
+
+
 (defn remaining
 
   "Returns the number of bytes remaining until the end of the view is reached.
