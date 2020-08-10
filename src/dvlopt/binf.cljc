@@ -1,6 +1,6 @@
 (ns dvlopt.binf
 
-  "Uninhibited library for any binary protocols.
+  "Uninhibited library for handling any binary protocol.
   
    See README for an overview."
 
@@ -98,7 +98,7 @@
     "Writes a 64-bit float to an absolute `position`.")
   
   (wa-string [this position string]
-    "Writes a string to an absolute `position`, encoded as UTF-8.
+    "Writes a string (encoded as UTF-8) to an absolute `position`.
     
      Unlike other functions which are implemented as a fluent interface, this function returns
      a tuple indicating how many bytes and chars have been written, and if the process is finished:
@@ -232,11 +232,13 @@
      Growing views always return true.")
 
   (offset [this]
-    "Returns the offset in the original buffer (returned by [[to-buffer]]).")
+    "Returns the offset in the original buffer (returned by [[to-buffer]]).
+    
+     Views can be counted using Clojure's `count` which expresses the number of bytes wrapped by the view
+     starting from the offset.")
 
   (position [this]
-
-    "Current the current position.")
+    "Returns the current position.")
 
   (seek [this position]
     "Modifies the current position.")
@@ -245,7 +247,9 @@
     "Skips `n-bytes` bytes.")
 
   (to-buffer [this]
-    "Returns the buffer wrapped by the view."))
+    "Returns the buffer wrapped by the view.
+    
+     Also see [[offset]]."))
 
 
 (defprotocol IViewBuilder
@@ -1150,10 +1154,11 @@
 
 (defn buffer
 
-  "Creates a new buffer having `n-bytes` bytes.
+  "Allocates a new buffer having `n-bytes` bytes.
   
-   In JS, corresponds to an `ArrayBuffer`.
-   On the JVM, corresponds to a plain byte array.
+   In Clojurescript, corresponds to a JS `ArrayBuffer`.
+
+   In Clojure on the JVM, corresponds to a plain byte array.
   
    In order to do anything interesting with this library, it needs to be wrapped in a [[view]]."
 
@@ -1168,9 +1173,9 @@
 
 (defmacro buffer*
 
-  "Creates a new buffers from the given byte values.
-  
-   Cf. [[buffer]]"
+  "Macro for instanting a new buffer populated by the given bytes.
+
+   For allocating a zeroed one, see [[buffer]]."
 
   [& b8s]
 
@@ -1677,7 +1682,7 @@
    A growing view will reallocate a bigger buffer everytime it reaches the end of the current one.
   
    This is a simple strategy for when the size is unknown in advance, but it has proven to be rather optimal
-   and ultimately efficient for the most common use cases. Even more so it the size can be roughly estimated.
+   and ultimately efficient for the most common use cases. Even more so if the size can be roughly estimated.
   
    The size of the bigger buffer is decided by calling `next-size` which is a function `old-size` -> `new-size`.
    Thus the user can be in full control of the process. When not provided, size is always multiplied by 1.5."
@@ -1715,7 +1720,7 @@
 
 (defn u8
 
-  "Converts an integer to an unsigned 8-bit integer."
+  "Casts the given `bits` (another integer) into a 8-bit unsigned integer."
 
   [integer]
 
@@ -1726,7 +1731,7 @@
 
 (defn i8
 
-  "Converts an unsigned 8-bit integer to signed one."
+  "Casts the given `bits` (another integer) into a 8-bit signed integer."
 
   [u8]
 
@@ -1740,7 +1745,7 @@
 
 (defn u16
 
-  ""
+  "Casts the given `bits` (another integer) into a 16-bit unsigned integer."
 
   ([i16]
 
@@ -1758,7 +1763,7 @@
 
 (defn i16
 
-  ""
+  "Casts the given `bits` (another integer) into a 16-bit signed integer."
 
   ([u16]
 
@@ -1778,7 +1783,7 @@
 
 (defn u32
 
-  ""
+  "Casts the given `bits` (another integer) into a 32-bit unsigned integer."
 
   ([i32]
 
@@ -1804,7 +1809,7 @@
 
 (defn i32
 
-  ""
+  "Casts the given `bits` (another integer) into a 32-bit signed integer."
 
   ([u32]
 
@@ -1825,7 +1830,7 @@
 
 (defn i64
 
-  ""
+  "Casts the given `bits` (another integer) into a 64-bit unsigned integer."
 
   [b8-1 b8-2 b8-3 b8-4 b8-5 b8-6 b8-7 b8-8]
 
@@ -1849,14 +1854,16 @@
 
 (defn f32
 
-  ""
+  "Interprets bits from an integer (at least 32 bits) as a 32-bit float.
+  
+   Opposite of [[bits-f32]]."
 
-  ([integer]
+  ([bits]
 
-   #?(:clj  (Float/intBitsToFloat integer)
+   #?(:clj  (Float/intBitsToFloat bits)
       :cljs (-> -conv-view
                 (wa-b32 0
-                        integer)
+                        bits)
                 (ra-f32 0))))
 
 
@@ -1871,14 +1878,16 @@
 
 (defn f64
 
-  ""
+  "Interprets bits from a 64-bits integer as a 64-bit float.
+  
+   Opposite of [[bits-64]]."
 
-  ([integer]
+  ([bits]
 
-   #?(:clj  (Double/longBitsToDouble integer)
+   #?(:clj  (Double/longBitsToDouble bits)
       :cljs (-> -conv-view
                 (wa-b64 0
-                        integer)
+                        bits)
                 (ra-f64 0))))
 
 
@@ -1897,7 +1906,7 @@
 
 (defn integer
 
-  "Converts a float value to an integer (eg. `42.0` to `42`)."
+  "Truncates a float value to 64-bit unsigned integer (eg. `42.0` to `42`)."
 
   [floating]
 
@@ -1907,7 +1916,9 @@
 
 (defn bits-f32
 
-  "Converts a 32-bit float to an integer preserving the bit pattern."
+  "Converts a 32-bit float to an integer preserving the bit pattern.
+  
+   Opposite of [[f32]]."
 
   [f32]
 
@@ -1921,7 +1932,9 @@
 
 (defn bits-f64
 
-  "Converts a 64-bit float to an integer preserving the bit pattern."
+  "Converts a 64-bit float to an integer preserving the bit pattern.
+  
+   Opposite of [[f32]]."
 
   [f64]
 
@@ -1998,7 +2011,7 @@
   "Returns the number of bytes remaining until the end of the view is reached.
   
    In the context of a growing view, this value means the number of bytes that can be written before
-   reallocating a bigger buffer."
+   reallocating a bigger buffer, shoud that information be useful."
 
   [view]
 
