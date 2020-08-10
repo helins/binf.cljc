@@ -2027,12 +2027,22 @@
            n-bytes)))
 
 
+  ([dest-buffer src-buffer]
+
+   (copy dest-buffer
+         0
+         src-buffer
+         0
+         (count src-buffer)))
+
+
   ([dest-buffer dest-offset src-buffer]
 
    (copy dest-buffer
          dest-offset
          src-buffer
-         nil))
+         0
+         (count src-buffer)))
 
 
   ([dest-buffer dest-offset src-buffer src-offset]
@@ -2041,26 +2051,22 @@
          dest-offset
          src-buffer
          src-offset
-         nil))
+         (- (count src-buffer)
+            src-offset)))
 
 
   ([dest-buffer dest-offset src-buffer src-offset n-bytes]
 
-   (let [src-offset-2 (clj/or src-offset
-                              0)
-         n-bytes-2    (clj/or n-bytes
-                              (- (count src-buffer)
-                                 src-offset-2))]
    #?(:clj  (System/arraycopy ^bytes src-buffer
-                              src-offset-2
+                              src-offset
                               ^bytes dest-buffer
                               dest-offset
-                              n-bytes-2)
+                              n-bytes)
       :cljs (.set (js/Uint8Array. dest-buffer)
                   (js/Uint8Array. src-buffer
-                                  src-offset-2
-                                  n-bytes-2)
-                  dest-offset)))
+                                  src-offset
+                                  n-bytes)
+                  dest-offset))
    dest-buffer))
 
 
