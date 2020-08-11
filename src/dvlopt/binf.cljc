@@ -1810,7 +1810,7 @@
 
   "Creates a growing view, starting with the given buffer.
   
-   A growing view will reallocate a bigger buffer everytime it reaches the end of the current one.
+   A growing view will reallocate a bigger buffer everytime it reaches the end of the current one, but ONLY WHEN WRITING.
   
    This is a simple strategy for when the size is unknown in advance, but it has proven to be rather optimal
    and ultimately efficient for the most common use cases. Even more so if the size can be roughly estimated.
@@ -2150,10 +2150,11 @@
 
 (defn remaining
 
-  "Returns the number of bytes remaining until the end of the view is reached.
+  "Returns the number of bytes remaining until the end of the view.
   
-   In the context of a growing view, this value means the number of bytes that can be written before
-   reallocating a bigger buffer, shoud that information be useful."
+   In the context of a growing view, this value means the number of bytes before hitting the end of the currently
+   allocated buffer, which matters for reading. When writing, this value indicates the number of bytes remaining
+   before reallocating a bigger buffer. See [[growing-buffer]]."
 
   [view]
 
