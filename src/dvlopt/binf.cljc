@@ -438,41 +438,50 @@
 
     (ra-u8 [_ position]
       (u8 (.get byte-buffer
-                ^long position)))
+                (+ -offset
+                   position))))
 
     (ra-i8 [_ position]
       (.get byte-buffer
-            ^long position))
+            (+ -offset
+               position)))
 
 
     (ra-u16 [_ position]
       (u16 (.getShort byte-buffer
-                      position)))
+                      (+ -offset
+                         position))))
 
     (ra-i16 [_ position]
       (.getShort byte-buffer
-                 position))
+                 (+ -offset
+                    position)))
 
 
     (ra-u32 [_ position]
       (u32 (.getInt byte-buffer
-                    position)))
+                    (+ -offset
+                       position))))
 
     (ra-i32 [_ position]
       (.getInt byte-buffer
-               position))
+               (+ -offset
+                  position)))
 
     (ra-i64 [_ position]
       (.getLong byte-buffer
-                position))
+                (+ -offset
+                   position)))
 
     (ra-f32 [_ position]
       (.getFloat byte-buffer
-                 position))
+                 (+ -offset
+                    position)))
 
     (ra-f64 [_ position]
       (.getDouble byte-buffer
-                  position))
+                  (+ -offset
+                     position)))
 
     (ra-string [this position n-bytes]
       (ra-string this
@@ -482,7 +491,8 @@
 
     (ra-string [this decoder position n-bytes]
       (String. (.array byte-buffer)
-               ^long position
+               (+ -offset
+                  position)
                ^long n-bytes
                (or ^Charset decoder
                    -charset-utf-8)))
@@ -558,12 +568,15 @@
       this)
 
     (wa-string [this position string]
-      (let [saved-position (.position byte-buffer)
-            res            (wr-string this
-                                      string)]
+      (let [saved-position (.position byte-buffer)]
         (.position byte-buffer
-                   saved-position)
-        res))
+                   (+ -offset
+                      position))
+        (let [res (wr-string this
+                             string)]
+          (.position byte-buffer
+                     saved-position)
+          res)))
     
 
   IEndianess
@@ -599,11 +612,11 @@
                  0))
 
     (rr-buffer [this n-bytes buffer offset]
-      (let [b (ra-buffer this
-                         (position this)
-                         n-bytes
-                         buffer
-                         offset)]
+      (let [b (copy buffer
+                    offset
+                    (to-buffer this)
+                    (.position byte-buffer)
+                    n-bytes)]
         (skip this
               n-bytes)
         b))
@@ -641,10 +654,11 @@
                  n-bytes))
 
     (rr-string [this decoder n-bytes]
-      (let [string (ra-string this
-                              decoder
-                              (.position byte-buffer)
-                              n-bytes)]
+      (let [string (String. (.array byte-buffer)
+                            (.position byte-buffer)
+                            ^long n-bytes
+                            (or ^Charset decoder
+                                -charset-utf-8))]
         (skip this
               n-bytes)
         string))
@@ -667,11 +681,11 @@
                     offset)))
 
     (wr-buffer [this buffer offset n-bytes]
-      (wa-buffer this
-                 (position this)
-                 buffer
-                 offset
-                 n-bytes)
+      (copy (to-buffer this)
+            (.position byte-buffer)
+            buffer
+            offset
+            n-bytes)
       (skip this
             n-bytes)
       this)
@@ -1411,15 +1425,11 @@
                  0))
 
     (ra-buffer [this position-given n-bytes buffer offset]
-      (garantee this
-                (- (+ position-given
-                      n-bytes)
-                   (position this)))
-      (copy buffer
-            offset
-            (to-buffer this)
-            position-given
-            n-bytes))
+      (ra-buffer -view
+                 position-given
+                 n-bytes
+                 buffer
+                 offset))
 
     (ra-u8 [_ position]
       (ra-u8 -view
@@ -1491,11 +1501,11 @@
                 (- (+ position-given
                       n-bytes)
                    (position this)))
-      (copy (to-buffer this)
-            position-given
-            buffer
-            offset
-            n-bytes)
+      (wa-buffer -view
+                 position-given
+                 buffer
+                 offset
+                 n-bytes)
       this)
 
 
@@ -1609,14 +1619,10 @@
                  0))
 
     (rr-buffer [this n-bytes buffer offset]
-      (let [b (ra-buffer this
-                         (position this)
-                         n-bytes
-                         buffer
-                         offset)]
-        (skip this
-              n-bytes)
-        b))
+      (rr-buffer -view
+                 n-bytes
+                 buffer
+                 offset))
 
     (rr-u8 [_]
       (rr-u8 -view))
@@ -1673,13 +1679,10 @@
     (wr-buffer [this buffer offset n-bytes]
       (garantee this
                 n-bytes)
-      (copy (to-buffer this)
-            (position this)
-            buffer
-            offset
-            n-bytes)
-      (skip this
-            n-bytes)
+      (wr-buffer -view
+                 buffer
+                 offset
+                 n-bytes)
       this)
 
     (wr-b8 [this integer]
