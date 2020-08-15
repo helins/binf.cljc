@@ -776,7 +776,8 @@
 
     (seek [this position]
       (.position byte-buffer
-                 position)
+                 (+ -offset
+                    position))
       this)
 
     (skip [this n-bytes]
