@@ -2180,7 +2180,7 @@
 
 (defn base64-decode
 
-  ""
+  "Decodes a string into a [[buffer]] according to the Base64 basic scheme (RFC 4648 section 4)"
 
   [string]
 
@@ -2192,7 +2192,7 @@
 
 (defn base64-encode
 
-  ""
+  "Encodes a [[buffer]] into a string according to the Base64 basic scheme (RFC 4648 section 4)"
 
   ([buffer]
 
