@@ -1,9 +1,9 @@
 # BinF stands for "Binary Formats"
 
 [![Clojars
-Project](https://img.shields.io/clojars/v/helins/binf.svg)](https://clojars.org/io.helins/binf)
+Project](https://img.shields.io/clojars/v/io.helins/binf.svg)](https://clojars.org/io.helins/binf)
 
-[![cljdoc badge](https://cljdoc.org/badge/helins/binf)](https://cljdoc.org/d/io.helins/binf)
+[![cljdoc badge](https://cljdoc.org/badge/io.helins/binf)](https://cljdoc.org/d/io.helins/binf)
 
 Cross-platform library for handling any kind of binary format or protocol without any shenaningans.
 
@@ -38,7 +38,7 @@ resulting in poor flexibility.
 
 ## Usage
 
-After reading the following overview, go explore the [full API](https://cljdoc.org/d/helins-io/binf.cljc) which really sheds light on what is possible.
+After reading the following overview, go explore the [full API](https://cljdoc.org/d/io.helins/binf) which really sheds light on what is possible.
 
 ### Buffers and Views
 
