@@ -2192,6 +2192,20 @@
 
   ""
 
-  [buffer]
+  ([buffer]
 
-  #?(:cljs (goog.crypt.base64/encodeByteArray (js/Uint8Array. buffer))))
+   #?(:cljs (goog.crypt.base64/encodeByteArray (js/Uint8Array. buffer))))
+
+
+  ([buffer offset]
+
+   #?(:cljs (goog.crypt.base64/encodeByteArray (js/Uint8Array. buffer
+                                                               offset))))
+
+
+  ([buffer offset n-bytes]
+
+   #?(:cljs (goog.crypt.base64/encodeByteArray (js/Uint8Array. buffer
+                                                               offset
+                                                               n-bytes))))
+  )
