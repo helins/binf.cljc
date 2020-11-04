@@ -1,8 +1,8 @@
 {:builds
  {:lib-dev
   {:modules    {:main {:entries [cljs.user
-                                 dvlopt.binf
-                                 dvlopt.binf-test]}}
+                                 helins.binf
+                                 helins.binf-test]}}
    :output-dir "public/js"
    :target     :browser}
 

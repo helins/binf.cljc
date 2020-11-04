@@ -1,9 +1,9 @@
-(ns dvlopt.binf-test
+(ns helins.binf-test
 
-  {:author "Adam Helinski"}
+  {:author "Adam Helins"}
 
   (:require [clojure.test :as t]
-            [dvlopt.binf  :as binf])
+            [helins.binf  :as binf])
   (:refer-clojure :rename {bit-shift-right >>}))
 
 

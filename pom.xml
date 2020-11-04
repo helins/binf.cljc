@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>dvlopt</groupId>
+  <groupId>io.helins</groupId>
   <artifactId>binf</artifactId>
   <version>0.0.0-alpha4</version>
-  <name>Binf</name>
-  <description>Handling binary formats</description>
-  <url>https://github.com/dvlopt/binf.cljc</url>
+  <name>BinF</name>
+  <description>Handling any binary format</description>
+  <url>https://github.com/helins-io/binf.cljc</url>
   <licenses>
     <license>
       <name>Eclipse Public License</name>
@@ -19,9 +19,9 @@
     </developer>
   </developers>
   <scm>
-    <url>https://github.com/dvlopt/binf.cljc</url>
-    <connection>scm:git:git://github.com/dvlopt/binf.cljc.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/dvlopt/binf.cljc.git</developerConnection>
+    <url>https://github.com/helins-io/binf.cljc</url>
+    <connection>scm:git:git://github.com/helins-io/binf.cljc.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/helins-io/binf.cljc.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
   <dependencies>

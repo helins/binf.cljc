@@ -1,12 +1,12 @@
-(ns dvlopt.binf
+(ns helins.binf
 
   "Uninhibited library for handling any binary protocol.
   
    See README for an overview."
 
-  {:author "Adam Helinski"}
+  {:author "Adam Helins"}
   (:require [clojure.core :as clj])
-  #?(:cljs (:require-macros [dvlopt.binf]))
+  #?(:cljs (:require-macros [helins.binf]))
   #?(:clj (:import clojure.lang.Counted
                    (java.nio ByteBuffer
                              ByteOrder
@@ -113,7 +113,7 @@
   
   (wa-string [this position string]
     "Writes a string (encoded as UTF-8) to an absolute `position`.
-    
+
      Unlike other functions which are implemented as a fluent interface, this function returns
      a tuple indicating how many bytes and chars have been written, and if the process is finished:
      `[finished? n-bytes n-chars]`.
@@ -140,7 +140,7 @@
 
   "Only applicable to `growing views` which are capable of growing size dynamically.
   
-   Cf. [[growing-view]]"
+   See [[growing-view]]."
 
   (garantee [this n-bytes]
     "Garantees that at least `n-bytes` bytes can be written.
@@ -193,7 +193,7 @@
 
      A decoder may be provided (default is UTF-8).
     
-     Cf. [[text-decoder]]"))
+     See [[text-decoder]]"))
 
 
 (defprotocol IRelativeWriter
@@ -241,10 +241,10 @@
   (garanteed? [this n-bytes]
     "Is it possible to write at least `n-bytes` bytes?
     
-     Growing views always return true.")
+     Growing views always return true since they can grow automatically.")
 
   (offset [this]
-    "Returns the offset in the original buffer (returned by [[to-buffer]]).
+    "Returns the offset in the original buffer this view starts from.
     
      Views can be counted using Clojure's `count` which expresses the number of bytes wrapped by the view
      starting from the offset.")
@@ -256,7 +256,7 @@
     "Modifies the current position.")
   
   (skip [this n-bytes]
-    "Skips `n-bytes` bytes.")
+    "Advances the current position by `n-bytes` bytes.")
 
   (to-buffer [this]
     "Returns the buffer wrapped by the view.
@@ -285,7 +285,7 @@
                      50
                      40))
 
-     ;; View from a view, offset of 60 bytes from the original buffer, 20 bytes long
+     ;; View from a view, offset of 60 bytes in the original buffer (50 + 10), 20 bytes long
      (def inner-view
           (binf/view my-view
                      10
@@ -356,7 +356,7 @@
   
    Available encodings are: `:iso-8859-1`, `:utf-8`, `:utf-16-be`, `:utf-16-le`
   
-   Default is UTF-8, but argument is non-nilable."
+   Default is UTF-8 but argument is non-nilable."
 
   ([]
 
@@ -1852,7 +1852,7 @@
 
 (defn u8
 
-  "Casts the given `bits` (another integer) into a 8-bit unsigned integer."
+  "Casts the given `bits` (any integer) into a 8-bit unsigned integer."
 
   [integer]
 
@@ -1863,7 +1863,7 @@
 
 (defn i8
 
-  "Casts the given `bits` (another integer) into a 8-bit signed integer."
+  "Casts the given `bits` (any integer) into a 8-bit signed integer."
 
   [u8]
 
@@ -1877,12 +1877,14 @@
 
 (defn u16
 
-  "Casts the given `bits` (another integer) into a 16-bit unsigned integer."
+  "Casts the given `bits` (any integer) into a 16-bit unsigned integer.
+  
+   Or recombines the given bytes in big endian order."
 
-  ([i16]
+  ([bits]
 
    (bit-and 0xffff
-            i16))
+            bits))
 
 
   ([b8-1 b8-2]
@@ -1895,14 +1897,16 @@
 
 (defn i16
 
-  "Casts the given `bits` (another integer) into a 16-bit signed integer."
+  "Casts the given `bits` (any integer) into a 16-bit signed integer.
+  
+   Or recombines the given bytes in big endian order."
 
-  ([u16]
+  ([bits]
 
-   #?(:clj  (unchecked-short u16)
+   #?(:clj  (unchecked-short bits)
       :cljs (-> -conv-view
                 (wa-b16 0
-                        u16)
+                        bits)
                 (ra-i16 0))))
 
 
@@ -1915,16 +1919,18 @@
 
 (defn u32
 
-  "Casts the given `bits` (another integer) into a 32-bit unsigned integer."
+  "Casts the given `bits` (any integer) into a 32-bit unsigned integer.
+  
+   Or recombines the given bytes in big endian order."
 
-  ([i32]
+  ([bits]
 
    #?(:clj  (bit-and 0xffffffff
-                     i32)
+                     bits)
       ;; Because bitwise operations in JS are 32 bits, bit-and'ing does not work in this case.
       :cljs (-> -conv-view
                 (wa-b32 0
-                        i32)
+                        bits)
                 (ra-u32 0))))
 
   ([b8-1 b8-2 b8-3 b8-4]
@@ -1941,11 +1947,13 @@
 
 (defn i32
 
-  "Casts the given `bits` (another integer) into a 32-bit signed integer."
+  "Casts the given `bits` (any integer) into a 32-bit signed integer.
+  
+   Or recombines the given bytes in big endian order."
 
-  ([u32]
+  ([bits]
 
-   #?(:clj  (unchecked-int u32)
+   #?(:clj  (unchecked-int bits)
       :cljs (-> -conv-view
                 (wa-b32 0
                         u32)
@@ -1962,7 +1970,7 @@
 
 (defn i64
 
-  "Casts the given `bits` (another integer) into a 64-bit unsigned integer."
+  "Recombines the given byets in big endian order to form a 64-bit signed integer."
 
   [b8-1 b8-2 b8-3 b8-4 b8-5 b8-6 b8-7 b8-8]
 
@@ -2140,7 +2148,9 @@
 
 (defn growing?
 
-  ""
+  "Returns true if `x` is a growing view instead of a fixed one.
+  
+   See [[growing-view]]."
 
   [x]
 
@@ -2155,7 +2165,7 @@
   
    In the context of a growing view, this value means the number of bytes before hitting the end of the currently
    allocated buffer, which matters for reading. When writing, this value indicates the number of bytes remaining
-   before reallocating a bigger buffer. See [[growing-buffer]]."
+   before reallocating a bigger buffer. See [[growing-view]]."
 
   [view]
 
