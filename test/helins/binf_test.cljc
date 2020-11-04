@@ -377,19 +377,19 @@
                      0)))
 
 
-(t/deftest copy
+(t/deftest copy-buffer
 
   (t/is (= (seq (binf/to-buffer (cp-view)))
-           (seq (binf/copy (binf/to-buffer (cp-view)))))
+           (seq (binf/copy-buffer (binf/to-buffer (cp-view)))))
         "Cloning")
 
   (t/is (= (concat (repeat 5
                            0)
                    (repeat 5
                            1))
-           (seq (binf/copy (binf/buffer 10)
-                           5
-                           (binf/to-buffer (cp-view)))))
+           (seq (binf/copy-buffer (binf/buffer 10)
+                                  5
+                                  (binf/to-buffer (cp-view)))))
         "Without offset nor length")
 
   (t/is (= (concat (repeat 5
@@ -398,19 +398,19 @@
                            1)
                    (repeat 2
                            0))
-           (seq (binf/copy (binf/buffer 10)
-                           5
-                           (binf/to-buffer (cp-view))
-                           2)))
+           (seq (binf/copy-buffer (binf/buffer 10)
+                                  5
+                                  (binf/to-buffer (cp-view))
+                                  2)))
         "With offset")
 
 
   (t/is (= cp-target
-           (seq (binf/copy (binf/buffer 10)
-                           5
-                           (binf/to-buffer (cp-view))
-                           2
-                           2)))
+           (seq (binf/copy-buffer (binf/buffer 10)
+                                  5
+                                  (binf/to-buffer (cp-view))
+                                  2
+                                  2)))
         "With offset and length"))
 
 

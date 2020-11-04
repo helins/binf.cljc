@@ -21,7 +21,7 @@
 
 
 (declare buffer
-         copy
+         copy-buffer
          i8
          i16
          i32
@@ -429,12 +429,12 @@
                  0))
 
     (ra-buffer [this position n-bytes buffer offset]
-      (copy buffer
-            offset
-            (to-buffer this)
-            (+ -offset
-               position)
-            n-bytes))
+      (copy-buffer buffer
+                   offset
+                   (to-buffer this)
+                   (+ -offset
+                      position)
+                   n-bytes))
 
     (ra-u8 [_ position]
       (u8 (.get byte-buffer
@@ -517,12 +517,12 @@
                     offset)))
 
     (wa-buffer [this position buffer offset n-bytes]
-      (copy (to-buffer this)
-            (+ -offset
-               position)
-            buffer
-            offset
-            n-bytes)
+      (copy-buffer (to-buffer this)
+                   (+ -offset
+                      position)
+                   buffer
+                   offset
+                   n-bytes)
       this)
 
     (wa-b8 [this position integer]
@@ -612,11 +612,11 @@
                  0))
 
     (rr-buffer [this n-bytes buffer offset]
-      (let [b (copy buffer
-                    offset
-                    (to-buffer this)
-                    (.position byte-buffer)
-                    n-bytes)]
+      (let [b (copy-buffer buffer
+                           offset
+                           (to-buffer this)
+                           (.position byte-buffer)
+                           n-bytes)]
         (skip this
               n-bytes)
         b))
@@ -681,11 +681,11 @@
                     offset)))
 
     (wr-buffer [this buffer offset n-bytes]
-      (copy (to-buffer this)
-            (.position byte-buffer)
-            buffer
-            offset
-            n-bytes)
+      (copy-buffer (to-buffer this)
+                   (.position byte-buffer)
+                   buffer
+                   offset
+                   n-bytes)
       (skip this
             n-bytes)
       this)
@@ -841,12 +841,12 @@
                  0))
 
     (ra-buffer [this position n-bytes buffer offset]
-      (copy buffer
-            offset
-            (to-buffer this)
-            (+ (.-byteOffset dataview)
-               position)
-            n-bytes))
+      (copy-buffer buffer
+                   offset
+                   (to-buffer this)
+                   (+ (.-byteOffset dataview)
+                      position)
+                   n-bytes))
 
     (ra-u8 [_ position]
       (.getUint8 dataview
@@ -926,12 +926,12 @@
                     offset)))
 
     (wa-buffer [this position buffer offset n-bytes]
-      (copy (to-buffer this)
-            (+ (.-byteOffset dataview)
-               position)
-            buffer
-            offset
-            n-bytes)
+      (copy-buffer (to-buffer this)
+                   (+ (.-byteOffset dataview)
+                      position)
+                   buffer
+                   offset
+                   n-bytes)
       this)
 
     (wa-b8 [this position integer]
@@ -1389,9 +1389,9 @@
     (-grow [this]
       (let [position-saved (position -view)
             buffer-new     (buffer (next-size (count -view)))]
-        (copy buffer-new
-              0
-              (to-buffer -view))
+        (copy-buffer buffer-new
+                     0
+                     (to-buffer -view))
         (set! -view
               (view buffer-new))
         (seek -view
@@ -1594,9 +1594,9 @@
                                                size-minimum)
                                          size-next
                                          (recur (next-size size-next)))))]
-          (copy buffer-new
-                0
-                (to-buffer -view))
+          (copy-buffer buffer-new
+                       0
+                       (to-buffer -view))
           (set! -view
                 (view buffer-new))
           (seek -view
@@ -2088,46 +2088,46 @@
 ;;;;;;;;;; Copying and miscellaneous
 
 
-(defn copy
+(defn copy-buffer
 
   "Copies a buffer to another buffer."
 
   ([src-buffer]
 
    (let [n-bytes (count src-buffer)]
-     (copy (buffer n-bytes)
-           0
-           src-buffer
-           0
-           n-bytes)))
+     (copy-buffer (buffer n-bytes)
+                  0
+                  src-buffer
+                  0
+                  n-bytes)))
 
 
   ([dest-buffer src-buffer]
 
-   (copy dest-buffer
-         0
-         src-buffer
-         0
-         (count src-buffer)))
+   (copy-buffer dest-buffer
+                0
+                src-buffer
+                0
+                (count src-buffer)))
 
 
   ([dest-buffer dest-offset src-buffer]
 
-   (copy dest-buffer
-         dest-offset
-         src-buffer
-         0
-         (count src-buffer)))
+   (copy-buffer dest-buffer
+                dest-offset
+                src-buffer
+                0
+                (count src-buffer)))
 
 
   ([dest-buffer dest-offset src-buffer src-offset]
 
-   (copy dest-buffer
-         dest-offset
-         src-buffer
-         src-offset
-         (- (count src-buffer)
-            src-offset)))
+   (copy-buffer dest-buffer
+                dest-offset
+                src-buffer
+                src-offset
+                (- (count src-buffer)
+                   src-offset)))
 
 
   ([dest-buffer dest-offset src-buffer src-offset n-bytes]
