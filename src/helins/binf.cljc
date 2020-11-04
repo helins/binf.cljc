@@ -440,13 +440,13 @@
 
     (ra-u8 [_ position]
       (u8 (.get byte-buffer
-                (+ -offset
-                   position))))
+                (int (+ -offset
+                         position)))))
 
     (ra-i8 [_ position]
       (.get byte-buffer
-            (+ -offset
-               position)))
+            (int (+ -offset
+                    position))))
 
 
     (ra-u16 [_ position]
@@ -493,8 +493,8 @@
 
     (ra-string [this decoder position n-bytes]
       (String. (.array byte-buffer)
-               (+ -offset
-                  position)
+               (int (+ -offset
+                       position))
                ^long n-bytes
                (or ^Charset decoder
                    -charset-utf-8)))
@@ -2185,7 +2185,7 @@
   [string]
 
   #?(:clj  (.decode (Base64/getDecoder)
-                    string)
+                    ^String string)
      :cljs (.-buffer (goog.crypt.base64/decodeStringToUint8Array string))))
 
 
