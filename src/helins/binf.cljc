@@ -16,7 +16,8 @@
                    (java.nio.charset Charset
                                      CharsetEncoder
                                      CoderResult
-                                     StandardCharsets)))
+                                     StandardCharsets)
+                   java.util.Base64))
   (:refer-clojure :rename {bit-shift-left           <<
                            bit-shift-right          >>
                            unsigned-bit-shift-right >>>}))
@@ -2184,7 +2185,9 @@
 
   [string]
 
-  #?(:cljs (.-buffer (goog.crypt.base64/decodeStringToUint8Array string))))
+  #?(:clj  (.decode (Base64/getDecoder)
+                    string)
+     :cljs (.-buffer (goog.crypt.base64/decodeStringToUint8Array string))))
 
 
 
@@ -2194,18 +2197,28 @@
 
   ([buffer]
 
-   #?(:cljs (goog.crypt.base64/encodeByteArray (js/Uint8Array. buffer))))
+   #?(:clj  (.encodeToString (Base64/getEncoder)
+                             buffer)
+      :cljs (goog.crypt.base64/encodeByteArray (js/Uint8Array. buffer))))
 
 
   ([buffer offset]
 
-   #?(:cljs (goog.crypt.base64/encodeByteArray (js/Uint8Array. buffer
+   #?(:clj  (base64-encode buffer
+                           offset
+                           (- (count buffer)
+                              offset))
+      :cljs (goog.crypt.base64/encodeByteArray (js/Uint8Array. buffer
                                                                offset))))
 
 
   ([buffer offset n-bytes]
 
-   #?(:cljs (goog.crypt.base64/encodeByteArray (js/Uint8Array. buffer
+   #?(:clj  (String. (.array (.encode (Base64/getEncoder)
+                                      (ByteBuffer/wrap buffer
+                                                       offset
+                                                       n-bytes))))
+      :cljs (goog.crypt.base64/encodeByteArray (js/Uint8Array. buffer
                                                                offset
                                                                n-bytes))))
   )
