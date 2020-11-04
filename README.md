@@ -1,9 +1,9 @@
 # BinF stands for "Binary Formats"
 
 [![Clojars
-Project](https://img.shields.io/clojars/v/helins/binf.cljc.svg)](https://clojars.org/helins-io/binf.cljc)
+Project](https://img.shields.io/clojars/v/helins/binf.svg)](https://clojars.org/io.helins/binf)
 
-[![cljdoc badge](https://cljdoc.org/badge/helins/binf.cljc)](https://cljdoc.org/d/helins-io/binf.cljc)
+[![cljdoc badge](https://cljdoc.org/badge/helins/binf)](https://cljdoc.org/d/io.helins/binf)
 
 Cross-platform library for handling any kind of binary format or protocol without any shenaningans.
 
