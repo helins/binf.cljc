@@ -1,13 +1,12 @@
 (ns helins.binf
 
-  "Uninhibited library for handling any binary protocol.
+  "Uninhibited library for handling any kind binary format or protocol.
   
    See README for an overview."
 
   {:author "Adam Helins"}
   (:require [clojure.core :as clj]
-            #?(:cljs [goog.crypt.base64])
-            )
+            #?(:cljs [goog.crypt.base64]))
   #?(:cljs (:require-macros [helins.binf]))
   #?(:clj (:import clojure.lang.Counted
                    (java.nio ByteBuffer
@@ -2220,5 +2219,4 @@
                                                        n-bytes))))
       :cljs (goog.crypt.base64/encodeByteArray (js/Uint8Array. buffer
                                                                offset
-                                                               n-bytes))))
-  )
+                                                               n-bytes)))))

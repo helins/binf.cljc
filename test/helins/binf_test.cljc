@@ -650,5 +650,19 @@
     (t/is (= (seq buffer)
              (seq (-> buffer
                       binf/base64-encode
-                      binf/base64-decode))))
-    ))
+                      binf/base64-decode)))
+          "Without offset nor lenght")
+    (t/is (= (drop 5
+                   (seq buffer))
+             (seq (-> buffer
+                      (binf/base64-encode 5)
+                      binf/base64-decode)))
+          "With offset without length")
+    (t/is (= (->> (seq buffer)
+                  (drop 5)
+                  (take 20))
+             (seq (-> buffer
+                      (binf/base64-encode 5
+                                          20)
+                      binf/base64-decode)))
+          "With offset and length")))
