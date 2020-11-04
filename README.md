@@ -47,7 +47,7 @@ Clojurescript, it is an
 [ArrayBuffer](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer).
 
 ```clojure
-(require '[helins/binf :as binf])
+(require '[helins.binf :as binf])
 
 (def my-buffer
      (binf/buffer 1024))
@@ -74,21 +74,21 @@ instance:
 ;; Relative to the current position, write a byte and a 32-bit integer
 ;; (sign is irrelevant, only the bit pattern is important when writing)
 ;;
-(-> view
+(-> my-view
     (binf/wr-b8 42)
     (binf/wr-b32 1000))
 
 
 ;; Relative position in bytes is updated
 ;;
-(= (binf/position view)
+(= (binf/position my-view)
    5)
 
 ;; At absolute positions, read our data as unsigned integers
 ;;
-[(binf/ra-u8 view
+[(binf/ra-u8 my-view
              0)
- (binf/ra-u32 view
+ (binf/ra-u32 my-view
               1)]
 
 ;; = [42 1000]
@@ -96,12 +96,12 @@ instance:
 
 ;; We could have rewind our data and used relative positioning
 ;;
-(binf/seek view
+(binf/seek my-view
            0)
 
-[(binf/rr-u8 view
+[(binf/rr-u8 my-view
              0)
- (binf/rr-u32 view
+ (binf/rr-u32 my-view
               1)]
 ```
 
@@ -125,7 +125,7 @@ a bigger one under the hood.
 
 ;; No worries
 ;;
-(= (count my-growing-buffer)
+(= (count my-growing-view)
    8675)
 ```
 

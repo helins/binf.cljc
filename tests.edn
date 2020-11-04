@@ -1,0 +1,7 @@
+#kaocha/v1
+{:tests [{:id :jvm}
+         {:id   :node
+          :type :kaocha.type/cljs}
+         {:id            :browser
+          :type          :kaocha.type/cljs
+          :cljs/repl-env cljs.repl.browser/repl-env}]}
