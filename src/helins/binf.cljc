@@ -38,41 +38,41 @@
 
   "Reading primitive values at an absolute position, without disturbing the current one."
   
-  (ra-buffer [this position n-bytes]
-             [this position n-bytes buffer]
-             [this position n-bytes buffer offset]
+  (ra-buffer [view position n-bytes]
+             [view position n-bytes buffer]
+             [view position n-bytes buffer offset]
     "Reads n-bytes from an absolute `position` and returns them in a new buffer or in the
      given one at the specified `offset` (or 0).")
 
-  (ra-u8 [this position]
+  (ra-u8 [view position]
     "Reads an unsigned 8-bit interger from an absolute `position`.")
 
-  (ra-i8 [this position]
+  (ra-i8 [view position]
     "Reads a signed 8-bit integer from an absolute `position`.")
 
-  (ra-u16 [this position]
+  (ra-u16 [view position]
     "Reads an unsigned 16-bit integer from an absolute `position`.")
 
-  (ra-i16 [this position]
+  (ra-i16 [view position]
     "Reads a signed 16-bit integer from an absolute `position`.")
 
-  (ra-u32 [this position]
+  (ra-u32 [view position]
     "Reads an unsigned 32-bit integer from an absolute `position`.")
 
-  (ra-i32 [this position]
+  (ra-i32 [view position]
     "Reads a signed 32-bit integer from an absolute `position`.")
 
-  (ra-i64 [this position]
+  (ra-i64 [view position]
     "Reads a signed 64-bit integer from an absolute `position`.")
 
-  (ra-f32 [this position]
+  (ra-f32 [view position]
     "Reads a 32-bit float at from absolute `position`.")
 
-  (ra-f64 [this position]
+  (ra-f64 [view position]
     "Reads a 64-bit float at from absolute `position`.")
   
-  (ra-string [this position n-bytes]
-             [this decoder position n-bytes]
+  (ra-string [view position n-bytes]
+             [view decoder position n-bytes]
     "Reads a string consisting of `n-bytes` bytes from an absolute `position`.
     
      A decoder may be provided (default is UTF-8).
@@ -86,35 +86,35 @@
   
    When writing integers, sign is irrelevant and truncation is automatic."
   
-  (wa-buffer [this position buffer]
-             [this position buffer offset]
-             [this position buffer offset n-bytes]
+  (wa-buffer [view position buffer]
+             [view position buffer offset]
+             [view position buffer offset n-bytes]
     "Copies the given `buffer` to an absolute `position`.
     
      An `offset` in the buffer as well as a number of bytes to copy (`n-bytes`) may be provided.")
 
-  (wa-b8 [this position integer]
+  (wa-b8 [view position integer]
     "Writes an 8-bit integer to an absolute position.")
 
-  (wa-b16 [this position integer]
+  (wa-b16 [view position integer]
     "Writes a 16-bit integer to an absolute `position`.")
 
-  (wa-b32 [this position integer]
+  (wa-b32 [view position integer]
     "Writes a 32-bit integer to an absolute `position`.")
 
-  (wa-b64 [this position integer]
+  (wa-b64 [view position integer]
     "Writes a 64-bit integer to an absolute `position`.")
 
-  (wa-f32 [this position floating]
+  (wa-f32 [view position floating]
     "Writes a 32-bit float to an absolute `position`.")
 
-  (wa-f64 [this position floating]
+  (wa-f64 [view position floating]
     "Writes a 64-bit float to an absolute `position`.")
   
-  (wa-string [this position string]
+  (wa-string [view position string]
     "Writes a string (encoded as UTF-8) to an absolute `position`.
 
-     Unlike other functions which are implemented as a fluent interface, this function returns
+     Unlike other functions which are implemented as a fluent interface, view function returns
      a tuple indicating how many bytes and chars have been written, and if the process is finished:
      `[finished? n-bytes n-chars]`.
     
@@ -129,8 +129,8 @@
 
   "Retrieving or modifying the endianess."
   
-  (endianess [this]
-             [this new-endianess]
+  (endianess [view]
+             [view new-endianess]
     "Arity 1 returns the current endianess, arity 2 sets it.
     
      Accepted values are `:little-endian` and `:big-endian`."))
@@ -142,7 +142,7 @@
   
    See [[growing-view]]."
 
-  (garantee [this n-bytes]
+  (garantee [growing-view n-bytes]
     "Garantees that at least `n-bytes` bytes can be written.
     
      The growing view will automatically grow its size if needed.
@@ -155,40 +155,40 @@
   "Reading primitive values from the current position, advancing it as needed. For instance,
    reading a 32-bit integer will advance the current position by 4 bytes."
 
-  (rr-buffer [this n-bytes]
-             [this n-bytes buffer]
-             [this n-bytes buffer offset]
+  (rr-buffer [view n-bytes]
+             [view n-bytes buffer]
+             [view n-bytes buffer offset]
     "Reads n-bytes and returns them in a new buffer or in the given one at the specified `offset` (or 0).")
 
-  (rr-u8 [this]
+  (rr-u8 [view]
     "Reads an unsigned 8-bit integer from the current position.")
 
-  (rr-i8 [this]
+  (rr-i8 [view]
     "Reads a signed 8-bit integer from the current position.")
 
-  (rr-u16 [this]
+  (rr-u16 [view]
     "Reads an unsigned 16-bit integer from the current position.")
 
-  (rr-i16 [this]
+  (rr-i16 [view]
     "Reads a signed 16-bit integer from the current position.")
 
-  (rr-u32 [this]
+  (rr-u32 [view]
     "Reads an unsigned 32-bit integer from the current position.")
 
-  (rr-i32 [this]
+  (rr-i32 [view]
     "Reads a signed 32-bit integer from the current position.")
 
-  (rr-i64 [this]
+  (rr-i64 [view]
     "Reads a signed 64-bit integer from the current position.")
 
-  (rr-f32 [this]
+  (rr-f32 [view]
     "Reads a 32-bit float from the current position.")
 
-  (rr-f64 [this]
+  (rr-f64 [view]
     "Reads a 64-bit float from the current position.")
   
-  (rr-string [this n-bytes]
-             [this decoder n-bytes]
+  (rr-string [view n-bytes]
+             [view decoder n-bytes]
     "Reads a string consisting of `n-bytes` from the current position.
 
      A decoder may be provided (default is UTF-8).
@@ -203,32 +203,32 @@
 
    When writing integers, sign is irrelevant and truncation is automatic."
 
-  (wr-buffer [this buffer]
-             [this buffer offset]
-             [this buffer offset n-bytes]
+  (wr-buffer [view buffer]
+             [view buffer offset]
+             [view buffer offset n-bytes]
     "Copies the given `buffer` to the current position.
 
      An `offset` in the buffer as well as a number of bytes to copy (`n-bytes`) may be provided.")
   
-  (wr-b8 [this integer]
+  (wr-b8 [view integer]
     "Writes an 8-bit integer to the current position.")
 
-  (wr-b16 [this integer]
+  (wr-b16 [view integer]
     "Writes a 16-bit integer to the current position.")
 
-  (wr-b32 [this integer]
+  (wr-b32 [view integer]
     "Writes a 32-bit integer to the current position.")
 
-  (wr-b64 [this integer]
+  (wr-b64 [view integer]
     "Writes a 64-bit integer to the current position.")
 
-  (wr-f32 [this floating]
+  (wr-f32 [view floating]
     "Writes a 32-bit float to the current position.")
 
-  (wr-f64 [this floating]
+  (wr-f64 [view floating]
     "Writes a 64-bit float to the current position.")
 
-  (wr-string [this string]
+  (wr-string [view string]
     "Writes a string to the current position, encoded at UTF-8.
     
      Cf. [[wa-string]] about the returned value"))
@@ -238,27 +238,27 @@
 
   "Additional functions related to views (growing ones as well)."
 
-  (garanteed? [this n-bytes]
+  (garanteed? [view n-bytes]
     "Is it possible to write at least `n-bytes` bytes?
     
      Growing views always return true since they can grow automatically.")
 
-  (offset [this]
+  (offset [view]
     "Returns the offset in the original buffer this view starts from.
     
      Views can be counted using Clojure's `count` which expresses the number of bytes wrapped by the view
      starting from the offset.")
 
-  (position [this]
+  (position [view]
     "Returns the current position.")
 
-  (seek [this position]
+  (seek [view position]
     "Modifies the current position.")
   
-  (skip [this n-bytes]
+  (skip [view n-bytes]
     "Advances the current position by `n-bytes` bytes.")
 
-  (to-buffer [this]
+  (to-buffer [view]
     "Returns the buffer wrapped by the view.
     
      Also see [[offset]]."))
@@ -268,9 +268,9 @@
 
   "Building a new view."
 
-  (view [this]
-        [this offset]
-        [this offset n-bytes]
+  (view [view]
+        [view offset]
+        [view offset n-bytes]
     "A view can be created from a buffer (see [[buffer]]) or from another view.
     
      An `offset` as well as a size (`n-bytes`) may be provided.
@@ -1956,7 +1956,7 @@
    #?(:clj  (unchecked-int bits)
       :cljs (-> -conv-view
                 (wa-b32 0
-                        u32)
+                        bits)
                 (ra-i32 0))))
 
   ([b8-1 b8-2 b8-3 b8-4]
