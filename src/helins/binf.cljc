@@ -5,7 +5,9 @@
    See README for an overview."
 
   {:author "Adam Helins"}
-  (:require [clojure.core :as clj])
+  (:require [clojure.core :as clj]
+            #?(:cljs [goog.crypt.base64])
+            )
   #?(:cljs (:require-macros [helins.binf]))
   #?(:clj (:import clojure.lang.Counted
                    (java.nio ByteBuffer
@@ -2171,3 +2173,25 @@
 
   (- (count view)
      (position view)))
+
+
+;;;;;;;;;; Base64 utilities
+
+
+(defn base64-decode
+
+  ""
+
+  [string]
+
+  #?(:cljs (.-buffer (goog.crypt.base64/decodeStringToUint8Array string))))
+
+
+
+(defn base64-encode
+
+  ""
+
+  [buffer]
+
+  #?(:cljs (goog.crypt.base64/encodeByteArray (js/Uint8Array. buffer))))

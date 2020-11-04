@@ -636,3 +636,19 @@
     (t/is (= 1000
              (binf/position gv)))))
 
+
+;;;;;;;;;; Base64 utilities
+
+
+(t/deftest base64
+
+  (let [buffer (binf/buffer 64)
+        view   (binf/view buffer)]
+    (dotimes [i 64]
+      (binf/wr-b8 view
+                  i))
+    (t/is (= (seq buffer)
+             (seq (-> buffer
+                      binf/base64-encode
+                      binf/base64-decode))))
+    ))
