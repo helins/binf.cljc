@@ -116,7 +116,7 @@
   (wa-string [view position string]
     "Writes a string (encoded as UTF-8) to an absolute `position`.
 
-     Unlike other functions which are implemented as a fluent interface, view function returns
+     Unlike other functions which are implemented as a fluent interface, this function returns
      a tuple indicating how many bytes and chars have been written, and if the process is finished:
      `[finished? n-bytes n-chars]`.
     
