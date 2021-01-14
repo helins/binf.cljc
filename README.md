@@ -99,10 +99,8 @@ instance:
 (binf/seek my-view
            0)
 
-[(binf/rr-u8 my-view
-             0)
- (binf/rr-u32 my-view
-              1)]
+[(binf/rr-u8 my-view)
+ (binf/rr-u32 my-view)]
 ```
 
 ### Growing views
