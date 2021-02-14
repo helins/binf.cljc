@@ -15,7 +15,6 @@
 
 .cljs_node_repl/
 node_modules/
-package-lock.json
 out
 
 // Shadow-cljs
@@ -24,9 +23,8 @@ out
 node_modules/
 out
 package.json
-package-lock.json
-resources/
-/public/*
-!/public/index.html
-chui/*
-!/chui/index.html
+
+/resources/public/*
+!/resources/public/index.html
+/resources/chui/*
+!/resources/chui/index.html

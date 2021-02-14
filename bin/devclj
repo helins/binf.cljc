@@ -1,4 +1,0 @@
-#!/usr/bin/env sh
-
-
-clj -A:dev:test:nrepl:rebel

@@ -1836,9 +1836,9 @@
                               size-previous)
                          size-next
                          (throw (ex-info "Must reallocate bigger buffer"
-                                         {::error          :reallocation
-                                          ::previous-sizes size-previous 
-                                          ::next-size      size-next})))))
+                                         {::error         :reallocation
+                                          ::previous-size size-previous 
+                                          ::next-size     size-next})))))
                    (fn default-reallocate [size-previous]
                      (Math/round (* 1.5
                                     size-previous))))

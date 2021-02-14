@@ -1,7 +1,13 @@
 #kaocha/v1
-{:tests [{:id :jvm}
-         {:id   :node
-          :type :kaocha.type/cljs}
-         {:id            :browser
-          :type          :kaocha.type/cljs
-          :cljs/repl-env cljs.repl.browser/repl-env}]}
+{:tests [{:id                  :jvm
+          :kaocha/source-paths ["src/main"]
+          :kaocha/test-paths   ["src/test"]}
+         {:id                  :node
+          :type                :kaocha.type/cljs
+          :kaocha/source-paths ["src/main"]
+          :kaocha/test-paths   ["src/test"]}
+         {:id                  :browser
+          :type                :kaocha.type/cljs
+          :cljs/repl-env       cljs.repl.browser/repl-env
+          :kaocha/source-paths ["src/main"]
+          :kaocha/test-paths   ["src/test"]}]}

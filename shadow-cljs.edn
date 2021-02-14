@@ -1,23 +1,21 @@
 {:builds
- {:lib-dev
-  {:modules    {:main {:entries [cljs.user
-                                 helins.binf
-                                 helins.binf-test]}}
-   :output-dir "public/js"
+ {:dev
+  {:asset-path "/js"
+   :modules    {:main {:entries [helins.binf.dev]}}
+   :output-dir "resources/public/js"
    :target     :browser}
 
 
  :test
  {:target    :browser-test
   :runner-ns lambdaisland.chui.shadow.browser-runner
-  :test-dir  "chui"}}
+  :test-dir  "resources/chui"}}
 
  :deps
  {:alias [:cljs]}
 
  :dev-http
- {8080 "public"}
+ {8000 "resources/public"}
  
  :nrepl
- {:port 4001}
- }
+ {:port 4000}}
