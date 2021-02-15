@@ -1,5 +1,12 @@
 {:builds
- {:dev
+ {:bench
+  {:asset-path "/js"
+   :modules    {:main {:entries [helins.binf.bench]
+                       :init-fn helins.binf.bench/main}}
+   :output-dir "resources/public/js"
+   :target     :browser}
+  
+  :dev
   {:asset-path "/js"
    :modules    {:main {:entries [helins.binf.dev]}}
    :output-dir "resources/public/js"
@@ -7,8 +14,8 @@
 
 
  :test
- {:target    :browser-test
-  :runner-ns lambdaisland.chui.shadow.browser-runner
+ {:runner-ns lambdaisland.chui.shadow.browser-runner
+  :target    :browser-test
   :test-dir  "resources/chui"}}
 
  :deps

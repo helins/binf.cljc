@@ -5,17 +5,21 @@
  ["src/main"]
 
  :aliases
- {:cljs
+ {:bench
+  {:extra-deps  {com.taoensso/tufte {:mvn/version "2.2.0"}}
+   :extra-paths ["src/bench"]}
+  
+  :cljs
   {:extra-deps {thheller/shadow-cljs {:mvn/version "2.11.6"}}
    :main-opts  ["-m" "shadow.cljs.devtools.cli"]}
 
   :deploy
   {:extra-deps {deps-deploy/deps-deploy {:mvn/version "0.0.9"}}
-   :main-opts ["-m" "deps-deploy.deps-deploy" "deploy" "release.jar"]}
+   :main-opts  ["-m" "deps-deploy.deps-deploy" "deploy" "release.jar"]}
 
   :dev
-  {:extra-paths ["src/dev"]
-   :extra-deps  {org.clojure/test.check {:mvn/version "0.10.0"}}}
+  {:extra-deps  {org.clojure/test.check {:mvn/version "0.10.0"}}
+   :extra-paths ["src/dev"]}
 
   :jar
   {:extra-deps {seancorfield/depstar {:mvn/version "0.5.2"}}
