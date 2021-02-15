@@ -33,6 +33,56 @@
          u32)
 
 
+;;;;;;;;;; Primitive type sizes
+
+
+(def sz-b8
+
+  "Number of bytes in an 8-bit integer."
+
+  1)
+
+
+
+(def sz-b16
+
+  "Number of bytes in a 16-bit integer."
+
+  2)
+
+
+
+(def sz-b32
+
+  "Number of bytes in a 32-bit integer."
+
+  4)
+
+
+
+(def sz-b64
+
+  "Number of bytes in a 64-bit integer."
+
+  8)
+
+
+
+(def sz-f32
+
+  "Number of bytes in a 32-bit float."
+
+  4)
+
+
+
+(def sz-f64
+
+  "Number of bytes in a 64-bit float."
+
+  8)
+
+
 ;;;;;;;;;; Protocols
 
 
@@ -47,7 +97,7 @@
      given one at the specified `offset` (or 0).")
 
   (ra-u8 [view position]
-    "Reads an unsigned 8-bit interger from an absolute `position`.")
+    "Reads an unsigned 8-bit integer from an absolute `position`.")
 
   (ra-i8 [view position]
     "Reads a signed 8-bit integer from an absolute `position`.")
@@ -1818,12 +1868,11 @@
                     (update 2
                             +
                             written-chars))
-                (do
-                  (recur res-next
-                         (+ (res-next 1)
-                            written-bytes)
-                         (+ (res-next 2)
-                            written-chars)))))))))
+                (recur res-next
+                       (+ (res-next 1)
+                          written-bytes)
+                       (+ (res-next 2)
+                          written-chars))))))))
 
 
     IView
