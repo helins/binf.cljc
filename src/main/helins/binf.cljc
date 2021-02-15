@@ -40,10 +40,10 @@
 
   "Reading primitive values at an absolute position, without disturbing the current one."
   
-  (ra-buffer [view position n-bytes]
-             [view position n-bytes buffer]
-             [view position n-bytes buffer offset]
-    "Reads n-bytes from an absolute `position` and returns them in a new buffer or in the
+  (ra-buffer [view position n-byte]
+             [view position n-byte buffer]
+             [view position n-byte buffer offset]
+    "Reads `n-byte` bytes from an absolute `position` and returns them in a new buffer or in the
      given one at the specified `offset` (or 0).")
 
   (ra-u8 [view position]
@@ -73,9 +73,9 @@
   (ra-f64 [view position]
     "Reads a 64-bit float at from absolute `position`.")
   
-  (ra-string [view position n-bytes]
-             [view decoder position n-bytes]
-    "Reads a string consisting of `n-bytes` bytes from an absolute `position`.
+  (ra-string [view position n-byte]
+             [view decoder position n-byte]
+    "Reads a string consisting of `n-byte` bytes from an absolute `position`.
     
      A decoder may be provided (default is UTF-8).
     
@@ -90,10 +90,10 @@
   
   (wa-buffer [view position buffer]
              [view position buffer offset]
-             [view position buffer offset n-bytes]
+             [view position buffer offset n-byte]
     "Copies the given `buffer` to an absolute `position`.
     
-     An `offset` in the buffer as well as a number of bytes to copy (`n-bytes`) may be provided.")
+     An `offset` in the buffer as well as a number of bytes to copy (`n-byte`) may be provided.")
 
   (wa-b8 [view position integer]
     "Writes an 8-bit integer to an absolute position.")
@@ -118,7 +118,7 @@
 
      Unlike other functions which are implemented as a fluent interface, this function returns
      a tuple indicating how many bytes and chars have been written, and if the process is finished:
-     `[finished? n-bytes n-chars]`.
+     `[finished? n-byte n-chars]`.
     
      With that information, the user can continue writing if needed. On the JVM, the tuple contains a 4th
      item which is a `CharBuffer` containing the rest of the unwritten string which can be passed in place
@@ -144,8 +144,8 @@
   
    See [[growing-view]]."
 
-  (garantee [growing-view n-bytes]
-    "Garantees that at least `n-bytes` bytes can be written.
+  (garantee [growing-view n-byte]
+    "Garantees that at least `n-byte` bytes can be written.
     
      The growing view will automatically grow its size if needed.
     
@@ -157,10 +157,10 @@
   "Reading primitive values from the current position, advancing it as needed. For instance,
    reading a 32-bit integer will advance the current position by 4 bytes."
 
-  (rr-buffer [view n-bytes]
-             [view n-bytes buffer]
-             [view n-bytes buffer offset]
-    "Reads n-bytes and returns them in a new buffer or in the given one at the specified `offset` (or 0).")
+  (rr-buffer [view n-byte]
+             [view n-byte buffer]
+             [view n-byte buffer offset]
+    "Reads n-byte and returns them in a new buffer or in the given one at the specified `offset` (or 0).")
 
   (rr-u8 [view]
     "Reads an unsigned 8-bit integer from the current position.")
@@ -189,9 +189,9 @@
   (rr-f64 [view]
     "Reads a 64-bit float from the current position.")
   
-  (rr-string [view n-bytes]
-             [view decoder n-bytes]
-    "Reads a string consisting of `n-bytes` from the current position.
+  (rr-string [view n-byte]
+             [view decoder n-byte]
+    "Reads a string consisting of `n-byte` from the current position.
 
      A decoder may be provided (default is UTF-8).
     
@@ -207,10 +207,10 @@
 
   (wr-buffer [view buffer]
              [view buffer offset]
-             [view buffer offset n-bytes]
+             [view buffer offset n-byte]
     "Copies the given `buffer` to the current position.
 
-     An `offset` in the buffer as well as a number of bytes to copy (`n-bytes`) may be provided.")
+     An `offset` in the buffer as well as a number of bytes to copy (`n-byte`) may be provided.")
   
   (wr-b8 [view integer]
     "Writes an 8-bit integer to the current position.")
@@ -240,8 +240,8 @@
 
   "Additional functions related to views (growing ones as well)."
 
-  (garanteed? [view n-bytes]
-    "Is it possible to write at least `n-bytes` bytes?
+  (garanteed? [view n-byte]
+    "Is it possible to write at least `n-byte` bytes?
     
      Growing views always return true since they can grow automatically.")
 
@@ -257,8 +257,8 @@
   (seek [view position]
     "Modifies the current position.")
   
-  (skip [view n-bytes]
-    "Advances the current position by `n-bytes` bytes.")
+  (skip [view n-byte]
+    "Advances the current position by `n-byte` bytes.")
 
   (to-buffer [view]
     "Returns the buffer wrapped by the view.
@@ -270,12 +270,12 @@
 
   "Building a new view."
 
-  (view [view]
-        [view offset]
-        [view offset n-bytes]
+  (view [viewable]
+        [viewable offset]
+        [viewable offset n-byte]
     "A view can be created from a buffer (see [[buffer]]) or from another view.
     
-     An `offset` as well as a size (`n-bytes`) may be provided.
+     An `offset` as well as a size (`n-byte`) may be provided.
     
      ```clojure
      (def my-buffer
@@ -416,27 +416,27 @@
 
   IAbsoluteReader
 
-    (ra-buffer [this position n-bytes]
+    (ra-buffer [this position n-byte]
       (ra-buffer this
                  position
-                 n-bytes
-                 (buffer n-bytes)
+                 n-byte
+                 (buffer n-byte)
                  0))
 
-    (ra-buffer [this position n-bytes buffer]
+    (ra-buffer [this position n-byte buffer]
       (ra-buffer this
                  position
-                 n-bytes
+                 n-byte
                  buffer
                  0))
 
-    (ra-buffer [this position n-bytes buffer offset]
+    (ra-buffer [this position n-byte buffer offset]
       (copy-buffer buffer
                    offset
                    (to-buffer this)
                    (+ -offset
                       position)
-                   n-bytes))
+                   n-byte))
 
     (ra-u8 [_ position]
       (u8 (.get byte-buffer
@@ -485,17 +485,17 @@
                   (+ -offset
                      position)))
 
-    (ra-string [this position n-bytes]
+    (ra-string [this position n-byte]
       (ra-string this
                  nil
                  position
-                 n-bytes))
+                 n-byte))
 
-    (ra-string [this decoder position n-bytes]
+    (ra-string [this decoder position n-byte]
       (String. (.array byte-buffer)
                (int (+ -offset
                        position))
-               ^long n-bytes
+               ^long n-byte
                (or ^Charset decoder
                    -charset-utf-8)))
 
@@ -518,13 +518,13 @@
                  (- (count buffer)
                     offset)))
 
-    (wa-buffer [this position buffer offset n-bytes]
+    (wa-buffer [this position buffer offset n-byte]
       (copy-buffer (to-buffer this)
                    (+ -offset
                       position)
                    buffer
                    offset
-                   n-bytes)
+                   n-byte)
       this)
 
     (wa-b8 [this position integer]
@@ -601,26 +601,26 @@
   IRelativeReader
 
     
-    (rr-buffer [this n-bytes]
+    (rr-buffer [this n-byte]
       (rr-buffer this
-                 n-bytes
-                 (buffer n-bytes)
+                 n-byte
+                 (buffer n-byte)
                  0))
 
-    (rr-buffer [this n-bytes buffer]
+    (rr-buffer [this n-byte buffer]
       (rr-buffer this
-                 n-bytes
+                 n-byte
                  buffer
                  0))
 
-    (rr-buffer [this n-bytes buffer offset]
+    (rr-buffer [this n-byte buffer offset]
       (let [b (copy-buffer buffer
                            offset
                            (to-buffer this)
                            (.position byte-buffer)
-                           n-bytes)]
+                           n-byte)]
         (skip this
-              n-bytes)
+              n-byte)
         b))
 
     (rr-u8 [_]
@@ -650,19 +650,19 @@
     (rr-f64 [_]
       (.getDouble byte-buffer))
 
-    (rr-string [this n-bytes]
+    (rr-string [this n-byte]
       (rr-string this
                  nil
-                 n-bytes))
+                 n-byte))
 
-    (rr-string [this decoder n-bytes]
+    (rr-string [this decoder n-byte]
       (let [string (String. (.array byte-buffer)
                             (.position byte-buffer)
-                            ^long n-bytes
+                            ^long n-byte
                             (or ^Charset decoder
                                 -charset-utf-8))]
         (skip this
-              n-bytes)
+              n-byte)
         string))
 
 
@@ -682,14 +682,14 @@
                  (- (count buffer)
                     offset)))
 
-    (wr-buffer [this buffer offset n-bytes]
+    (wr-buffer [this buffer offset n-byte]
       (copy-buffer (to-buffer this)
                    (.position byte-buffer)
                    buffer
                    offset
-                   n-bytes)
+                   n-byte)
       (skip this
-            n-bytes)
+            n-byte)
       this)
 
     (wr-b8 [this integer]
@@ -734,14 +734,14 @@
                                  char-buffer 
                                  byte-buffer
                                  true)
-            n-bytes     (- (.position byte-buffer)
+            n-byte      (- (.position byte-buffer)
                            position-bb)
             n-chars     (- (.position ^CharBuffer char-buffer)
                            position-cb)]
         (condp =
                res
-          CoderResult/UNDERFLOW [true n-bytes n-chars]
-          CoderResult/OVERFLOW  [false n-bytes n-chars char-buffer]
+          CoderResult/UNDERFLOW [true n-byte n-chars]
+          CoderResult/OVERFLOW  [false n-byte n-chars char-buffer]
           (throw (ex-info (str "Unable to write string: "
                                string)
                           {::error  :string-encoding
@@ -764,10 +764,10 @@
 
   IView
 
-    (garanteed? [_ n-bytes]
+    (garanteed? [_ n-byte]
       (>= (- (.limit byte-buffer)
              (.position byte-buffer))
-          n-bytes))
+          n-byte))
 
     (offset [_]
       -offset)
@@ -782,10 +782,10 @@
                     position))
       this)
 
-    (skip [this n-bytes]
+    (skip [this n-byte]
       (.position byte-buffer
                  (+ (.position byte-buffer)
-                    n-bytes))
+                    n-byte))
       this)
 
     (to-buffer [_]
@@ -828,27 +828,27 @@
 
   IAbsoluteReader
 
-    (ra-buffer [this position n-bytes]
+    (ra-buffer [this position n-byte]
       (ra-buffer this
                  position
-                 n-bytes
-                 (buffer n-bytes)
+                 n-byte
+                 (buffer n-byte)
                  0))
 
-    (ra-buffer [this position n-bytes buffer]
+    (ra-buffer [this position n-byte buffer]
       (ra-buffer this
                  position
-                 n-bytes
+                 n-byte
                  buffer
                  0))
 
-    (ra-buffer [this position n-bytes buffer offset]
+    (ra-buffer [this position n-byte buffer offset]
       (copy-buffer buffer
                    offset
                    (to-buffer this)
                    (+ (.-byteOffset dataview)
                       position)
-                   n-bytes))
+                   n-byte))
 
     (ra-u8 [_ position]
       (.getUint8 dataview
@@ -895,19 +895,19 @@
                    position
                    little-endian?))
 
-    (ra-string [this position n-bytes]
+    (ra-string [this position n-byte]
       (ra-string this
                  nil
                  position
-                 n-bytes))
+                 n-byte))
 
-    (ra-string [this decoder position n-bytes]
+    (ra-string [this decoder position n-byte]
       (.decode (or decoder 
                    -text-decoder-utf-8)
                (js/Uint8Array. (.-buffer dataview)
                                (+ (.-byteOffset dataview)
                                   position)
-                               n-bytes)))
+                               n-byte)))
 
 
   IAbsoluteWriter
@@ -927,13 +927,13 @@
                  (- (count buffer)
                     offset)))
 
-    (wa-buffer [this position buffer offset n-bytes]
+    (wa-buffer [this position buffer offset n-byte]
       (copy-buffer (to-buffer this)
                    (+ (.-byteOffset dataview)
                       position)
                    buffer
                    offset
-                   n-bytes)
+                   n-byte)
       this)
 
     (wa-b8 [this position integer]
@@ -1012,26 +1012,26 @@
   IRelativeReader
 
 
-    (rr-buffer [this n-bytes]
+    (rr-buffer [this n-byte]
       (rr-buffer this
-                 n-bytes
-                 (buffer n-bytes)
+                 n-byte
+                 (buffer n-byte)
                  0))
 
-    (rr-buffer [this n-bytes buffer]
+    (rr-buffer [this n-byte buffer]
       (rr-buffer this
-                 n-bytes
+                 n-byte
                  buffer
                  0))
 
-    (rr-buffer [this n-bytes buffer offset]
+    (rr-buffer [this n-byte buffer offset]
       (let [b (ra-buffer this
                          (position this)
-                         n-bytes
+                         n-byte
                          buffer
                          offset)]
         (skip this
-              n-bytes)
+              n-byte)
         b))
 
     (rr-u8 [this]
@@ -1104,18 +1104,18 @@
                  8))
         ret))
 
-    (rr-string [this n-bytes]
+    (rr-string [this n-byte]
       (rr-string this
                  nil
-                 n-bytes))
+                 n-byte))
 
-    (rr-string [this decoder n-bytes]
+    (rr-string [this decoder n-byte]
       (let [string (ra-string this
                               decoder
                               -position
-                              n-bytes)]
+                              n-byte)]
         (skip this
-              n-bytes)
+              n-byte)
         string))
 
 
@@ -1134,14 +1134,14 @@
              (- (count buffer)
                 offset)))
 
-    (wr-buffer [this buffer offset n-bytes]
+    (wr-buffer [this buffer offset n-byte]
       (wa-buffer this
                  (position this)
                  buffer
                  offset
-                 n-bytes)
+                 n-byte)
       (skip this
-            n-bytes)
+            n-byte)
       this)
 
     (wr-b8 [this integer]
@@ -1209,10 +1209,10 @@
   IView
 
 
-    (garanteed? [_ n-bytes]
+    (garanteed? [_ n-byte]
       (>= (- (.-byteLength dataview)
              -position)
-          n-bytes))
+          n-byte))
 
     (offset [_]
       (.-byteOffset dataview))
@@ -1225,10 +1225,10 @@
             position)
       this)
 
-    (skip [this n-bytes]
+    (skip [this n-byte]
       (set! -position
             (+ -position
-               n-bytes))
+               n-byte))
       this)
 
     (to-buffer [_]
@@ -1259,7 +1259,7 @@
 
 (defn buffer
 
-  "Allocates a new buffer having `n-bytes` bytes.
+  "Allocates a new buffer having `n-byte` bytes.
   
    In Clojurescript, corresponds to a JS `ArrayBuffer`.
 
@@ -1267,10 +1267,20 @@
   
    In order to do anything interesting with this library, it needs to be wrapped in a [[view]]."
 
-  [n-bytes]
+  [n-byte]
 
-  #?(:clj  (byte-array n-bytes)
-     :cljs (js/ArrayBuffer. n-bytes)))
+  #?(:clj  (byte-array n-byte)
+     :cljs (js/ArrayBuffer. n-byte)))
+
+
+
+#?(:cljs (defn buffer-shared
+
+  ""
+
+  [n-byte]
+
+  (js/SharedArrayBuffer. n-byte)))
 
 
 
@@ -1323,31 +1333,73 @@
 
 
 
+#?(:cljs (defn- -buffer->view
+
+  ;;
+
+
+  ([buffer]
+
+   (View. (js/DataView. buffer)
+          false
+          0))
+
+
+  ([buffer offset]
+
+   (View. (js/DataView. buffer
+                        offset)
+          false
+          0))
+
+
+  ([buffer offset n-byte]
+
+   (View. (js/DataView. buffer
+                        offset
+                        n-byte)
+          false
+          0))))
+
+
+
 #?(:cljs
 
 (extend-protocol IViewBuilder
+
 
   js/ArrayBuffer
 
     (view
 
       ([this]
-       (View. (js/DataView. this)
-              false
-              0))
+       (-buffer->view this))
 
       ([this offset]
-       (View. (js/DataView. this
-                            offset)
-              false
-              0))
+       (-buffer->view this
+                      offset))
 
-      ([this offset size]
-       (View. (js/DataView. this
-                            offset
-                            size)
-              false
-              0)))))
+      ([this offset n-byte]
+       (-buffer->view this
+                      offset
+                      n-byte)))
+
+
+    js/SharedArrayBuffer
+
+      (view
+
+        ([this]
+         (-buffer->view this))
+
+        ([this offset]
+         (-buffer->view this
+                        offset))
+
+        ([this offset n-byte]
+         (-buffer->view this
+                        offset
+                        n-byte)))))
 
 
 
@@ -1367,6 +1419,21 @@
       (array-seq (js/Int8Array. this)))))
 
 
+
+#?(:cljs
+
+(extend-type js/SharedArrayBuffer
+
+  ICounted
+
+    (-count [this]
+      (.-byteLength this))
+
+
+  ISeqable
+
+    (-seq [this]
+      (array-seq (js/Int8Array. this)))))
 
 
 
@@ -1413,24 +1480,24 @@
 
   IAbsoluteReader
 
-    (ra-buffer [this position n-bytes]
+    (ra-buffer [this position n-byte]
       (ra-buffer this
                  position
-                 n-bytes
-                 (buffer n-bytes)
+                 n-byte
+                 (buffer n-byte)
                  0))
 
-    (ra-buffer [this position n-bytes buffer]
+    (ra-buffer [this position n-byte buffer]
       (ra-buffer this
                  position
-                 n-bytes
+                 n-byte
                  buffer
                  0))
 
-    (ra-buffer [this position-given n-bytes buffer offset]
+    (ra-buffer [this position-given n-byte buffer offset]
       (ra-buffer -view
                  position-given
-                 n-bytes
+                 n-byte
                  buffer
                  offset))
 
@@ -1470,16 +1537,16 @@
       (ra-f64 -view
               position))
     
-    (ra-string [_ position n-bytes]
+    (ra-string [_ position n-byte]
       (ra-string -view
                  position
-                 n-bytes))
+                 n-byte))
 
-    (ra-string [_ decoder position n-bytes]
+    (ra-string [_ decoder position n-byte]
       (ra-string -view
                  decoder 
                  position
-                 n-bytes))
+                 n-byte))
 
 
   IAbsoluteWriter
@@ -1499,16 +1566,16 @@
                  (- (count buffer)
                     offset)))
 
-    (wa-buffer [this position-given buffer offset n-bytes]
+    (wa-buffer [this position-given buffer offset n-byte]
       (garantee this
                 (- (+ position-given
-                      n-bytes)
+                      n-byte)
                    (position this)))
       (wa-buffer -view
                  position-given
                  buffer
                  offset
-                 n-bytes)
+                 n-byte)
       this)
 
 
@@ -1585,12 +1652,12 @@
 
   IGrowing
 
-    (garantee [this n-bytes]
+    (garantee [this n-byte]
       (when-not (garanteed? -view
-                            n-bytes)
+                            n-byte)
         (let [position-saved (position -view)
               size-minimum   (+ position-saved
-                                n-bytes)
+                                n-byte)
               buffer-new     (buffer (loop [size-next (next-size (count -view))]
                                        (if (>= size-next
                                                size-minimum)
@@ -1609,21 +1676,21 @@
   IRelativeReader
 
 
-    (rr-buffer [this n-bytes]
+    (rr-buffer [this n-byte]
       (rr-buffer this
-                 n-bytes
-                 (buffer n-bytes)
+                 n-byte
+                 (buffer n-byte)
                  0))
 
-    (rr-buffer [this n-bytes buffer]
+    (rr-buffer [this n-byte buffer]
       (rr-buffer this
-                 n-bytes
+                 n-byte
                  buffer
                  0))
 
-    (rr-buffer [this n-bytes buffer offset]
+    (rr-buffer [this n-byte buffer offset]
       (rr-buffer -view
-                 n-bytes
+                 n-byte
                  buffer
                  offset))
 
@@ -1654,14 +1721,14 @@
     (rr-f64 [_]
       (rr-f64 -view))
     
-    (rr-string [_ n-bytes]
+    (rr-string [_ n-byte]
       (rr-string -view
-                 n-bytes))
+                 n-byte))
 
-    (rr-string [_ decoder n-bytes]
+    (rr-string [_ decoder n-byte]
       (rr-string -view
                  decoder
-                 n-bytes))
+                 n-byte))
 
 
   IRelativeWriter
@@ -1679,13 +1746,13 @@
                  (- (count buffer)
                     offset)))
 
-    (wr-buffer [this buffer offset n-bytes]
+    (wr-buffer [this buffer offset n-byte]
       (garantee this
-                n-bytes)
+                n-byte)
       (wr-buffer -view
                  buffer
                  offset
-                 n-bytes)
+                 n-byte)
       this)
 
     (wr-b8 [this integer]
@@ -1762,9 +1829,9 @@
     IView
 
 
-      (garanteed? [this n-bytes]
+      (garanteed? [this n-byte]
         (garantee this
-                  n-bytes)
+                  n-byte)
         true)
 
       (offset [_]
@@ -1783,11 +1850,11 @@
         (seek -view
               position-new))
 
-      (skip [this n-bytes]
+      (skip [this n-byte]
         (garantee this
-                  n-bytes)
+                  n-byte)
         (skip -view
-              n-bytes))
+              n-byte))
 
       (to-buffer [_]
         (to-buffer -view))
@@ -2096,12 +2163,12 @@
 
   ([src-buffer]
 
-   (let [n-bytes (count src-buffer)]
-     (copy-buffer (buffer n-bytes)
+   (let [n-byte (count src-buffer)]
+     (copy-buffer (buffer n-byte)
                   0
                   src-buffer
                   0
-                  n-bytes)))
+                  n-byte)))
 
 
   ([dest-buffer src-buffer]
@@ -2132,17 +2199,17 @@
                    src-offset)))
 
 
-  ([dest-buffer dest-offset src-buffer src-offset n-bytes]
+  ([dest-buffer dest-offset src-buffer src-offset n-byte]
 
    #?(:clj  (System/arraycopy ^bytes src-buffer
                               src-offset
                               ^bytes dest-buffer
                               dest-offset
-                              n-bytes)
+                              n-byte)
       :cljs (.set (js/Uint8Array. dest-buffer)
                   (js/Uint8Array. src-buffer
                                   src-offset
-                                  n-bytes)
+                                  n-byte)
                   dest-offset))
    dest-buffer))
 
@@ -2211,12 +2278,12 @@
                                                                offset))))
 
 
-  ([buffer offset n-bytes]
+  ([buffer offset n-byte]
 
    #?(:clj  (String. (.array (.encode (Base64/getEncoder)
                                       (ByteBuffer/wrap buffer
                                                        offset
-                                                       n-bytes))))
+                                                       n-byte))))
       :cljs (goog.crypt.base64/encodeByteArray (js/Uint8Array. buffer
                                                                offset
-                                                               n-bytes)))))
+                                                               n-byte)))))
