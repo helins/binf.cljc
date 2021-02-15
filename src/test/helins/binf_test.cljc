@@ -60,9 +60,7 @@
                        (binf/u8 value))))))
 
 
-#?(:clj
-
-(t/deftest f32
+#?(:clj (t/deftest f32
 
   ; JS does not have real floats, imprecision arise when they get converted automatically to f64.
   ; Other than that, the implementation is technically correct.
@@ -98,48 +96,68 @@
      (binf/view (binf/buffer size)))
 
 
+#?(:cljs (def view-shared
+              (binf/view (binf/buffer-shared size))))
+
+
 (t/deftest buffer->view
 
   ;; Without offset nor size
   
   (t/is (= 0
-           (binf/offset view)))
+           (binf/offset view)
+           #?(:cljs (binf/offset view-shared))))
   (t/is (= 0
-           (binf/position view)))
+           (binf/position view)
+           #?(:cljs (binf/position view-shared))))
   (t/is (= size
-           (count view)))
+           (count view)
+           #?(:cljs (count view-shared))))
   (t/is (= size
-           (binf/remaining view)))
+           (binf/remaining view)
+           #?(:cljs (binf/remaining view-shared))))
 
   ;; With offset
 
   (let [v (binf/view (binf/buffer size)
-                     offset)]
+                     offset)
+        #?@(:cljs [v-shared (binf/view (binf/buffer-shared size)
+                                       offset)])]
     (t/is (= offset
-             (binf/offset v)))
+             (binf/offset v)
+             #?(:cljs (binf/offset v-shared))))
     (t/is (= 0
-             (binf/position v)))
+             (binf/position v)
+             #?(:cljs (binf/position v-shared))))
     (t/is (= (- size
                 offset)
-             (count v)))
+             (count v)
+             #?(:cljs (count v-shared))))
     (t/is (= (- size
                 offset)
-             (binf/remaining v))))
-
+             (binf/remaining v)
+             #?(:cljs (binf/remaining v-shared)))))
 
   ;; With offset and size
 
   (let [v (binf/view (binf/buffer size)
                      offset
-                     size-2)]
+                     size-2)
+        #?@(:cljs [v-shared (binf/view (binf/buffer-shared size)
+                                       offset
+                                       size-2)])]
     (t/is (= offset
-             (binf/offset v)))
+             (binf/offset v)
+             #?(:cljs (binf/offset v-shared))))
     (t/is (= 0
-             (binf/position v)))
+             (binf/position v)
+             #?(:cljs (binf/position v-shared))))
     (t/is (= size-2
-             (count v)))
+             (count v)
+             #?(:cljs (count v-shared))))
     (t/is (= size-2
-             (binf/remaining v)))))
+             (binf/remaining v)
+             #?(:cljs (binf/remaining v-shared))))))
 
 
 
@@ -172,7 +190,6 @@
                 offset)
              (binf/remaining v))))
 
-
   ;; With offset and size
 
   (let [v (binf/view view
@@ -197,17 +214,41 @@
 
 
 
+#?(:cljs (defn view-8-shared
+
+  []
+
+  (binf/view (binf/buffer-shared 8))))
+
+
+
+(defn grow-buffer
+
+  [n-byte-old]
+
+  (+ n-byte-old
+     (if (< (rand)
+            0.5)
+       3
+       4)))
+
+
+
 (defn gview
 
   []
 
   (binf/growing-view (binf/buffer 1)
-                     (fn next-size [size]
-                       (+ size
-                          (if (< (rand)
-                                 0.5)
-                            3
-                            4)))))
+                     grow-buffer))
+
+
+
+; #?(:cljs (defn gview-shared
+; 
+;   []
+; 
+;   (binf/growing-view (binf/buffer-shared 1)
+;                      grow-buffer)))
 
 
 
@@ -228,7 +269,6 @@
                            (binf/seek 0)
                            rr))
                     "Relative uint"))
-
 
 
     binf/wa-b8  binf/ra-u8  binf/wr-b8  binf/rr-u8  (binf/integer (dec (Math/pow 2 8)))
@@ -261,9 +301,7 @@
 
 
 
-#?(:clj
-
-(defn- -view-f32
+#?(:clj (defn- -view-f32
 
   [f-view]
 
@@ -309,6 +347,12 @@
 
 
 
+#?(:cljs (t/deftest view-uints-shared
+
+  (-view-uints view-8)))
+
+
+
 (t/deftest gview-uints
 
   (-view-uints gview))
@@ -321,23 +365,25 @@
 
 
 
+#?(:cljs (t/deftest view-i64-shared
+
+  (-view-i64 view-8-shared)))
+
+
+
 (t/deftest gview-i64
 
   (-view-i64 gview))
 
 
 
-#?(:clj
-
-(t/deftest view-f32
+#?(:clj (t/deftest view-f32
 
   (-view-f32 view-8)))
 
 
 
-#?(:clj
-
-(t/deftest gview-f32
+#?(:clj (t/deftest gview-f32
 
   (-view-f32 gview)))
 
@@ -346,6 +392,12 @@
 (t/deftest view-f64
 
   (-view-f64 view-8))
+
+
+
+#?(:cljs (t/deftest view-f64-shared
+
+  (-view-f64 view-8-shared)))
 
 
 
