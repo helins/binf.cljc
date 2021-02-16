@@ -2,13 +2,15 @@
 
   "For daydreaming in the repl."
 
-  (:require [helins.binf :as binf]))
+  (:require [helins.binf        :as binf]
+            [helins.binf.base64 :as binf.base64]))
 
 
 ;;;;;;;;;;
 
 
 (comment
+
 
   (.grow js/mem
          1)
