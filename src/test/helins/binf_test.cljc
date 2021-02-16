@@ -603,20 +603,30 @@
 (t/deftest base64
 
   (let [buffer (binf/buffer 64)
-        view   (binf/view buffer)]
+        view   (binf/view buffer)
+        #?@(:cljs [buffer-shared (binf/buffer-shared 64)
+                   view-shared   (binf/view buffer-shared)])]
     (dotimes [i 64]
       (binf/wr-b8 view
+                  i)
+      (binf/wr-b8 view-shared
                   i))
     (t/is (= (seq buffer)
              (seq (-> buffer
                       binf/base64-encode
-                      binf/base64-decode)))
+                      binf/base64-decode))
+             #?(:cljs (seq (-> buffer-shared
+                               binf/base64-encode
+                               (binf/base64-decode binf/buffer-shared)))))
           "Without offset nor lenght")
     (t/is (= (drop 5
                    (seq buffer))
              (seq (-> buffer
                       (binf/base64-encode 5)
-                      binf/base64-decode)))
+                      binf/base64-decode))
+             #?(:cljs (seq (-> buffer-shared
+                               (binf/base64-encode 5)
+                               (binf/base64-decode binf/buffer-shared)))))
           "With offset without length")
     (t/is (= (->> (seq buffer)
                   (drop 5)
@@ -624,5 +634,9 @@
              (seq (-> buffer
                       (binf/base64-encode 5
                                           20)
-                      binf/base64-decode)))
+                      binf/base64-decode))
+             #?(:cljs (seq (-> buffer-shared
+                               (binf/base64-encode 5
+                                                   20)
+                               (binf/base64-decode binf/buffer-shared)))))
           "With offset and length")))

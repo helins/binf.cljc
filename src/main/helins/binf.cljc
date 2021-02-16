@@ -1810,15 +1810,60 @@
 ;;;;;;;;;; Base64 utilities
 
 
+#?(:cljs (defn- -base64-decode
+
+  ;;
+
+  [string make-buffer]
+
+  (let [n-utf-16-code     (.-length string)
+        n-byte-estimate   (/ (* n-utf-16-code
+                                3)
+                             4)
+        n-byte-estimate-2 (cond
+                            (not (zero? (mod n-byte-estimate
+                                             3)))
+                            (js/Math.floor n-byte-estimate)
+                            ;;
+                            (goog.crypt.base64/isPadding_ (aget string
+                                                                (dec n-utf-16-code)))
+                            (- n-byte-estimate
+                               (if (goog.crypt.base64/isPadding_ (aget string
+                                                                       (- n-utf-16-code
+                                                                          2)))
+                                 2
+                                 1))
+                            ;;
+                            :else
+                            n-byte-estimate)
+        buffer            (make-buffer n-byte-estimate-2)
+        arr-u8            (js/Uint8Array. buffer)
+        v*n-byte          (volatile! 0)]
+    (goog.crypt.base64/decodeStringInternal_ string
+                                             (fn [b8]
+                                               (aset arr-u8
+                                                     @v*n-byte
+                                                     b8)
+                                               (vswap! v*n-byte
+                                                       inc)))
+    buffer)))
+
+
+
 (defn base64-decode
 
   "Decodes a string into a [[buffer]] according to the Base64 basic scheme (RFC 4648 section 4)"
 
-  [string]
+  #?@(:clj  [[^String string]
+             (.decode (Base64/getDecoder)
+                      string)]
 
-  #?(:clj  (.decode (Base64/getDecoder)
-                    ^String string)
-     :cljs (.-buffer (goog.crypt.base64/decodeStringToUint8Array string))))
+      :cljs [([string]
+              (-base64-decode string
+                              buffer))
+             ([string make-buffer]
+              (-base64-decode string
+                              make-buffer))]))
 
 
 
