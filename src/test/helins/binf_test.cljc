@@ -222,36 +222,6 @@
 
 
 
-(defn grow-buffer
-
-  [n-byte-old]
-
-  (+ n-byte-old
-     (if (< (rand)
-            0.5)
-       3
-       4)))
-
-
-
-(defn gview
-
-  []
-
-  (binf/growing-view (binf/buffer 1)
-                     grow-buffer))
-
-
-
-; #?(:cljs (defn gview-shared
-; 
-;   []
-; 
-;   (binf/growing-view (binf/buffer-shared 1)
-;                      grow-buffer)))
-
-
-
 (defn- -view-uints
 
   [f-view]
@@ -353,12 +323,6 @@
 
 
 
-(t/deftest gview-uints
-
-  (-view-uints gview))
-
-
-
 (t/deftest view-i64
 
   (-view-i64 view-8))
@@ -371,21 +335,9 @@
 
 
 
-(t/deftest gview-i64
-
-  (-view-i64 gview))
-
-
-
 #?(:clj (t/deftest view-f32
 
   (-view-f32 view-8)))
-
-
-
-#?(:clj (t/deftest gview-f32
-
-  (-view-f32 gview)))
 
 
 
@@ -398,12 +350,6 @@
 #?(:cljs (t/deftest view-f64-shared
 
   (-view-f64 view-8-shared)))
-
-
-
-(t/deftest gview-f64
-
-  (-view-f64 gview))
 
 
 ;;;;;;;;;; Copying
@@ -541,18 +487,6 @@
   (-rwr-buffer (binf/view (binf/buffer 10))))
 
 
-
-(t/deftest grwa-buffer
-
-  (-rwa-buffer (binf/growing-view (binf/buffer 2))))
-
-
-
-(t/deftest grwr-buffer
-
-  (-rwr-buffer (binf/growing-view (binf/buffer 2))))
-
-
 ;;;;;;;;;; Encoding and decoding text
 
 
@@ -654,14 +588,6 @@
 
 
 
-
-(t/deftest ga-string
-
-  (-a-string gview))
-
-
-
-
 (t/deftest r-string
 
   (t/is (false? (first (binf/wr-string (binf/view (binf/buffer 10))
@@ -669,24 +595,6 @@
         "Not enough bytes to write everything")
 
   (-r-string #(binf/view (binf/buffer 1024))))
-
-
-
-(t/deftest gr-string
-
-  (-r-string gview))
-
-
-;;;;;;;;;; Growing views
-
-
-(t/deftest gseek
-
-  (let [gv (binf/growing-view (binf/buffer 10))]
-    (binf/seek gv
-               1000)
-    (t/is (= 1000
-             (binf/position gv)))))
 
 
 ;;;;;;;;;; Base64 utilities
