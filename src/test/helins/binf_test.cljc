@@ -357,13 +357,18 @@
 
 (defn cp-view
 
-  []
+  ([]
 
-  (let [view (binf/view (binf/buffer 5))]
-    (dotimes [_ 5]
-      (binf/wr-b8 view
-                  1))
-    view))
+   (cp-view binf/buffer))
+
+
+  ([make-buffer]
+
+   (let [view (binf/view (make-buffer 5))]
+     (dotimes [_ 5]
+       (binf/wr-b8 view
+                   1))
+     view)))
 
 
 (def cp-target
@@ -378,7 +383,9 @@
 (t/deftest copy-buffer
 
   (t/is (= (seq (binf/to-buffer (cp-view)))
-           (seq (binf/copy-buffer (binf/to-buffer (cp-view)))))
+           (seq (binf/copy-buffer (binf/to-buffer (cp-view))))
+           #?(:cljs (seq (binf/to-buffer (cp-view binf/buffer-shared))))
+           #?(:cljs (seq (binf/copy-buffer (binf/to-buffer (cp-view binf/buffer-shared))))))
         "Cloning")
 
   (t/is (= (concat (repeat 5
@@ -387,7 +394,10 @@
                            1))
            (seq (binf/copy-buffer (binf/buffer 10)
                                   5
-                                  (binf/to-buffer (cp-view)))))
+                                  (binf/to-buffer (cp-view))))
+           #?(:cljs (seq (binf/copy-buffer (binf/buffer-shared 10)
+                                           5
+                                           (binf/to-buffer (cp-view binf/buffer-shared))))))
         "Without offset nor length")
 
   (t/is (= (concat (repeat 5
@@ -399,7 +409,11 @@
            (seq (binf/copy-buffer (binf/buffer 10)
                                   5
                                   (binf/to-buffer (cp-view))
-                                  2)))
+                                  2))
+           #?(:cljs (seq (binf/copy-buffer (binf/buffer-shared 10)
+                                           5
+                                           (binf/to-buffer (cp-view binf/buffer-shared))
+                                           2))))
         "With offset")
 
 
@@ -408,7 +422,12 @@
                                   5
                                   (binf/to-buffer (cp-view))
                                   2
-                                  2)))
+                                  2))
+           #?(:cljs (seq (binf/copy-buffer (binf/buffer-shared 10)
+                                           5
+                                           (binf/to-buffer (cp-view binf/buffer-shared))
+                                           2
+                                           2))))
         "With offset and length"))
 
 
@@ -482,9 +501,21 @@
 
 
 
+#?(:cljs (t/deftest rwa-buffer-shared
+
+  (-rwa-buffer (binf/view (binf/buffer-shared 10)))))
+
+
+
 (t/deftest rwr-buffer
 
   (-rwr-buffer (binf/view (binf/buffer 10))))
+
+
+
+#?(:cljs (t/deftest rwr-buffer-shared
+
+  (-rwr-buffer (binf/view (binf/buffer-shared 10)))))
 
 
 ;;;;;;;;;; Encoding and decoding text
