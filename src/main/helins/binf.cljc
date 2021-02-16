@@ -1846,7 +1846,9 @@
                                                      b8)
                                                (vswap! v*n-byte
                                                        inc)))
-    buffer)))
+    (view buffer
+          0
+          @v*n-byte))))
 
 
 
@@ -1855,12 +1857,12 @@
   "Decodes a string into a [[buffer]] according to the Base64 basic scheme (RFC 4648 section 4)"
 
   #?@(:clj  [[^String string]
-             (.decode (Base64/getDecoder)
-                      string)]
+             (view (.decode (Base64/getDecoder)
+                            string))]
 
       :cljs [([string]
-              (-base64-decode string
-                              buffer))
+              (base64-decode string
+                             buffer))
              ([string make-buffer]
               (-base64-decode string
                               make-buffer))]))
