@@ -21,13 +21,7 @@
 
 (declare buffer
          copy-buffer
-         i8
-         i16
-         i32
-         text-decoder
-         u8
-         u16
-         u32)
+         text-decoder)
 
 
 ;;;;;;;;;; Primitive type sizes
@@ -1560,3 +1554,9 @@
 
   (- (count view)
      (position view)))
+
+
+;;;;;;;;;; Creating primitives from bytes
+
+
+#?(:cljs (def ^:no-doc -view-cast (view (buffer 8))))
