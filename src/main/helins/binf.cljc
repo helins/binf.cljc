@@ -1534,6 +1534,18 @@
      (position view)))
 
 
+;;;;;
+
+
+;#?(:cljs (defn view->data-view
+;
+;  ""
+;
+;  [view]
+;
+;  ))
+
+
 ;;;;;;;;;; Creating primitives from bytes
 
 
