@@ -78,8 +78,10 @@
 
   
   (binf.int64/i8 (js/BigInt -1))
-  (binf.int64/u8 -1)
+  (binf.int64/u8 0xfffffffffffffffff)
 
+
+  (binf.int64/u64* 0xfffffffffffffffff)
 
 
 

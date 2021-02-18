@@ -4,7 +4,9 @@
 
   {:author "Adam Helinski"}
 
-  #?(:clj (:require [helins.binf.int :as binf.int])))
+  #?(:clj (:require [helins.binf.int :as binf.int]))
+  #?(:cljs (:require-macros [helins.binf.int64 :refer [i64*
+                                                       u64*]])))
 
 
 ;;;;;;;;;;
@@ -95,6 +97,45 @@
                 b64)))
 
 
+;;;;;;;;;;
+
+
+#?(:clj (defn- -b64
+
+  ;;
+
+  [env as-xint x]
+
+  (if (:ns env)
+    `(~as-xint 64
+               (js/BigInt ~(if (number? x)
+                             (str x)
+                             x)))
+    (unchecked-long x))))
+
+
+
+#?(:clj (defmacro i64*
+
+  ""
+
+  [n]
+
+  (-b64 &env
+        'js/BigInt.asIntN
+        n)))
+
+
+
+#?(:clj (defmacro u64*
+
+  ""
+
+  [n]
+
+  (-b64 &env
+        'js/BigInt.asUintN
+        n)))
 
 
 
