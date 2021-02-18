@@ -15,7 +15,7 @@
 
 
 
-;;;;;;;;;; Casting to u8
+;;;;;;;;;; Casting to integers <= 32 bit
 
 
 (defn i8

@@ -6,7 +6,11 @@
 
   #?(:clj (:require [helins.binf.int :as binf.int]))
   #?(:cljs (:require-macros [helins.binf.int64 :refer [i64*
-                                                       u64*]])))
+                                                       u64*]]))
+  (:refer-clojure :exclude [bit-clear
+                            bit-flip
+                            bit-set
+                            bit-test]))
 
 
 ;;;;;;;;;;
@@ -138,27 +142,51 @@
         n)))
 
 
+;;;;;;;;;;
 
-(comment
 
-(defn i64
+(defn bit-clear
 
-  "Recombines the given bytes in big endian order to form a 64-bit signed integer."
+  ""
 
-  [b8-1 b8-2 b8-3 b8-4 b8-5 b8-6 b8-7 b8-8]
+  [x n]
 
-  (bit-or (<< b8-1
-              56)
-          (<< b8-2
-              48)
-          (<< b8-3
-              40)
-          (<< b8-4
-              32)
-          (<< b8-5
-              24)
-          (<< b8-6
-              16)
-          (<< b8-7
-              8)
-          b8-8)))
+  (bit-and x
+           (bit-not (bit-shift-left (u64* 1)
+                                    n))))
+
+
+
+(defn bit-flip
+
+  ""
+
+  [x n]
+
+  (bit-xor x
+           (bit-shift-left (u64* 1)
+                           n)))
+
+
+(defn bit-set
+
+  ""
+
+  [x n]
+
+  (bit-or x
+          (bit-shift-left (u64* 1)
+                          n)))
+
+
+
+(defn bit-test
+
+  ""
+
+  [x n]
+
+  (not (= (bit-and x
+                   (bit-shift-left (u64* 1)
+                                   n))
+          (u64* 0))))
