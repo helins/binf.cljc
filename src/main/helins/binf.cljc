@@ -74,28 +74,6 @@
   8)
 
 
-;;;;;;;;;; Miscellaneous
-
-
-(defn array-endianess
-
-  ""
-
-  []
-
-  #?(:clj  :big-endian
-     :cljs (let [b16 (js/Uint32Array. 1)
-                 b8  (js/Uint8Array. (.-buffer b16))]
-             (aset b16
-                   0
-                   0xaa)
-             (if (= (aget b8
-                          0)
-                    0xaa)
-               :little-endian
-               :big-endian))))
-
-
 ;;;;;;;;;; Protocols
 
 
