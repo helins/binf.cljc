@@ -4,9 +4,7 @@
 
   {:author "Adam Helinski"}
 
-  (:require #?(:cljs [helins.binf       :as binf])
-                     [helins.binf.int   :as binf.int]
-                     [helins.binf.int64 :as binf.int64]))
+  (:require #?(:cljs [helins.binf :as binf])))
 
 
 ;;;;;;;;;; 
@@ -50,22 +48,13 @@
   
    Opposite of [[bits-f32]]."
 
-  ([bits]
+  [bits]
 
-   #?(:clj  (Float/intBitsToFloat bits)
-      :cljs (-> binf/-view-cast
-                (binf/wa-b32 0
-                             bits)
-                (binf/ra-f32 0))))
-
-
-  ([b8-1 b8-2 b8-3 b8-4]
-
-   (from-bit-32 (binf.int/u32 b8-1
-                              b8-2
-                              b8-3
-                              b8-4))))
-
+  #?(:clj  (Float/intBitsToFloat bits)
+     :cljs (-> binf/-view-cast
+               (binf/wa-b32 0
+                            bits)
+               (binf/ra-f32 0))))
 
 
 (defn from-bit-64
@@ -74,25 +63,14 @@
   
    Opposite of [[bits-64]]."
 
-  ([bits]
+  [bits]
 
-   #?(:clj  (Double/longBitsToDouble bits)
-      :cljs (-> binf/-view-cast
-                (binf/wa-b64 0
-                             bits)
-                (binf/ra-f64 0))))
+  #?(:clj  (Double/longBitsToDouble bits)
+     :cljs (-> binf/-view-cast
+               (binf/wa-b64 0
+                            bits)
+               (binf/ra-f64 0))))
 
-
-  #_([b8-1 b8-2 b8-3 b8-4 b8-5 b8-6 b8-7 b8-8]
-
-   (f64 (binf/i64 b8-1
-                  b8-2
-                  b8-3
-                  b8-4
-                  b8-5
-                  b8-6
-                  b8-7
-                  b8-8))))
 
 
 

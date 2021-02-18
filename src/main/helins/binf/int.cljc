@@ -3,9 +3,7 @@
   {:author "Adam Helinski"}
 
   #?(:cljs (:require [helins.binf :as binf]))
-  (:refer-clojure :rename {bit-shift-left           <<
-                           bit-shift-right          >>
-                           unsigned-bit-shift-right >>>}))
+  (:refer-clojure :rename {bit-shift-left <<}))
 
 
 ;;;;;;;;;; Casting between  integers <= 32 bit
@@ -89,15 +87,19 @@
                 (binf/ra-u32 0))))
 
 
+  ([b16-1 b16-2]
+
+   (u32 (bit-or (<< b16-1
+                    16)
+                b16-2)))
+
+
   ([b8-1 b8-2 b8-3 b8-4]
 
-   (u32 (bit-or (<< b8-1
-                    24)
-                (<< b8-2
-                    16)
-                (<< b8-3
-                    8)
-                b8-4))))
+   (u32 (u16 b8-1
+             b8-2)
+        (u16 b8-3
+             b8-4))))
 
 
 
@@ -113,9 +115,96 @@
                              max-b32)
                 (binf/ra-i32 0))))
 
+  ([b16-1 b16-2]
+
+   (i32 (u32 b16-1
+             b16-2)))
+
   ([b8-1 b8-2 b8-3 b8-4]
 
    (i32 (u32 b8-1
              b8-2
              b8-3
              b8-4))))
+
+
+
+(defn- -b64
+
+  ;;
+
+  [b32-1 b32-2]
+
+  #?(:clj  (bit-or (<< b32-1
+                       32)
+                   b32-2)
+     :cljs (bit-or (<< (js/BigInt b32-1)
+                       (js/BigInt 32))
+                   b32-2)))
+
+
+(defn i64
+
+  ""
+
+  ([b32-1 b32-2]
+
+   (let [ret (-b64 b32-1
+                   b32-2)]
+     #?(:clj  ret
+        :cljs (js/BigInt.asIntN 64
+                                ret))))
+
+
+  ([b16-1 b16-2 b16-3 b16-4]
+
+   (i64 (u32 b16-1
+             b16-2)
+        (u32 b16-3
+             b16-4)))
+
+
+  ([b8-1 b8-2 b8-3 b8-4 b8-5 b8-6 b8-7 b8-8]
+
+   (i64 (u16 b8-1
+             b8-2)
+        (u16 b8-3
+             b8-4)
+        (u16 b8-5
+             b8-6)
+        (u16 b8-7
+             b8-8))))
+
+
+
+(defn u64
+
+  ""
+
+  ([b32-1 b32-2]
+
+   (let [ret (-b64 b32-1
+                   b32-2)]
+     #?(:clj  ret
+        :cljs (js/BigInt.asUintN 64
+                                 ret))))
+
+
+  ([b16-1 b16-2 b16-3 b16-4]
+
+   (i64 (u32 b16-1
+             b16-2)
+        (u32 b16-3
+             b16-4)))
+
+
+  ([b8-1 b8-2 b8-3 b8-4 b8-5 b8-6 b8-7 b8-8]
+
+   (i64 (u16 b8-1
+             b8-2)
+        (u16 b8-3
+             b8-4)
+        (u16 b8-5
+             b8-6)
+        (u16 b8-7
+             b8-8))))

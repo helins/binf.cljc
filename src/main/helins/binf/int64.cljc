@@ -4,13 +4,14 @@
 
   {:author "Adam Helinski"}
 
-  #?(:clj (:require [helins.binf.int :as binf.int]))
+  (:require [helins.binf.int :as binf.int])
   #?(:cljs (:require-macros [helins.binf.int64 :refer [i64*
                                                        u64*]]))
   (:refer-clojure :exclude [bit-clear
                             bit-flip
                             bit-set
-                            bit-test]))
+                            bit-test]
+                  :rename  {bit-shift-left <<}))
 
 
 ;;;;;;;;;;
@@ -104,7 +105,7 @@
 ;;;;;;;;;;
 
 
-#?(:clj (defn- -b64
+#?(:clj (defn- -b64*
 
   ;;
 
@@ -125,9 +126,9 @@
 
   [n]
 
-  (-b64 &env
-        'js/BigInt.asIntN
-        n)))
+  (-b64* &env
+         'js/BigInt.asIntN
+         n)))
 
 
 
@@ -137,9 +138,9 @@
 
   [n]
 
-  (-b64 &env
-        'js/BigInt.asUintN
-        n)))
+  (-b64* &env
+         'js/BigInt.asUintN
+         n)))
 
 
 ;;;;;;;;;;
@@ -152,8 +153,8 @@
   [x n]
 
   (bit-and x
-           (bit-not (bit-shift-left (u64* 1)
-                                    n))))
+           (bit-not (<< (u64* 1)
+                        n))))
 
 
 
@@ -164,8 +165,8 @@
   [x n]
 
   (bit-xor x
-           (bit-shift-left (u64* 1)
-                           n)))
+           (<< (u64* 1)
+               n)))
 
 
 (defn bit-set
@@ -175,8 +176,8 @@
   [x n]
 
   (bit-or x
-          (bit-shift-left (u64* 1)
-                          n)))
+          (<< (u64* 1)
+              n)))
 
 
 
@@ -187,6 +188,6 @@
   [x n]
 
   (not (= (bit-and x
-                   (bit-shift-left (u64* 1)
-                                   n))
+                   (<< (u64* 1)
+                             n))
           (u64* 0))))
