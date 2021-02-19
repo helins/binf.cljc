@@ -5,7 +5,8 @@
   {:author "Adam Helinski"}
 
   (:require #?(:cljs [goog.crypt.base64])
-                     [helins.binf        :as binf])
+            [helins.binf          :as binf]
+            [helins.binf.protocol :as binf.protocol])
   #?(:clj (:import java.nio.ByteBuffer
                    java.util.Base64)))
 
@@ -49,9 +50,9 @@
                                                      b8)
                                                (vswap! v*n-byte
                                                        inc)))
-    (binf/view buffer
-               0
-               @v*n-byte))))
+    (binf.protocol/view buffer
+                        0
+                        @v*n-byte))))
 
 
 
@@ -60,8 +61,8 @@
   "Decodes a string into a [[buffer]] according to the Base64 basic scheme (RFC 4648 section 4)"
 
   #?@(:clj  [[^String string]
-             (binf/view (.decode (Base64/getDecoder)
-                                 string))]
+             (binf.protocol/view (.decode (Base64/getDecoder)
+                                          string))]
 
       :cljs [([string]
               (decode string

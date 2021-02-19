@@ -4,7 +4,8 @@
 
   {:author "Adam Helinski"}
 
-  (:require #?(:cljs [helins.binf :as binf])))
+  #?(:cljs (:require [helins.binf          :as binf]
+                     [helins.binf.protocol :as binf.protocol])))
 
 
 ;;;;;;;;;; 
@@ -20,9 +21,9 @@
 
   #?(:clj  (Float/floatToIntBits f32)
      :cljs (-> binf/-view-cast
-               (binf/wa-f32 0
-                            f32)
-               (binf/ra-u32 0))))
+               (binf.protocol/wa-f32 0
+                                     f32)
+               (binf.protocol/ra-u32 0))))
 
 
 
@@ -36,9 +37,9 @@
 
   #?(:clj  (Double/doubleToLongBits f64)
      :cljs (-> binf/-view-cast
-               (binf/wa-f64 0
-                            f64)
-               (binf/ra-i64 0))))
+               (binf.protocol/wa-f64 0
+                                     f64)
+               (binf.protocol/ra-i64 0))))
 
 
 
@@ -52,9 +53,9 @@
 
   #?(:clj  (Float/intBitsToFloat bits)
      :cljs (-> binf/-view-cast
-               (binf/wa-b32 0
-                            bits)
-               (binf/ra-f32 0))))
+               (binf.protocol/wa-b32 0
+                                     bits)
+               (binf.protocol/ra-f32 0))))
 
 
 (defn from-b64
@@ -67,9 +68,9 @@
 
   #?(:clj  (Double/longBitsToDouble bits)
      :cljs (-> binf/-view-cast
-               (binf/wa-b64 0
-                            bits)
-               (binf/ra-f64 0))))
+               (binf.protocol/wa-b64 0
+                                     bits)
+               (binf.protocol/ra-f64 0))))
 
 
 ;;;;;;;;;;

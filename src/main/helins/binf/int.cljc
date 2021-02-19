@@ -2,7 +2,8 @@
 
   {:author "Adam Helinski"}
 
-  #?(:cljs (:require [helins.binf :as binf]))
+  #?(:cljs (:require [helins.binf          :as binf]
+                     [helins.binf.protocol :as binf.protocol]))
   (:refer-clojure :rename {bit-shift-left <<}))
 
 
@@ -17,9 +18,9 @@
 
   #?(:clj  (unchecked-byte max-b32)
      :cljs (-> binf/-view-cast
-               (binf/wa-b8 0
-                           max-b32)
-               (binf/ra-i8 0))))
+               (binf.protocol/wa-b8 0
+                                    max-b32)
+               (binf.protocol/ra-i8 0))))
 
 
 
@@ -60,9 +61,9 @@
 
    #?(:clj  (unchecked-short max-b32)
       :cljs (-> binf/-view-cast
-                (binf/wa-b16 0
-                             max-b32)
-                (binf/ra-i16 0))))
+                (binf.protocol/wa-b16 0
+                                      max-b32)
+                (binf.protocol/ra-i16 0))))
 
 
   ([b8-1 b8-2]
@@ -82,9 +83,9 @@
                      max-b32)
       ;; Because bitwise operations in JS are 32 bits, bit-and'ing does not work in this case.
       :cljs (-> binf/-view-cast
-                (binf/wa-b32 0
-                             max-b32)
-                (binf/ra-u32 0))))
+                (binf.protocol/wa-b32 0
+                                      max-b32)
+                (binf.protocol/ra-u32 0))))
 
 
   ([b16-1 b16-2]
@@ -111,9 +112,9 @@
 
    #?(:clj  (unchecked-int max-b32)
       :cljs (-> binf/-view-cast
-                (binf/wa-b32 0
-                             max-b32)
-                (binf/ra-i32 0))))
+                (binf.protocol/wa-b32 0
+                                      max-b32)
+                (binf.protocol/ra-i32 0))))
 
   ([b16-1 b16-2]
 
