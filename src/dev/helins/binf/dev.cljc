@@ -7,7 +7,8 @@
             [helins.binf.endian :as binf.endian]
             [helins.binf.float  :as binf.float]
             [helins.binf.int    :as binf.int]
-            [helins.binf.int64  :as binf.int64]))
+            [helins.binf.int64  :as binf.int64]
+            [helins.binf.string :as binf.string]))
 
 
 ;;;;;;;;;;

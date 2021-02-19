@@ -5,6 +5,7 @@
    See README for an overview."
 
   {:author "Adam Helins"}
+
   (:require [clojure.core :as clj])
   #?(:cljs (:require-macros [helins.binf]))
   #?(:clj (:import clojure.lang.Counted
@@ -22,6 +23,22 @@
 (declare buffer
          copy-buffer
          text-decoder)
+
+
+
+#?(:cljs (def ^:private -text-decoder-utf-8
+
+  ;;
+
+  (js/TextEncoder.)))
+
+
+
+#?(:cljs (def ^:private -text-encoder
+
+  ;;
+
+  (js/TextEncoder.)))
 
 
 ;;;;;;;;;; Primitive type sizes
@@ -320,108 +337,6 @@
                      10
                      20))
      ```"))
-
-
-;;;;;;;;;; Encoding and decoding strings
-
-
-#?(:clj
-   
-(def ^Charset -charset-utf-8
-
-  ;; UTF charset on the JVM.
-
-  StandardCharsets/UTF_8))
-
-
-
-(def ^:private -text-decoder-utf-8
-
-  ;; Crossplatform UTF-8 decoding.
-
-  #?(:clj  -charset-utf-8
-     :cljs (js/TextDecoder. "utf-8")))
-
-
-
-(def ^:private -text-decoders
-
-  ;; Available decoders by encoding.
-
-  {:iso-8859-1 #?(:clj  StandardCharsets/ISO_8859_1
-                  :cljs (js/TextDecoder. "iso-8859-1")) 
-   :utf-8      -text-decoder-utf-8
-   :utf-16-be  #?(:clj  StandardCharsets/UTF_16BE
-                  :cljs (js/TextDecoder. "utf-16be"))
-   :utf-16-le  #?(:clj  StandardCharsets/UTF_16LE
-                  :cljs (js/TextDecoder. "utf-16le"))})
-
-
-
-(defn text-decode
-
-  "Interprets the given `buffer` as a string.
-  
-   A decoder may be provided (see [[text-decoder]])."
-
-  ([buffer]
-
-   (text-decode (text-decoder)
-                buffer))
-
-
-  ([text-decoder buffer]
-
-   #?(:clj  (String. ^bytes buffer
-                     ^Charset text-decoder)
-      :cljs (.decode text-decoder
-                     buffer))))
-
-
-
-(defn text-decoder
-
-  "Some functions accepts a text decoder.
-  
-   Available encodings are: `:iso-8859-1`, `:utf-8`, `:utf-16-be`, `:utf-16-le`
-  
-   Default is UTF-8 but argument is non-nilable."
-
-  ([]
-
-   -text-decoder-utf-8)
-
-
-  ([encoding]
-
-   (or (-text-decoders encoding)
-       (throw (ex-info (str "Unknown encoding: "
-                            encoding)
-                       {::encoding encoding
-                        ::error    :unknown-encoding})))))
-
-
-
-#?(:cljs
-
-(def ^:private -text-encoder
-
-  ;; UTF-8 encoder.
-
-  (js/TextEncoder.)))
-
-
-
-(defn text-encode
-
-  "Returns a buffer containing the given `string` encoded in UTF-8."
-
-  [string]
-
-  #?(:clj  (.getBytes ^String string
-                      -charset-utf-8)
-     :cljs (.-buffer (.encode -text-encoder
-                              string))))
 
 
 ;;;;;;;;;; Types and protocol extensions
