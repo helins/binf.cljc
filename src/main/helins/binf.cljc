@@ -6,7 +6,9 @@
 
   {:author "Adam Helins"}
 
-  (:require [clojure.core :as clj])
+  (:require [clojure.core         :as clj]
+            [helins.binf.buffer   :as binf.buffer]
+            [helins.binf.protocol :as binf.protocol])
   #?(:cljs (:require-macros [helins.binf]))
   #?(:clj (:import clojure.lang.Counted
                    (java.nio ByteBuffer
@@ -19,10 +21,6 @@
                            bit-shift-right          >>
                            unsigned-bit-shift-right >>>}))
 
-
-(declare buffer
-         copy-buffer
-         text-decoder)
 
 
 
@@ -93,6 +91,7 @@
 
 ;;;;;;;;;; Types and protocol extensions
 
+(comment
 
 #?(:clj
 
@@ -950,60 +949,26 @@
              0))))
 
 
+(defn remaining
 
-(defn buffer
+  "Returns the number of bytes remaining until the end of the view."
 
-  "Allocates a new buffer having `n-byte` bytes.
-  
-   In Clojurescript, corresponds to a JS `ArrayBuffer`.
+  [view]
 
-   In Clojure on the JVM, corresponds to a plain byte array.
-  
-   In order to do anything interesting with this library, it needs to be wrapped in a [[view]]."
+  (- (count view)
+     (position view)))
 
-  [n-byte]
-
-  #?(:clj  (byte-array n-byte)
-     :cljs (js/ArrayBuffer. n-byte)))
+)
 
 
 
-#?(:cljs (defn buffer-shared
 
-  ""
-
-  [n-byte]
-
-  (js/SharedArrayBuffer. n-byte)))
-
+(comment
 
 
 #?(:clj
 
-(defmacro buffer*
-
-  "Macro for instanting a new buffer populated by the given bytes.
-
-   For allocating a zeroed one, see [[buffer]]."
-
-  [& b8s]
-
-  (let [sym-buffer (gensym)
-        sym-view   (gensym)
-        n          (count b8s)]
-    `(let [~sym-buffer (buffer ~n)
-           ~sym-view   (view ~sym-buffer)]
-       ~@(map (fn set-b8 [b]
-                `(wr-b8 ~sym-view
-                        ~b))
-              b8s)
-       ~sym-buffer))))
-
-
-
-#?(:clj
-
-(extend-protocol IViewBuilder
+(extend-protocol binf.protocol/IViewBuilder
 
   (Class/forName "[B")
 
@@ -1059,7 +1024,7 @@
 
 #?(:cljs
 
-(extend-protocol IViewBuilder
+(extend-protocol binf.protocol/IViewBuilder
 
 
   js/ArrayBuffer
@@ -1095,110 +1060,7 @@
                         offset
                         n-byte)))))
 
-
-
-#?(:cljs
-
-(extend-type js/ArrayBuffer
-
-  ICounted
-
-    (-count [this]
-      (.-byteLength this))
-
-
-  ISeqable
-
-    (-seq [this]
-      (array-seq (js/Int8Array. this)))))
-
-
-
-#?(:cljs
-
-(extend-type js/SharedArrayBuffer
-
-  ICounted
-
-    (-count [this]
-      (.-byteLength this))
-
-
-  ISeqable
-
-    (-seq [this]
-      (array-seq (js/Int8Array. this)))))
-
-
-;;;;;;;;;; Copying and miscellaneous
-
-
-(defn copy-buffer
-
-  "Copies a buffer to another buffer."
-
-  ([src-buffer]
-
-   (let [n-byte (count src-buffer)]
-     (copy-buffer (buffer n-byte)
-                  0
-                  src-buffer
-                  0
-                  n-byte)))
-
-
-  ([dest-buffer src-buffer]
-
-   (copy-buffer dest-buffer
-                0
-                src-buffer
-                0
-                (count src-buffer)))
-
-
-  ([dest-buffer dest-offset src-buffer]
-
-   (copy-buffer dest-buffer
-                dest-offset
-                src-buffer
-                0
-                (count src-buffer)))
-
-
-  ([dest-buffer dest-offset src-buffer src-offset]
-
-   (copy-buffer dest-buffer
-                dest-offset
-                src-buffer
-                src-offset
-                (- (count src-buffer)
-                   src-offset)))
-
-
-  ([dest-buffer dest-offset src-buffer src-offset n-byte]
-
-   #?(:clj  (System/arraycopy ^bytes src-buffer
-                              src-offset
-                              ^bytes dest-buffer
-                              dest-offset
-                              n-byte)
-      :cljs (.set (js/Uint8Array. dest-buffer)
-                  (js/Uint8Array. src-buffer
-                                  src-offset
-                                  n-byte)
-                  dest-offset))
-   dest-buffer))
-
-
-
-(defn remaining
-
-  "Returns the number of bytes remaining until the end of the view."
-
-  [view]
-
-  (- (count view)
-     (position view)))
+)
 
 
 ;;;;;
@@ -1216,4 +1078,4 @@
 ;;;;;;;;;; Creating primitives from bytes
 
 
-#?(:cljs (def ^:no-doc -view-cast (view (buffer 8))))
+#?(:cljs (def ^:no-doc -view-cast (binf.protocol/view (binf.buffer/alloc 8))))

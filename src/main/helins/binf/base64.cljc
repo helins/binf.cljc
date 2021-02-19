@@ -6,6 +6,7 @@
 
   (:require #?(:cljs [goog.crypt.base64])
             [helins.binf          :as binf]
+            [helins.binf.buffer   :as binf.buffer]
             [helins.binf.protocol :as binf.protocol])
   #?(:clj (:import java.nio.ByteBuffer
                    java.util.Base64)))
@@ -66,7 +67,7 @@
 
       :cljs [([string]
               (decode string
-                      binf/buffer))
+                      binf.buffer/alloc))
              ([string make-buffer]
               (-decode string
                        make-buffer))]))

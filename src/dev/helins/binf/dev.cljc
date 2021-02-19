@@ -4,6 +4,7 @@
 
   (:require [helins.binf          :as binf]
             [helins.binf.base64   :as binf.base64]
+            [helins.binf.buffer   :as binf.buffer]
             [helins.binf.endian   :as binf.endian]
             [helins.binf.float    :as binf.float]
             [helins.binf.int      :as binf.int]

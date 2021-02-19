@@ -3,7 +3,7 @@
   ""
 
   {:author "Adam Helinski"}
-  #?(:cljs (:require [helins.binf :as binf]))
+  #?(:cljs (:require [helins.binf.buffer :as binf.buffer]))
   #?(:clj (:import java.nio.ByteOrder)))
 
 
@@ -56,7 +56,7 @@
 
   ;;
 
-  (js/DataView. (binf/buffer 8))))
+  (js/DataView. (binf.buffer/alloc 8))))
 
 
 
