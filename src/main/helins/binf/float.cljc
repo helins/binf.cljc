@@ -10,7 +10,7 @@
 ;;;;;;;;;; 
 
 
-(defn bit-32
+(defn b32
 
   "Converts a 32-bit float to an integer preserving the bit pattern.
   
@@ -26,7 +26,7 @@
 
 
 
-(defn bit-64
+(defn b64
 
   "Converts a 64-bit float to an integer preserving the bit pattern.
   
@@ -42,7 +42,7 @@
 
 
 
-(defn from-bit-32
+(defn from-b32
 
   "Interprets bits from an integer (at least 32 bits) as a 32-bit float.
   
@@ -57,7 +57,7 @@
                (binf/ra-f32 0))))
 
 
-(defn from-bit-64
+(defn from-b64
 
   "Interprets bits from a 64-bits integer as a 64-bit float.
   
@@ -71,6 +71,27 @@
                             bits)
                (binf/ra-f64 0))))
 
+
+;;;;;;;;;;
+
+
+(defn f32
+
+  ""
+
+  [x]
+
+  (float x))
+
+
+
+(defn f64
+
+  ""
+
+  [x]
+
+  (double x))
 
 
 
