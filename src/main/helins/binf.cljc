@@ -417,6 +417,83 @@
                             endianess))
 
 
+;;;;; IRelativeReader
+
+
+(defn rr-buffer
+
+  "Reads n-byte and returns them in a new buffer or in the given one at the specified `offset` (or 0)."
+
+
+  ([view n-byte]
+
+   (binf.protocol/rr-buffer view
+                            n-byte
+                            (binf.buffer/alloc n-byte)
+                            0))
+
+
+  ([view n-byte buffer]
+
+   (binf.protocol/rr-buffer view
+                            n-byte
+                            buffer
+                            0))
+
+
+  ([view n-byte buffer offset]
+
+   (binf.protocol/rr-buffer view
+                            n-byte
+                            buffer
+                            offset)))
+
+
+
+
+    
+
+#_(defprotocol IRelativeReader
+
+  "Reading primitive values from the current position, advancing it as needed. For instance,
+   reading a 32-bit integer will advance the current position by 4 bytes."
+
+  
+
+  (rr-u8 [view]
+    "Reads an unsigned 8-bit integer from the current position.")
+
+  (rr-i8 [view]
+    "Reads a signed 8-bit integer from the current position.")
+
+  (rr-u16 [view]
+    "Reads an unsigned 16-bit integer from the current position.")
+
+  (rr-i16 [view]
+    "Reads a signed 16-bit integer from the current position.")
+
+  (rr-u32 [view]
+    "Reads an unsigned 32-bit integer from the current position.")
+
+  (rr-i32 [view]
+    "Reads a signed 32-bit integer from the current position.")
+
+  (rr-i64 [view]
+    "Reads a signed 64-bit integer from the current position.")
+
+  (rr-f32 [view]
+    "Reads a 32-bit float from the current position.")
+
+  (rr-f64 [view]
+    "Reads a 64-bit float from the current position.")
+  
+  (rr-string [view n-byte]
+             [view decoder n-byte]
+    "Reads a string consisting of `n-byte` from the current position.
+
+     A decoder may be provided (default is UTF-8).
+    
+     See [[text-decoder]]"))
 
 
 ;;;;; IViewable

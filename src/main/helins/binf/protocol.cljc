@@ -77,10 +77,7 @@
   "Reading primitive values from the current position, advancing it as needed. For instance,
    reading a 32-bit integer will advance the current position by 4 bytes."
 
-  (rr-buffer [view n-byte]
-             [view n-byte buffer]
-             [view n-byte buffer offset]
-    "Reads n-byte and returns them in a new buffer or in the given one at the specified `offset` (or 0).")
+  (rr-buffer [view n-byte buffer offset])
 
   (rr-u8 [view]
     "Reads an unsigned 8-bit integer from the current position.")

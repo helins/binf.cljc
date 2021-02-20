@@ -179,19 +179,6 @@
 
   binf.protocol/IRelativeReader
 
-
-    (rr-buffer [this n-byte]
-      (binf.protocol/rr-buffer this
-                 n-byte
-                 (binf.buffer/alloc n-byte)
-                 0))
-
-    (rr-buffer [this n-byte buffer]
-      (binf.protocol/rr-buffer this
-                               n-byte
-                               buffer
-                               0))
-
     (rr-buffer [this n-byte buffer offset]
       (let [b (binf.protocol/ra-buffer this
                                        (binf.protocol/position this)
