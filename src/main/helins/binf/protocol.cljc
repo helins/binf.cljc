@@ -56,18 +56,8 @@
 
   (wa-f64 [view position floating])
   
-  (wa-string [view position string]
-    "Writes a string (encoded as UTF-8) to an absolute `position`.
+  (wa-string [view position string]))
 
-     Unlike other functions which are implemented as a fluent interface, this function returns
-     a tuple indicating how many bytes and chars have been written, and if the process is finished:
-     `[finished? n-byte n-chars]`.
-    
-     With that information, the user can continue writing if needed. On the JVM, the tuple contains a 4th
-     item which is a `CharBuffer` containing the rest of the unwritten string which can be passed in place
-     of the `string` argument.
-    
-     Growing views will automatically grow and only one call will be sufficient."))
 
 
 (defprotocol IEndianess
