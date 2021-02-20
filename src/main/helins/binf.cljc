@@ -607,6 +607,74 @@
 
 
 
+(defn wr-b8
+
+  "Writes an 8-bit integer to the current position."
+
+  [view int]
+
+  (binf.protocol/wr-b8 view
+                       int))
+
+
+
+(defn wr-b16
+
+  "Writes a 16-bit integer to the current position."
+
+  [view int]
+
+  (binf.protocol/wr-b16 view
+                        int))
+
+
+
+(defn wr-b32
+
+  "Writes a 32-bit integer to the current position."
+
+  [view int]
+
+  (binf.protocol/wr-b32 view
+                        int))
+
+
+
+(defn wr-b64
+
+  "Writes a 64-bit integer to the current position."
+
+  [view int]
+
+  (binf.protocol/wr-b64 view
+                        int))
+
+
+
+(defn wr-f32
+
+  "Writes a 32-bit float to the current position."
+
+  [view floating]
+
+  (binf.protocol/wr-f32 view
+                        floating))
+
+
+
+(defn wr-f64
+
+  "Writes a 64-bit float to the current position."
+
+  [view floating]
+
+  (binf.protocol/wr-f64 view
+                        floating))
+
+
+
+
+
 #_(defprotocol IRelativeWriter
 
   "Writing primitive values to the current position, advancing it as needed. For instance,
@@ -616,24 +684,6 @@
 
   
   
-  (wr-b8 [view integer]
-    "Writes an 8-bit integer to the current position.")
-
-  (wr-b16 [view integer]
-    "Writes a 16-bit integer to the current position.")
-
-  (wr-b32 [view integer]
-    "Writes a 32-bit integer to the current position.")
-
-  (wr-b64 [view integer]
-    "Writes a 64-bit integer to the current position.")
-
-  (wr-f32 [view floating]
-    "Writes a 32-bit float to the current position.")
-
-  (wr-f64 [view floating]
-    "Writes a 64-bit float to the current position.")
-
   (wr-string [view string]
     "Writes a string to the current position, encoded at UTF-8.
     

@@ -46,13 +46,13 @@
   
   (wa-buffer [view position buffer offset n-byte])
 
-  (wa-b8 [view position integer])
+  (wa-b8 [view position int])
 
-  (wa-b16 [view position integer])
+  (wa-b16 [view position int])
 
-  (wa-b32 [view position integer])
+  (wa-b32 [view position int])
 
-  (wa-b64 [view position integer])
+  (wa-b64 [view position int])
 
   (wa-f32 [view position floating])
 
@@ -113,23 +113,17 @@
 
   (wr-buffer [view buffer offset n-byte])
   
-  (wr-b8 [view integer]
-    "Writes an 8-bit integer to the current position.")
+  (wr-b8 [view int])
 
-  (wr-b16 [view integer]
-    "Writes a 16-bit integer to the current position.")
+  (wr-b16 [view int])
 
-  (wr-b32 [view integer]
-    "Writes a 32-bit integer to the current position.")
+  (wr-b32 [view int])
 
-  (wr-b64 [view integer]
-    "Writes a 64-bit integer to the current position.")
+  (wr-b64 [view int])
 
-  (wr-f32 [view floating]
-    "Writes a 32-bit float to the current position.")
+  (wr-f32 [view floating])
 
-  (wr-f64 [view floating]
-    "Writes a 64-bit float to the current position.")
+  (wr-f64 [view floating])
 
   (wr-string [view string]
     "Writes a string to the current position, encoded at UTF-8.
