@@ -159,14 +159,14 @@
   binf.protocol/IEndianess
 
 
-    (endianess [_]
+    (endian-get [_]
       (if little-endian?
         :little-endian
         :big-endian))
 
-    (endianess [this new-endianess]
+    (endian-set [this endianess]
       (set! little-endian?
-            (case new-endianess
+            (case endianess
               :big-endian    false
               :little-endian true))
       this)

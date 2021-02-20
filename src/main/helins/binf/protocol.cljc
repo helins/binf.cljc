@@ -64,11 +64,10 @@
 
   "Retrieving or modifying the endianess."
   
-  (endianess [view]
-             [view new-endianess]
-    "Arity 1 returns the current endianess, arity 2 sets it.
-    
-     Accepted values are `:little-endian` and `:big-endian`."))
+  (endian-get [view])
+
+  (endian-set [view endianess]))
+
 
 
 (defprotocol IRelativeReader

@@ -163,15 +163,15 @@
   binf.protocol/IEndianess
 
 
-    (endianess [_]
+    (endian-get [_this]
       (condp =
              (.order byte-buffer)
         ByteOrder/BIG_ENDIAN    :big-endian
         ByteOrder/LITTLE_ENDIAN :little-endian))
 
-    (endianess [this new-endianess]
+    (endian-set [this endianess]
       (.order byte-buffer
-              (case new-endianess
+              (case endianess
                 :big-endian    ByteOrder/BIG_ENDIAN
                 :little-endian ByteOrder/LITTLE_ENDIAN))
       this)
@@ -182,9 +182,9 @@
     
     (rr-buffer [this n-byte]
       (binf.protocol/rr-buffer this
-                 n-byte
-                 (binf.buffer/alloc n-byte)
-                 0))
+                               n-byte
+                               (binf.buffer/alloc n-byte)
+                               0))
 
     (rr-buffer [this n-byte buffer]
       (binf.protocol/rr-buffer this

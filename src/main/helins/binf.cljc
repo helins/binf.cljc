@@ -384,6 +384,29 @@
                            string))
 
 
+;;;;; IEndianess
+
+
+(defn endian-get
+
+  "Returns the endianess of the given `view`, either `:big-endian` or `:little-endian`."
+
+  [view]
+
+  (binf.protocol/endian-get view))
+
+
+
+(defn endian-set
+
+  "Sets the endianess of the given `view`, either `:big-endian` or `:little-endian`."
+
+  [view endianess]
+
+  (binf.protocol/endian-set view
+                            endianess))
+
+
 ;;;;;
 
 
