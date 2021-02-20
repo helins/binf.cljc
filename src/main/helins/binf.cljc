@@ -6,37 +6,12 @@
 
   {:author "Adam Helins"}
 
-  (:require [clojure.core         :as clj]
-            [helins.binf.buffer   :as binf.buffer]
-            [helins.binf.protocol :as binf.protocol])
-  #?(:cljs (:require-macros [helins.binf]))
-  #?(:clj (:import clojure.lang.Counted
-                   (java.nio ByteBuffer
-                             ByteOrder
-                             CharBuffer)
-                   (java.nio.charset Charset
-                                     CoderResult
-                                     StandardCharsets)))
-  (:refer-clojure :rename {bit-shift-left           <<
-                           bit-shift-right          >>
-                           unsigned-bit-shift-right >>>}))
+  (:require #?(:cljs [helins.binf.buffer  :as binf.buffer])
+            [helins.binf.protocol         :as binf.protocol]
+            [helins.binf.protocol.impl]))
 
 
-
-
-#?(:cljs (def ^:private -text-decoder-utf-8
-
-  ;;
-
-  (js/TextEncoder.)))
-
-
-
-#?(:cljs (def ^:private -text-encoder
-
-  ;;
-
-  (js/TextEncoder.)))
+(declare remaining)
 
 
 ;;;;;;;;;; Primitive type sizes
@@ -89,30 +64,7 @@
   8)
 
 
-;;;;;;;;;; Types and protocol extensions
-
-(comment
-
-;; Copying in CLJS is almost exactly the same as in CLJ
-
-
-
-
-
-
-)
-
-
-
-(defn remaining
-
-  "Returns the number of bytes remaining until the end of the view."
-
-  [view]
-
-  (- (count view)
-     (binf.protocol/position view)))
-
+;;;;;;;;;; Helper functions
 
 
 (defn garanteed?
@@ -126,7 +78,14 @@
 
 
 
+(defn remaining
 
+  "Returns the number of bytes remaining until the end of the view."
+
+  [view]
+
+  (- (count view)
+     (binf.protocol/position view)))
 
 
 ;;;;;
@@ -141,7 +100,7 @@
 ;  ))
 
 
-;;;;;;;;;; Creating primitives from bytes
+;;;;;;;;;; Used by other namespaces for casting primitive types in CLJS
 
 
 #?(:cljs (def ^:no-doc -view-cast (binf.protocol/view (binf.buffer/alloc 8))))
