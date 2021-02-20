@@ -356,7 +356,7 @@
         res))
 
 
-  binf.protocol/IView
+  binf.protocol/IPosition
 
     (offset [_]
       (.-byteOffset dataview))

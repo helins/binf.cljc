@@ -685,6 +685,65 @@
                            string))
 
 
+;;;; IPosition
+
+
+(defn offset
+  
+  "Returns the offset in the original buffer this view starts from.
+  
+   Views can be counted using Clojure's `count` which expresses the number of bytes wrapped by the view
+   starting from the offset."
+
+  [view]
+
+  (binf.protocol/offset view))
+
+
+
+(defn position
+
+  "Returns the current position."
+
+  [view]
+
+  (binf.protocol/position view))
+
+
+
+(defn seek
+
+  "Modifies the current position."
+
+  [view position]
+
+  (binf.protocol/seek view
+                      position))
+
+
+
+(defn skip
+
+  "Advances the current position by `n-byte` bytes."
+
+  [view n-byte]
+
+  (binf.protocol/skip view
+                      n-byte))
+
+
+
+(defn to-buffer
+  
+  "Returns the buffer wrapped by the view.
+  
+   Also see [[offset]]."
+
+  [view]
+
+  (binf.protocol/to-buffer view))
+
+
 ;;;;; IViewable
 
 

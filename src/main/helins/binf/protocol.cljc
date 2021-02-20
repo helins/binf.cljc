@@ -128,29 +128,21 @@
   (wr-string [view string]))
 
 
-(defprotocol IView
 
-  "Additional functions related to views."
+(defprotocol IPosition
 
-  (offset [view]
-    "Returns the offset in the original buffer this view starts from.
-    
-     Views can be counted using Clojure's `count` which expresses the number of bytes wrapped by the view
-     starting from the offset.")
+  "Handling the position of a view and its relation to its buffer."
 
-  (position [view]
-    "Returns the current position.")
+  (offset [view])
 
-  (seek [view position]
-    "Modifies the current position.")
+  (position [view])
+
+  (seek [view position])
   
-  (skip [view n-byte]
-    "Advances the current position by `n-byte` bytes.")
+  (skip [view n-byte])
 
-  (to-buffer [view]
-    "Returns the buffer wrapped by the view.
-    
-     Also see [[offset]]."))
+  (to-buffer [view]))
+
 
 
 (defprotocol IViewable

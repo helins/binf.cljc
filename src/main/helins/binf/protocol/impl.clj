@@ -321,7 +321,7 @@
         ;                    ::string string}))))
 
 
-  binf.protocol/IView
+  binf.protocol/IPosition
 
     (offset [_]
       -offset)
