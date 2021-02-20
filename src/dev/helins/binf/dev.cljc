@@ -68,7 +68,7 @@
 
   (binf/wa-b64 v
                0
-               (binf.int64/i64* -42))
+               (binf.int64/u64* -42))
 
   (binf/ra-i64 v
                0)

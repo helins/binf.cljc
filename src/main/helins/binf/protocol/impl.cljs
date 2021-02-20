@@ -64,6 +64,11 @@
                  position
                  little-endian?))
 
+    (ra-u64 [_ position]
+      (.getBigUint64 dataview
+                     position
+                     little-endian?))
+
     (ra-i64 [_ position]
       (.getBigInt64 dataview
                     position

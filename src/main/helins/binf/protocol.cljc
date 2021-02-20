@@ -26,6 +26,8 @@
 
   (ra-i32 [view position])
 
+  (ra-u64 [view position])
+
   (ra-i64 [view position])
 
   (ra-f32 [view position])

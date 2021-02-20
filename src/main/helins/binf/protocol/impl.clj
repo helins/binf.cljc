@@ -71,6 +71,10 @@
                (+ -offset
                   position)))
 
+    (ra-u64 [this position]
+      (binf.protocol/ra-i64 this
+                            position))
+
     (ra-i64 [_ position]
       (.getLong byte-buffer
                 (+ -offset

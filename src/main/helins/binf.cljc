@@ -193,6 +193,16 @@
                         position))
 
 
+(defn ra-u64
+
+  "Reads a signed 64-bit integer from an absolute `position`."
+
+  [view position]
+
+  (binf.protocol/ra-u64 view
+                        position))
+
+
 
 (defn ra-i64
 
