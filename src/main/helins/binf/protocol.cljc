@@ -100,12 +100,8 @@
   (rr-f64 [view])
   
   (rr-string [view n-byte]
-             [view decoder n-byte]
-    "Reads a string consisting of `n-byte` from the current position.
+             [view decoder n-byte]))
 
-     A decoder may be provided (default is UTF-8).
-    
-     See [[text-decoder]]"))
 
 
 (defprotocol IRelativeWriter

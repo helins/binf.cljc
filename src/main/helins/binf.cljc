@@ -549,22 +549,27 @@
   (binf.protocol/rr-f64 view))
 
 
-    
 
-#_(defprotocol IRelativeReader
-
-  "Reading primitive values from the current position, advancing it as needed. For instance,
-   reading a 32-bit integer will advance the current position by 4 bytes."
-
-
+(defn rr-string
   
-  (rr-string [view n-byte]
-             [view decoder n-byte]
-    "Reads a string consisting of `n-byte` from the current position.
+  "Reads a string consisting of `n-byte` from the current position.
 
-     A decoder may be provided (default is UTF-8).
-    
-     See [[text-decoder]]"))
+   A decoder may be provided (default is UTF-8).
+  
+   See [[text-decoder]]"
+
+
+  ([view n-byte]
+
+   (binf.protocol/rr-string view
+                            n-byte))
+
+
+  ([view decoder n-byte]
+
+   (binf.protocol/rr-string view
+                            decoder
+                            n-byte)))
 
 
 ;;;;; IViewable
