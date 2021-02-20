@@ -4,18 +4,18 @@
 
   (:require [clojure.test       :as t]
             [helins.binf        :as binf]
-            [helins.binf.base64 :as binf.base64])
-  (:refer-clojure :rename {bit-shift-right >>}))
+            [helins.binf.base64 :as binf.base64]
+            [helins.binf.buffer :as binf.buffer]))
 
 
 ;;;;;;;;;;
 
 
-(t/deftest base64
+(t/deftest main
 
-  (let [buffer (binf/buffer 64)
+  (let [buffer (binf.buffer/alloc 64)
         view   (binf/view buffer)
-        #?@(:cljs [buffer-shared (binf/buffer-shared 64)
+        #?@(:cljs [buffer-shared (binf.buffer/alloc-shared 64)
                    view-shared   (binf/view buffer-shared)])]
     (dotimes [i 64]
       (binf/wr-b8 view

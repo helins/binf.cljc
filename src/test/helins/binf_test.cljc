@@ -7,18 +7,9 @@
   (:refer-clojure :rename {bit-shift-right >>}))
 
 
-;;;;;;;;;;
-
-
-(t/deftest buffer*
-  
-  (t/is (= (range -3
-                  4)
-           (seq (binf/buffer* -3 -2 -1 0 1 2 3)))))
-
-
 ;;;;;;;;;; Primitive conversions
 
+(comment
 
 (t/deftest uints
 
@@ -626,3 +617,5 @@
         "Not enough bytes to write everything")
 
   (-r-string #(binf/view (binf/buffer 1024))))
+
+)
