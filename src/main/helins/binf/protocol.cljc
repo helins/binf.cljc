@@ -111,12 +111,7 @@
 
    When writing integers, sign is irrelevant and truncation is automatic."
 
-  (wr-buffer [view buffer]
-             [view buffer offset]
-             [view buffer offset n-byte]
-    "Copies the given `buffer` to the current position.
-
-     An `offset` in the buffer as well as a number of bytes to copy (`n-byte`) may be provided.")
+  (wr-buffer [view buffer offset n-byte])
   
   (wr-b8 [view integer]
     "Writes an 8-bit integer to the current position.")

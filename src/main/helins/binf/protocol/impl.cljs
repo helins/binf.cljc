@@ -284,19 +284,6 @@
 
   binf.protocol/IRelativeWriter
     
-    (wr-buffer [this buffer]
-      (binf.protocol/wr-buffer this
-                               buffer
-                               0
-                               (count buffer)))
-
-    (wr-buffer [this buffer offset]
-      (binf.protocol/wr-buffer this
-                               buffer
-                               offset
-                               (- (count buffer)
-                                  offset)))
-
     (wr-buffer [this buffer offset n-byte]
       (binf.protocol/wa-buffer this
                                (binf.protocol/position this)

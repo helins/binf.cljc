@@ -572,6 +572,74 @@
                             n-byte)))
 
 
+;;;;; IRelativeWriter
+
+
+(defn wr-buffer
+  
+  "Copies the given `buffer` to the current position.
+
+   An `offset` in the buffer as well as a number of bytes to copy (`n-byte`) may be provided."
+
+  ([view buffer]
+
+   (binf.protocol/wr-buffer view
+                            buffer
+                            0
+                            (count buffer)))
+
+
+  ([view buffer offset]
+
+   (binf.protocol/wr-buffer view
+                            buffer
+                            offset
+                            (- (count buffer)
+                               offset)))
+
+
+  ([view buffer offset n-byte]
+
+   (binf.protocol/wr-buffer view
+                            buffer
+                            offset
+                            n-byte)))
+
+
+
+#_(defprotocol IRelativeWriter
+
+  "Writing primitive values to the current position, advancing it as needed. For instance,
+   reading a 64-bit float will advance the current position by 8 bytes.
+
+   When writing integers, sign is irrelevant and truncation is automatic."
+
+  
+  
+  (wr-b8 [view integer]
+    "Writes an 8-bit integer to the current position.")
+
+  (wr-b16 [view integer]
+    "Writes a 16-bit integer to the current position.")
+
+  (wr-b32 [view integer]
+    "Writes a 32-bit integer to the current position.")
+
+  (wr-b64 [view integer]
+    "Writes a 64-bit integer to the current position.")
+
+  (wr-f32 [view floating]
+    "Writes a 32-bit float to the current position.")
+
+  (wr-f64 [view floating]
+    "Writes a 64-bit float to the current position.")
+
+  (wr-string [view string]
+    "Writes a string to the current position, encoded at UTF-8.
+    
+     Cf. [[wa-string]] about the returned value"))
+
+
 ;;;;; IViewable
 
 
