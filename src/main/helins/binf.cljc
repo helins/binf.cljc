@@ -407,6 +407,52 @@
                             endianess))
 
 
+
+
+;;;;; IViewable
+
+
+(defn view
+  
+  "A view can be created from a buffer (see [[buffer]]) or from another view.
+  
+   An `offset` as well as a size (`n-byte`) may be provided.
+  
+   ```clojure
+   (def my-buffer
+        (binf/buffer 100))
+
+   ;; View with an offset of 50 bytes, 40 bytes long
+   (def my-view
+        (binf/view my-buffer
+                   50
+                   40))
+
+   ;; View from a view, offset of 60 bytes in the original buffer (50 + 10), 20 bytes long
+   (def inner-view
+        (binf/view my-view
+                   10
+                   20))
+   ```"
+
+  ([viewable]
+
+   (binf.protocol/view viewable))
+
+
+  ([viewable offset]
+
+   (binf.protocol/view viewable
+                       offset))
+
+
+  ([viewable offset n-byte]
+
+   (binf.protocol/view viewable
+                       offset
+                       n-byte)))
+
+
 ;;;;;
 
 
