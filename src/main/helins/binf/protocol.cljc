@@ -125,10 +125,7 @@
 
   (wr-f64 [view floating])
 
-  (wr-string [view string]
-    "Writes a string to the current position, encoded at UTF-8.
-    
-     Cf. [[wa-string]] about the returned value"))
+  (wr-string [view string]))
 
 
 (defprotocol IView

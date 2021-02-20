@@ -673,21 +673,16 @@
 
 
 
-
-
-#_(defprotocol IRelativeWriter
-
-  "Writing primitive values to the current position, advancing it as needed. For instance,
-   reading a 64-bit float will advance the current position by 8 bytes.
-
-   When writing integers, sign is irrelevant and truncation is automatic."
-
+(defn wr-string
   
+  "Writes a string to the current position, encoded at UTF-8.
   
-  (wr-string [view string]
-    "Writes a string to the current position, encoded at UTF-8.
-    
-     Cf. [[wa-string]] about the returned value"))
+   Cf. [[wa-string]] about the returned value"
+
+  [view string]
+
+  (binf.protocol/wr-string view
+                           string))
 
 
 ;;;;; IViewable
