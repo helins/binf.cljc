@@ -14,7 +14,8 @@
 
 
  :test
- {:runner-ns lambdaisland.chui.shadow.browser-runner
+ {:ns-regexp ".+"
+  :runner-ns lambdaisland.chui.shadow.browser-runner
   :target    :browser-test
   :test-dir  "resources/chui"}}
 

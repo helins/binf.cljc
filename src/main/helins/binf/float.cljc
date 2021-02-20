@@ -93,13 +93,3 @@
   [x]
 
   (double x))
-
-
-
-(defn integer
-
-  "Truncates a float value to a 64-bit unsigned integer (eg. `42.0` to `42`)."
-
-  [floating]
-
-  (long floating))

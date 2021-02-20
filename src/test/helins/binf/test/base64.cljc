@@ -29,7 +29,7 @@
                       binf/to-buffer))
              #?(:cljs (seq (-> buffer-shared
                                binf.base64/encode
-                               (binf.base64/decode binf/buffer-shared)
+                               (binf.base64/decode binf.buffer/alloc-shared)
                                binf/to-buffer))))
           "Without offset nor lenght")
     (t/is (= (drop 5
@@ -40,7 +40,7 @@
                       binf/to-buffer))
              #?(:cljs (seq (-> buffer-shared
                                (binf.base64/encode 5)
-                               (binf.base64/decode binf/buffer-shared)
+                               (binf.base64/decode binf.buffer/alloc-shared)
                                binf/to-buffer))))
           "With offset without length")
     (t/is (= (->> (seq buffer)
@@ -54,6 +54,6 @@
              #?(:cljs (seq (-> buffer-shared
                                (binf.base64/encode 5
                                                    20)
-                               (binf.base64/decode binf/buffer-shared)
+                               (binf.base64/decode binf.buffer/alloc-shared)
                                binf/to-buffer))))
           "With offset and length")))

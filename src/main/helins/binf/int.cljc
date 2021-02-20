@@ -141,7 +141,7 @@
                    b32-2)
      :cljs (bit-or (<< (js/BigInt b32-1)
                        (js/BigInt 32))
-                   b32-2)))
+                   (js/BigInt b32-2))))
 
 
 (defn i64
@@ -209,3 +209,15 @@
              b8-6)
         (u16 b8-7
              b8-8))))
+
+
+;;;;;;;;;;
+
+
+(defn from-float
+
+  "Truncates a float value to an integer (eg. `42.0` to `42`)."
+
+  [floating]
+
+  (long floating))

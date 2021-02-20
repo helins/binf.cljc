@@ -11,45 +11,6 @@
 
 (comment
 
-(t/deftest uints
-
-  (t/are [n fi fu]
-         (let [value (dec (binf/integer (Math/pow 2
-                                                  n)))]
-           (t/is (= value
-                    (-> value
-                        fu
-                        fi
-                        fu
-                        fi
-                        fu))))
-    8  binf/i8  binf/u8
-    16 binf/i16 binf/u16
-    32 binf/i32 binf/u32))
-
-
-
-(t/deftest i64
-
-  (let [value (binf/integer (Math/pow 2
-                                      7))]
-    (t/is (= value
-             (binf/i64 (binf/u8 (>> value
-                                    56))
-                       (binf/u8 (>> value
-                                    48))
-                       (binf/u8 (>> value
-                                    40))
-                       (binf/u8 (>> value
-                                    32))
-                       (binf/u8 (>> value
-                                    24))
-                       (binf/u8 (>> value
-                                    16))
-                       (binf/u8 (>> value
-                                    8))
-                       (binf/u8 value))))))
-
 
 #?(:clj (t/deftest f32
 
