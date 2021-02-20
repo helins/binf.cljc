@@ -450,6 +450,94 @@
 
 
 
+(defn rr-u8
+
+  "Reads an unsigned 8-bit integer from the current position."
+
+  [view]
+
+  (binf.protocol/rr-u8 view))
+
+
+
+(defn rr-i8
+
+  "Reads a signed 8-bit integer from the current position."
+
+  [view]
+
+  (binf.protocol/rr-i8 view))
+
+
+
+(defn rr-u16
+
+  "Reads an unsigned 16-bit integer from the current position."
+
+  [view]
+
+  (binf.protocol/rr-u16 view))
+
+
+
+(defn rr-i16
+
+  "Reads a signed 16-bit integer from the current position."
+
+  [view]
+
+  (binf.protocol/rr-i16 view))
+
+
+
+(defn rr-u32
+
+  "Reads an unsigned 32-bit integer from the current position."
+
+  [view]
+
+  (binf.protocol/rr-u32 view))
+
+
+
+(defn rr-i32
+
+  "Reads a signed 32-bit integer from the current position."
+
+  [view]
+
+  (binf.protocol/rr-i32 view))
+
+
+
+(defn rr-i64
+
+  "Reads a signed 64-bit integer from the current position."
+
+  [view]
+
+  (binf.protocol/rr-i64 view))
+
+
+
+(defn rr-f32
+
+  "Reads a 32-bit float from the current position."
+
+  [view]
+
+  (binf.protocol/rr-f32 view))
+
+
+
+(defn rr-f64
+
+  "Reads a 64-bit float from the current position."
+
+  [view]
+
+  (binf.protocol/rr-f64 view))
+
 
     
 
@@ -458,34 +546,7 @@
   "Reading primitive values from the current position, advancing it as needed. For instance,
    reading a 32-bit integer will advance the current position by 4 bytes."
 
-  
 
-  (rr-u8 [view]
-    "Reads an unsigned 8-bit integer from the current position.")
-
-  (rr-i8 [view]
-    "Reads a signed 8-bit integer from the current position.")
-
-  (rr-u16 [view]
-    "Reads an unsigned 16-bit integer from the current position.")
-
-  (rr-i16 [view]
-    "Reads a signed 16-bit integer from the current position.")
-
-  (rr-u32 [view]
-    "Reads an unsigned 32-bit integer from the current position.")
-
-  (rr-i32 [view]
-    "Reads a signed 32-bit integer from the current position.")
-
-  (rr-i64 [view]
-    "Reads a signed 64-bit integer from the current position.")
-
-  (rr-f32 [view]
-    "Reads a 32-bit float from the current position.")
-
-  (rr-f64 [view]
-    "Reads a 64-bit float from the current position.")
   
   (rr-string [view n-byte]
              [view decoder n-byte]

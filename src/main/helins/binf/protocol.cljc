@@ -79,32 +79,23 @@
 
   (rr-buffer [view n-byte buffer offset])
 
-  (rr-u8 [view]
-    "Reads an unsigned 8-bit integer from the current position.")
+  (rr-u8 [view])
 
-  (rr-i8 [view]
-    "Reads a signed 8-bit integer from the current position.")
+  (rr-i8 [view])
 
-  (rr-u16 [view]
-    "Reads an unsigned 16-bit integer from the current position.")
+  (rr-u16 [view])
 
-  (rr-i16 [view]
-    "Reads a signed 16-bit integer from the current position.")
+  (rr-i16 [view])
 
-  (rr-u32 [view]
-    "Reads an unsigned 32-bit integer from the current position.")
+  (rr-u32 [view])
 
-  (rr-i32 [view]
-    "Reads a signed 32-bit integer from the current position.")
+  (rr-i32 [view])
 
-  (rr-i64 [view]
-    "Reads a signed 64-bit integer from the current position.")
+  (rr-i64 [view])
 
-  (rr-f32 [view]
-    "Reads a 32-bit float from the current position.")
+  (rr-f32 [view])
 
-  (rr-f64 [view]
-    "Reads a 64-bit float from the current position.")
+  (rr-f64 [view])
   
   (rr-string [view n-byte]
              [view decoder n-byte]
