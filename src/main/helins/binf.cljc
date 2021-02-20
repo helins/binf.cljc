@@ -291,27 +291,81 @@
 
 
 
+(defn wa-b8
+
+  "Writes an 8-bit integer to an absolute position."
+
+  [view position int]
+
+  (binf.protocol/wa-b8 view
+                       position
+                       int))
+
+
+
+(defn wa-b16
+
+  "Writes a 16-bit integer to an absolute `position`."
+
+  [view position int]
+
+  (binf.protocol/wa-b16 view
+                        position
+                        int))
+
+
+
+(defn wa-b32
+
+  "Writes a 32-bit integer to an absolute `position`."
+
+  [view position int]
+
+  (binf.protocol/wa-b32 view
+                        position
+                        int))
+
+
+
+(defn wa-b64
+
+  "Writes a 64-bit integer to an absolute `position`."
+
+  [view position int64]
+
+  (binf.protocol/wa-b64 view
+                        position
+                        int64))
+
+
+
+(defn wa-f32
+
+  "Writes a 32-bit float to an absolute `position`."
+
+  [view position floating]
+
+  (binf.protocol/wa-f32 view
+                        position
+                        floating))
+
+
+
+(defn wa-f64
+
+  "Writes a 64-bit float to an absolute `position`."
+
+  [view position floating]
+
+  (binf.protocol/wa-f64 view
+                        position
+                        floating))
+
+
 
 #_(defprotocol IAbsoluteWriter
 
 
-  (wa-b8 [view position integer]
-    "Writes an 8-bit integer to an absolute position.")
-
-  (wa-b16 [view position integer]
-    "Writes a 16-bit integer to an absolute `position`.")
-
-  (wa-b32 [view position integer]
-    "Writes a 32-bit integer to an absolute `position`.")
-
-  (wa-b64 [view position integer]
-    "Writes a 64-bit integer to an absolute `position`.")
-
-  (wa-f32 [view position floating]
-    "Writes a 32-bit float to an absolute `position`.")
-
-  (wa-f64 [view position floating]
-    "Writes a 64-bit float to an absolute `position`.")
   
   (wa-string [view position string]
     "Writes a string (encoded as UTF-8) to an absolute `position`.
