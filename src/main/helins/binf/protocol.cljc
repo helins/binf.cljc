@@ -42,9 +42,7 @@
   
    When writing integers, sign is irrelevant and truncation is automatic."
   
-  (wa-buffer [view position buffer]
-             [view position buffer offset]
-             [view position buffer offset n-byte]
+  (wa-buffer [view position buffer offset n-byte]
     "Copies the given `buffer` to an absolute `position`.
     
      An `offset` in the buffer as well as a number of bytes to copy (`n-byte`) may be provided.")

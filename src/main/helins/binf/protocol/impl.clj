@@ -97,21 +97,6 @@
 
   binf.protocol/IAbsoluteWriter
 
-
-    (wa-buffer [this position buffer]
-      (binf.protocol/wa-buffer this
-                               position
-                               buffer
-                               (count buffer)))
-
-    (wa-buffer [this position buffer offset]
-      (binf.protocol/wa-buffer this
-                               position
-                               buffer
-                               offset
-                               (- (count buffer)
-                                  offset)))
-
     (wa-buffer [this position buffer offset n-byte]
       (binf.buffer/copy (binf.protocol/to-buffer this)
                         (+ -offset

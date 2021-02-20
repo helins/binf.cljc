@@ -252,7 +252,79 @@
                             n-byte)))
 
 
+;;;;; IAbsoluteWriter
 
+
+(defn wa-buffer
+
+  "Copies the given `buffer` to an absolute `position`.
+  
+   An `offset` in the buffer as well as a number of bytes to copy (`n-byte`) may be provided."
+
+
+  ([view position buffer]
+
+    (binf.protocol/wa-buffer view
+                             position
+                             buffer
+                             0
+                             (count buffer)))
+
+
+  ([view position buffer offset]
+
+   (binf.protocol/wa-buffer view
+                            position
+                            buffer
+                            offset
+                            (- (count buffer)
+                               offset)))
+
+
+  ([view position buffer offset n-byte]
+
+   (binf.protocol/wa-buffer view
+                            position
+                            buffer
+                            offset
+                            n-byte)))
+
+
+
+
+#_(defprotocol IAbsoluteWriter
+
+
+  (wa-b8 [view position integer]
+    "Writes an 8-bit integer to an absolute position.")
+
+  (wa-b16 [view position integer]
+    "Writes a 16-bit integer to an absolute `position`.")
+
+  (wa-b32 [view position integer]
+    "Writes a 32-bit integer to an absolute `position`.")
+
+  (wa-b64 [view position integer]
+    "Writes a 64-bit integer to an absolute `position`.")
+
+  (wa-f32 [view position floating]
+    "Writes a 32-bit float to an absolute `position`.")
+
+  (wa-f64 [view position floating]
+    "Writes a 64-bit float to an absolute `position`.")
+  
+  (wa-string [view position string]
+    "Writes a string (encoded as UTF-8) to an absolute `position`.
+
+     Unlike other functions which are implemented as a fluent interface, this function returns
+     a tuple indicating how many bytes and chars have been written, and if the process is finished:
+     `[finished? n-byte n-chars]`.
+    
+     With that information, the user can continue writing if needed. On the JVM, the tuple contains a 4th
+     item which is a `CharBuffer` containing the rest of the unwritten string which can be passed in place
+     of the `string` argument.
+    
+     Growing views will automatically grow and only one call will be sufficient."))
 
 
 ;;;;;
