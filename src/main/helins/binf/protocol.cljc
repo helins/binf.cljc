@@ -12,11 +12,7 @@
 
   "Reading primitive values at an absolute position, without disturbing the current one."
   
-  (ra-buffer [view position n-byte]
-             [view position n-byte buffer]
-             [view position n-byte buffer offset]
-    "Reads `n-byte` bytes from an absolute `position` and returns them in a new buffer or in the
-     given one at the specified `offset` (or 0).")
+  (ra-buffer [view position n-byte buffer offset])
 
   (ra-u8 [view position]
     "Reads an unsigned 8-bit integer from an absolute `position`.")

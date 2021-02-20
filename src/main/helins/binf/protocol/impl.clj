@@ -24,27 +24,12 @@
 
   clojure.lang.Counted
 
-
     (count [_]
       (- (.limit byte-buffer)
          -offset))
 
 
   binf.protocol/IAbsoluteReader
-
-    (ra-buffer [this position n-byte]
-      (binf.protocol/ra-buffer this
-                               position
-                               n-byte
-                               (binf.buffer/alloc n-byte)
-                               0))
-
-    (ra-buffer [this position n-byte buffer]
-      (binf.protocol/ra-buffer this
-                               position
-                               n-byte
-                               buffer
-                               0))
 
     (ra-buffer [this position n-byte buffer offset]
       (binf.buffer/copy buffer

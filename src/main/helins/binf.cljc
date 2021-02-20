@@ -6,7 +6,7 @@
 
   {:author "Adam Helins"}
 
-  (:require #?(:cljs [helins.binf.buffer  :as binf.buffer])
+  (:require [helins.binf.buffer           :as binf.buffer]
             [helins.binf.protocol         :as binf.protocol]
             [helins.binf.protocol.impl]))
 
@@ -86,6 +86,87 @@
 
   (- (count view)
      (binf.protocol/position view)))
+
+
+;;;;;;;;;; Pointing to IAbsoluteReader
+
+
+(defn ra-buffer
+
+  "Reads `n-byte` bytes from an absolute `position` and returns them in a new buffer or in the
+   given `buffer` at the specified `offset` (or 0)."
+
+
+  ([this position n-byte]
+
+   (binf.protocol/ra-buffer this
+                            position
+                            n-byte
+                            (binf.buffer/alloc n-byte)
+                            0))
+
+
+  ([this position n-byte buffer]
+
+   (binf.protocol/ra-buffer this
+                            position
+                            n-byte
+                            buffer
+                            0))
+
+
+  ([view position n-byte buffer offset]
+
+   (binf.protocol/ra-buffer view
+                            position
+                            n-byte
+                            buffer
+                            offset)))
+
+
+
+
+
+
+
+#_(defprotocol IAbsoluteReader
+
+  "Reading primitive values at an absolute position, without disturbing the current one."
+  
+  (ra-u8 [view position]
+    "Reads an unsigned 8-bit integer from an absolute `position`.")
+
+  (ra-i8 [view position]
+    "Reads a signed 8-bit integer from an absolute `position`.")
+
+  (ra-u16 [view position]
+    "Reads an unsigned 16-bit integer from an absolute `position`.")
+
+  (ra-i16 [view position]
+    "Reads a signed 16-bit integer from an absolute `position`.")
+
+  (ra-u32 [view position]
+    "Reads an unsigned 32-bit integer from an absolute `position`.")
+
+  (ra-i32 [view position]
+    "Reads a signed 32-bit integer from an absolute `position`.")
+
+  (ra-i64 [view position]
+    "Reads a signed 64-bit integer from an absolute `position`.")
+
+  (ra-f32 [view position]
+    "Reads a 32-bit float at from absolute `position`.")
+
+  (ra-f64 [view position]
+    "Reads a 64-bit float at from absolute `position`.")
+  
+  (ra-string [view position n-byte]
+             [view decoder position n-byte]
+    "Reads a string consisting of `n-byte` bytes from an absolute `position`.
+    
+     A decoder may be provided (default is UTF-8).
+    
+     Cf. [[text-decoder]]"))
 
 
 ;;;;;
