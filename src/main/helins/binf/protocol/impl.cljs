@@ -406,12 +406,6 @@
 
   binf.protocol/IView
 
-
-    (garanteed? [_ n-byte]
-      (>= (- (.-byteLength dataview)
-             -position)
-          n-byte))
-
     (offset [_]
       (.-byteOffset dataview))
 

@@ -379,11 +379,6 @@
 
   binf.protocol/IView
 
-    (garanteed? [_ n-byte]
-      (>= (- (.limit byte-buffer)
-             (.position byte-buffer))
-          n-byte))
-
     (offset [_]
       -offset)
 

@@ -98,6 +98,12 @@
 
 
 
+
+
+)
+
+
+
 (defn remaining
 
   "Returns the number of bytes remaining until the end of the view."
@@ -105,12 +111,18 @@
   [view]
 
   (- (count view)
-     (position view)))
-
-)
+     (binf.protocol/position view)))
 
 
 
+(defn garanteed?
+
+  ""
+
+  [view n-byte]
+
+  (>= (remaining view)
+      n-byte))
 
 
 

@@ -198,11 +198,6 @@
 
   "Additional functions related to views."
 
-  (garanteed? [view n-byte]
-    "Is it possible to write at least `n-byte` bytes?
-    
-     Growing views always return true since they can grow automatically.")
-
   (offset [view]
     "Returns the offset in the original buffer this view starts from.
     
@@ -251,5 +246,3 @@
                      10
                      20))
      ```"))
-
-
