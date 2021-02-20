@@ -25,7 +25,7 @@
 
   (-> (js/BigInt.asIntN n-bit
                         big-int)
-      js/Number.)))
+      js/Number)))
 
 
 
@@ -37,7 +37,7 @@
 
   (-> (js/BigInt.asUintN n-bit
                          big-int)
-      js/Number.)))
+      js/Number)))
 
 
 ;;;;;;;;;;
@@ -77,7 +77,7 @@
 
   [b64]
 
-  #?(:clj  (u16 b64)
+  #?(:clj  (binf.int/u16 b64)
      :cljs (-ux 16
                 b64)))
 
@@ -97,7 +97,7 @@
 
   [b64]
 
-  #?(:clj  (u32 b64)
+  #?(:clj  (binf.int/u32 b64)
      :cljs (-ux 32
                 b64)))
 
@@ -111,12 +111,11 @@
 
   [env as-xint x]
 
-  (if (:ns env)
-    `(~as-xint 64
-               (js/BigInt ~(if (number? x)
-                             (str x)
-                             x)))
-    (unchecked-long x))))
+  (let [x-2 (unchecked-long x)]
+    (if (:ns env)
+      `(~as-xint 64
+                 (js/BigInt ~(str x-2)))
+      x-2))))
 
 
 
