@@ -179,7 +179,7 @@
      Also see [[offset]]."))
 
 
-(defprotocol IViewBuilder
+(defprotocol IViewable
 
   "Building a new view."
 

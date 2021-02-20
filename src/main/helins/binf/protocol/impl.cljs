@@ -392,7 +392,7 @@
       (.-buffer dataview))
 
 
-  binf.protocol/IViewBuilder
+  binf.protocol/IViewable
 
     (view [this]
       this)
@@ -446,7 +446,7 @@
 
 
 
-(extend-protocol binf.protocol/IViewBuilder
+(extend-protocol binf.protocol/IViewable
 
 
   js/ArrayBuffer

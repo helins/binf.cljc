@@ -63,6 +63,12 @@
 
 
 
+  (def v
+       (binf/view (binf.buffer/alloc 16)))
+
+  (binf/wa-b64 v
+               0
+               42)
 
 
 
