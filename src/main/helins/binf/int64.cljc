@@ -5,8 +5,8 @@
   {:author "Adam Helinski"}
 
   (:require [helins.binf.int :as binf.int])
-  #?(:cljs (:require-macros [helins.binf.int64 :refer [i64*
-                                                       u64*]]))
+  #?(:cljs (:require-macros [helins.binf.int64 :refer [i*
+                                                       u*]]))
   (:refer-clojure :exclude [bit-clear
                             bit-flip
                             bit-set
@@ -119,7 +119,7 @@
 
 
 
-#?(:clj (defmacro i64*
+#?(:clj (defmacro i*
 
   ""
 
@@ -131,7 +131,7 @@
 
 
 
-#?(:clj (defmacro u64*
+#?(:clj (defmacro u*
 
   ""
 
@@ -152,7 +152,7 @@
   [x n]
 
   (bit-and x
-           (bit-not (<< (u64* 1)
+           (bit-not (<< (u* 1)
                         n))))
 
 
@@ -164,7 +164,7 @@
   [x n]
 
   (bit-xor x
-           (<< (u64* 1)
+           (<< (u* 1)
                n)))
 
 
@@ -175,7 +175,7 @@
   [x n]
 
   (bit-or x
-          (<< (u64* 1)
+          (<< (u* 1)
               n)))
 
 
@@ -187,6 +187,6 @@
   [x n]
 
   (not (= (bit-and x
-                   (<< (u64* 1)
+                   (<< (u* 1)
                              n))
-          (u64* 0))))
+          (u* 0))))
