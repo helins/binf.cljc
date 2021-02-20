@@ -4,7 +4,8 @@
 
   {:author "Adam Helinski"}
 
-  (:require [helins.binf.int :as binf.int])
+  #?(:clj (:require [clojure.core]
+                    [helins.binf.int :as binf.int]))
   #?(:cljs (:require-macros [helins.binf.int64 :refer [i*
                                                        u*]]))
   (:refer-clojure :exclude [bit-clear
@@ -151,9 +152,11 @@
 
   [x n]
 
-  (bit-and x
-           (bit-not (<< (u* 1)
-                        n))))
+  #?(:clj  (clojure.core/bit-clear x
+                                   n)
+     :cljs (bit-and x
+                    (bit-not (<< (u* 1)
+                                 n)))))
 
 
 
@@ -163,9 +166,11 @@
 
   [x n]
 
-  (bit-xor x
-           (<< (u* 1)
-               n)))
+  #?(:clj  (clojure.core/bit-flip x
+                                  n)
+     :cljs (bit-xor x
+                    (<< (u* 1)
+                        n))))
 
 
 (defn bit-set
@@ -174,9 +179,11 @@
 
   [x n]
 
-  (bit-or x
-          (<< (u* 1)
-              n)))
+  #?(:clj  (clojure.core/bit-set x
+                                 n)
+     :cljs (bit-or x
+                   (<< (u* 1)
+                       n))))
 
 
 
@@ -186,7 +193,9 @@
 
   [x n]
 
-  (not (= (bit-and x
-                   (<< (u* 1)
-                             n))
-          (u* 0))))
+  #?(:clj  (clojure.core/bit-test x
+                                  n)
+     :cljs (not (= (bit-and x
+                            (<< (u* 1)
+                                      n))
+                   (u* 0)))))
