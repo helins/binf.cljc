@@ -1,4 +1,4 @@
-(ns helins.binf.base64-test
+(ns helins.binf.test.base64
 
   {:author "Adam Helins"}
 

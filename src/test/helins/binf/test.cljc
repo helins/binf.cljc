@@ -1,4 +1,4 @@
-(ns helins.binf-test
+(ns helins.binf.test
 
   {:author "Adam Helins"}
 
