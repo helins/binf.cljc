@@ -211,6 +211,9 @@
     (rr-i32 [_]
       (.getInt byte-buffer))
 
+    (rr-u64 [_]
+      (.getLong byte-buffer))
+
     (rr-i64 [_]
       (.getLong byte-buffer))
 

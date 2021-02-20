@@ -195,7 +195,7 @@
 
 (defn ra-u64
 
-  "Reads a signed 64-bit integer from an absolute `position`."
+  "Reads an unsigned 64-bit integer from an absolute `position`."
 
   [view position]
 
@@ -507,6 +507,16 @@
   [view]
 
   (binf.protocol/rr-i32 view))
+
+
+
+(defn rr-u64
+
+  "Reads an unsigned 64-bit integer from the current position."
+
+  [view]
+
+  (binf.protocol/rr-u64 view))
 
 
 

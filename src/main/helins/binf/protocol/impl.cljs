@@ -235,6 +235,14 @@
                  4))
         ret))
 
+    (rr-u64 [this]
+      (let [ret (binf.protocol/ra-u64 this
+                                      -position)]
+        (set! -position
+              (+ -position
+                 8))
+        ret))
+
     (rr-i64 [this]
       (let [ret (binf.protocol/ra-i64 this
                                       -position)]

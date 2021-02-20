@@ -91,6 +91,8 @@
 
   (rr-i32 [view])
 
+  (rr-u64 [view])
+
   (rr-i64 [view])
 
   (rr-f32 [view])
