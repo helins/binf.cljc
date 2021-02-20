@@ -125,40 +125,111 @@
 
 
 
+(defn ra-u8
+  
+  "Reads an unsigned 8-bit integer from an absolute `position`."
+
+  [view position]
+
+  (binf.protocol/ra-u8 view
+                       position))
+
+
+
+(defn ra-i8
+  
+  "Reads a signed 8-bit integer from an absolute `position`."
+
+  [view position]
+
+  (binf.protocol/ra-i8 view
+                       position))
+
+
+
+(defn ra-u16
+
+  "Reads an unsigned 16-bit integer from an absolute `position`."
+
+  [view position]
+
+  (binf.protocol/ra-u16 view
+                        position))
+
+
+
+(defn ra-i16
+
+  "Reads a signed 16-bit integer from an absolute `position`."
+
+  [view position]
+
+  (binf.protocol/ra-i16 view
+                        position))
+
+
+
+(defn ra-u32
+
+  "Reads an unsigned 32-bit integer from an absolute `position`."
+
+  [view position]
+
+  (binf.protocol/ra-u32 view
+                        position))
+
+
+
+(defn ra-i32
+
+  "Reads a signed 32-bit integer from an absolute `position`."
+
+  [view position]
+
+  (binf.protocol/ra-i32 view
+                        position))
+
+
+
+(defn ra-i64
+
+  "Reads a signed 64-bit integer from an absolute `position`."
+
+  [view position]
+
+  (binf.protocol/ra-i64 view
+                        position))
+
+
+
+(defn ra-f32
+
+  "Reads a 32-bit float at from absolute `position`."
+
+  [view position]
+
+  (binf.protocol/ra-f32 view
+                        position))
+
+
+
+(defn ra-f64
+
+  "Reads a 64-bit float at from absolute `position`."
+
+  [view position]
+
+  (binf.protocol/ra-f64 view
+                        position))
+
 
 
 
 
 #_(defprotocol IAbsoluteReader
 
-  "Reading primitive values at an absolute position, without disturbing the current one."
   
-  (ra-u8 [view position]
-    "Reads an unsigned 8-bit integer from an absolute `position`.")
 
-  (ra-i8 [view position]
-    "Reads a signed 8-bit integer from an absolute `position`.")
-
-  (ra-u16 [view position]
-    "Reads an unsigned 16-bit integer from an absolute `position`.")
-
-  (ra-i16 [view position]
-    "Reads a signed 16-bit integer from an absolute `position`.")
-
-  (ra-u32 [view position]
-    "Reads an unsigned 32-bit integer from an absolute `position`.")
-
-  (ra-i32 [view position]
-    "Reads a signed 32-bit integer from an absolute `position`.")
-
-  (ra-i64 [view position]
-    "Reads a signed 64-bit integer from an absolute `position`.")
-
-  (ra-f32 [view position]
-    "Reads a 32-bit float at from absolute `position`.")
-
-  (ra-f64 [view position]
-    "Reads a 64-bit float at from absolute `position`.")
   
   (ra-string [view position n-byte]
              [view decoder position n-byte]

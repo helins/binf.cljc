@@ -14,32 +14,23 @@
   
   (ra-buffer [view position n-byte buffer offset])
 
-  (ra-u8 [view position]
-    "Reads an unsigned 8-bit integer from an absolute `position`.")
+  (ra-u8 [view position])
 
-  (ra-i8 [view position]
-    "Reads a signed 8-bit integer from an absolute `position`.")
+  (ra-i8 [view position])
 
-  (ra-u16 [view position]
-    "Reads an unsigned 16-bit integer from an absolute `position`.")
+  (ra-u16 [view position])
 
-  (ra-i16 [view position]
-    "Reads a signed 16-bit integer from an absolute `position`.")
+  (ra-i16 [view position])
 
-  (ra-u32 [view position]
-    "Reads an unsigned 32-bit integer from an absolute `position`.")
+  (ra-u32 [view position])
 
-  (ra-i32 [view position]
-    "Reads a signed 32-bit integer from an absolute `position`.")
+  (ra-i32 [view position])
 
-  (ra-i64 [view position]
-    "Reads a signed 64-bit integer from an absolute `position`.")
+  (ra-i64 [view position])
 
-  (ra-f32 [view position]
-    "Reads a 32-bit float at from absolute `position`.")
+  (ra-f32 [view position])
 
-  (ra-f64 [view position]
-    "Reads a 64-bit float at from absolute `position`.")
+  (ra-f64 [view position])
   
   (ra-string [view position n-byte]
              [view decoder position n-byte]
