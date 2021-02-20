@@ -79,12 +79,6 @@
                    position
                    little-endian?))
 
-    (ra-string [this position n-byte]
-      (binf.protocol/ra-string this
-                               nil
-                               position
-                               n-byte))
-
     (ra-string [_this decoder position n-byte]
       (.decode (or decoder 
                    binf.string/decoder-utf-8)

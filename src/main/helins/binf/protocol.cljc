@@ -32,13 +32,8 @@
 
   (ra-f64 [view position])
   
-  (ra-string [view position n-byte]
-             [view decoder position n-byte]
-    "Reads a string consisting of `n-byte` bytes from an absolute `position`.
-    
-     A decoder may be provided (default is UTF-8).
-    
-     Cf. [[text-decoder]]"))
+  (ra-string [view decoder position n-byte]))
+
 
 
 (defprotocol IAbsoluteWriter

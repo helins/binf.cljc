@@ -88,7 +88,10 @@
      (binf.protocol/position view)))
 
 
-;;;;;;;;;; Pointing to IAbsoluteReader
+;;;;;;;;;; Pointing to protocol implementations
+
+
+;;;;; IAbsoluteReader
 
 
 (defn ra-buffer
@@ -224,20 +227,32 @@
 
 
 
+(defn ra-string
 
-
-#_(defprotocol IAbsoluteReader
-
+  "Reads a string consisting of `n-byte` bytes from an absolute `position`.
   
-
+   A decoder may be provided (default is UTF-8).
   
-  (ra-string [view position n-byte]
-             [view decoder position n-byte]
-    "Reads a string consisting of `n-byte` bytes from an absolute `position`.
-    
-     A decoder may be provided (default is UTF-8).
-    
-     Cf. [[text-decoder]]"))
+   Cf. [[text-decoder]]"
+
+
+  ([view position n-byte]
+
+   (binf.protocol/ra-string view
+                            nil
+                            position
+                            n-byte))
+
+
+  ([view decoder position n-byte]
+
+   (binf.protocol/ra-string view
+                            decoder
+                            position
+                            n-byte)))
+
+
+
 
 
 ;;;;;

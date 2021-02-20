@@ -86,12 +86,6 @@
                   (+ -offset
                      position)))
 
-    (ra-string [this position n-byte]
-      (binf.protocol/ra-string this
-                               nil
-                               position
-                               n-byte))
-
     (ra-string [_this decoder position n-byte]
       (String. (.array byte-buffer)
                (int (+ -offset
