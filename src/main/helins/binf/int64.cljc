@@ -201,7 +201,7 @@
                    (u* 0)))))
 
 
-;;;;;;;;;; Unsigned logic and math
+;;;;;;;;;; Unsigned logic tests
 
 
 (defn u=
@@ -268,3 +268,31 @@
                0)
      :cljs (>= u64-1
                u64-2)))
+
+
+;;;;;;;;;; Unsigned maths
+
+
+(defn udiv
+
+  ""
+
+  [u64-1 u64-2]
+
+  #?(:clj  (Long/divideUnsigned u64-1
+                                u64-2)
+     :cljs (/ u64-1
+              u64-2)))
+
+
+
+(defn urem
+
+  ""
+
+  [u64-1 u64-2]
+
+  #?(:clj  (Long/remainderUnsigned u64-1
+                                   u64-2)
+     :cljs (js-mod u64-1
+                   u64-2)))

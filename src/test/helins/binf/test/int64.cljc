@@ -71,7 +71,7 @@
                                      (binf.int64/u* 1)))))
 
 
-;;;;;;;;;; Unsigned logic and math
+;;;;;;;;;; Unsigned logic tests
 
 
 (def u64-max
@@ -143,3 +143,21 @@
 
   (t/is (binf.int64/u>= u64-max
                         u64-max)))
+
+
+;;;;;;;;;; Unsigned maths
+
+
+(t/deftest udiv
+
+  (t/is (= (binf.int64/u* 0x7fffffffffffffff)
+           (binf.int64/udiv u64-max
+                            (binf.int64/u* 2)))))
+
+
+
+(t/deftest urem
+
+  (t/is (= (binf.int64/u* 1)
+           (binf.int64/urem (binf.int64/u* 10)
+                            (binf.int64/u* 3)))))
