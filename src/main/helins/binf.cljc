@@ -417,6 +417,19 @@
                             endianess))
 
 
+;;;;; IGrow
+
+
+(defn grow
+
+  ""
+
+  [view n-additional-byte]
+
+  (binf.protocol/grow view
+                      n-additional-byte))
+
+
 ;;;;; IRelativeReader
 
 

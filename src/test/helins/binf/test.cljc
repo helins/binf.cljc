@@ -457,7 +457,6 @@
 
 
 
-
 (t/deftest a-string
   
   (t/is (false? (first (binf/wa-string (binf/view (binf.buffer/alloc 10))
@@ -476,3 +475,17 @@
         "Not enough bytes to write everything")
 
   (-r-string #(binf/view (binf.buffer/alloc 1024))))
+
+
+;;;;;;;;;; Reallocating views
+
+
+(t/deftest grow
+
+  (t/is (= [1 2 42 0 0 0]
+           (seq (binf/backing-buffer (binf/grow (-> (binf.buffer/alloc 4)
+                                                    binf/view
+                                                    (binf/wr-b8 1)
+                                                    (binf/wr-b8 2)
+                                                    (binf/wr-b8 42))
+                                                2))))))

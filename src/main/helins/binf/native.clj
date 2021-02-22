@@ -48,7 +48,19 @@
   binf.protocol/-IByteBuffer
 
     (-array-index [_this position]
-      position))
+      position)
+
+
+  binf.protocol/IGrow
+
+    (grow [this n-additional-byte]
+      (.position this
+                 0)
+      (let [bb-new (ByteBuffer/allocateDirect (+ (binf.protocol/limit this)
+                                                 n-additional-byte))]
+        (.put bb-new
+              this)
+        bb-new)))
 
 
 ;;;;;;;;;; Access to the Unsafe API
@@ -324,6 +336,7 @@
   (.putDouble -unsafe
               ptr
               f64))
+
 
 ;;;;;;;;;; Reading and writing pointers
 

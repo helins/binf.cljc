@@ -195,6 +195,18 @@
       this)
 
 
+  binf.protocol/IGrow
+
+    (grow [this n-additional-byte]
+      (.position this
+                 0)
+      (let [bb-new (ByteBuffer/allocate (+ (binf.protocol/limit this)
+                                           n-additional-byte))]
+        (.put bb-new
+              this)
+        bb-new))
+
+
   binf.protocol/IRelativeReader
 
     (rr-buffer [this n-byte buffer offset]

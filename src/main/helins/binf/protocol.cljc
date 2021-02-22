@@ -82,6 +82,14 @@
 
 
 
+(defprotocol IGrow
+
+  ""
+
+  (grow [this n-additional-byte]))
+
+
+
 (defprotocol IRelativeReader
 
   "Reading primitive values from the current position, advancing it as needed. For instance,
