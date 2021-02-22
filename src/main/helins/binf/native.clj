@@ -8,7 +8,12 @@
   (:import (java.nio Buffer
                      ByteBuffer
                      ByteOrder
-                     DirectByteBuffer)))
+                     DirectByteBuffer)
+           sun.misc.Unsafe))
+
+
+(set! *warn-on-reflection*
+      true)
 
 
 ;;;;;;;;;; Reflection
@@ -45,7 +50,18 @@
       position))
 
 
-;;;;;;;;;; Access to native memory
+;;;;;;;;;; Access to the Unsafe API
+
+
+(def ^:no-doc ^Unsafe -unsafe
+
+  (.get (doto (.getDeclaredField Unsafe
+                                 "theUnsafe")
+          (.setAccessible true))
+        nil))
+
+
+;;;;;;;;;;  Creating native views
 
 
 (defn view
@@ -59,22 +75,46 @@
   (ByteBuffer/allocateDirect n-byte))
 
 
-;;;;;
+;;;;;;;;;; Handling raw pointers
 
 
-(defn native?
+(defn alloc
 
   ""
 
-  ;; Also returns true on mmap'ed byte buffers
+  [n-byte]
 
-  [^ByteBuffer view]
-
-  (.isDirect view))
-
+  (.allocateMemory -unsafe
+                   n-byte))
 
 
-(defn pointer
+(defn free
+
+  ""
+
+  [pointer]
+
+  (.freeMemory -unsafe
+               pointer)
+  nil)
+
+
+
+(defn realloc
+
+  ""
+
+  [pointer n-byte]
+
+  (.reallocateMemory -unsafe
+                     pointer
+                     n-byte))
+
+
+;;;;; Translation between views and pointer
+
+
+(defn view->pointer
 
   ""
 
@@ -89,7 +129,7 @@
 
   ""
 
-  [pointer n-byte]
+  [pointer ^long n-byte]
 
   (let [view (-> (view 0)
                  (.order (ByteOrder/nativeOrder)))]
@@ -99,6 +139,8 @@
     (.setInt -field-capacity
              view
              n-byte)
+    (.limit view
+            n-byte)
     view))
 
 
@@ -108,11 +150,13 @@
 (comment
 
   (require '[helins.binf :as binf])
-  (def v (view 5))
 
-  (-> v
-      (.position 1)
-      .slice
-      pointer)
+
+  (def pt (alloc 10))
+  (def v (pointer->view pt 50))
+
+  (binf/wa-b8 v
+              20
+              42)
 
   )
