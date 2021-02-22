@@ -41,10 +41,10 @@
 
 (t/deftest copy-buffer
 
-  (t/is (= (seq (binf/to-buffer (make-view)))
-           (seq (binf.buffer/copy (binf/to-buffer (make-view))))
-           #?(:cljs (seq (binf/to-buffer (make-view binf.buffer/alloc-shared))))
-           #?(:cljs (seq (binf.buffer/copy (binf/to-buffer (make-view binf.buffer/alloc-shared))))))
+  (t/is (= (seq (binf/backing-buffer (make-view)))
+           (seq (binf.buffer/copy (binf/backing-buffer (make-view))))
+           #?(:cljs (seq (binf/backing-buffer (make-view binf.buffer/alloc-shared))))
+           #?(:cljs (seq (binf.buffer/copy (binf/backing-buffer (make-view binf.buffer/alloc-shared))))))
         "Cloning")
 
   (t/is (= (concat (repeat 5
@@ -53,10 +53,10 @@
                            1))
            (seq (binf.buffer/copy (binf.buffer/alloc 10)
                                   5
-                                  (binf/to-buffer (make-view))))
+                                  (binf/backing-buffer (make-view))))
            #?(:cljs (seq (binf.buffer/copy (binf.buffer/alloc-shared 10)
                                            5
-                                           (binf/to-buffer (make-view binf.buffer/alloc-shared))))))
+                                           (binf/backing-buffer (make-view binf.buffer/alloc-shared))))))
         "Without offset nor length")
 
   (t/is (= (concat (repeat 5
@@ -67,11 +67,11 @@
                            0))
            (seq (binf.buffer/copy (binf.buffer/alloc 10)
                                   5
-                                  (binf/to-buffer (make-view))
+                                  (binf/backing-buffer (make-view))
                                   2))
            #?(:cljs (seq (binf.buffer/copy (binf.buffer/alloc-shared 10)
                                            5
-                                           (binf/to-buffer (make-view binf.buffer/alloc-shared))
+                                           (binf/backing-buffer (make-view binf.buffer/alloc-shared))
                                            2))))
         "With offset")
 
@@ -79,12 +79,12 @@
   (t/is (= copy-target
            (seq (binf.buffer/copy (binf.buffer/alloc 10)
                                   5
-                                  (binf/to-buffer (make-view))
+                                  (binf/backing-buffer (make-view))
                                   2
                                   2))
            #?(:cljs (seq (binf.buffer/copy (binf.buffer/alloc-shared 10)
                                            5
-                                           (binf/to-buffer (make-view binf.buffer/alloc-shared))
+                                           (binf/backing-buffer (make-view binf.buffer/alloc-shared))
                                            2
                                            2))))
         "With offset and length"))

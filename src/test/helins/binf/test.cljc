@@ -45,8 +45,8 @@
   ;; Without offset nor size
   
   (t/is (= 0
-           (binf/offset view)
-           #?(:cljs (binf/offset view-shared))))
+           (binf/buffer-offset view)
+           #?(:cljs (binf/buffer-offset view-shared))))
   (t/is (= 0
            (binf/position view)
            #?(:cljs (binf/position view-shared))))
@@ -64,8 +64,8 @@
         #?@(:cljs [v-shared (binf/view (binf.buffer/alloc-shared size)
                                        offset)])]
     (t/is (= offset
-             (binf/offset v)
-             #?(:cljs (binf/offset v-shared))))
+             (binf/buffer-offset v)
+             #?(:cljs (binf/buffer-offset v-shared))))
     (t/is (= 0
              (binf/position v)
              #?(:cljs (binf/position v-shared))))
@@ -87,8 +87,8 @@
                                        offset
                                        size-2)])]
     (t/is (= offset
-             (binf/offset v)
-             #?(:cljs (binf/offset v-shared))))
+             (binf/buffer-offset v)
+             #?(:cljs (binf/buffer-offset v-shared))))
     (t/is (= 0
              (binf/position v)
              #?(:cljs (binf/position v-shared))))
@@ -107,7 +107,7 @@
   
   (let [v (binf/view view)]
     (t/is (= 0
-             (binf/offset v)))
+             (binf/buffer-offset v)))
     (t/is (= 0
              (binf/position v)))
     (t/is (= size
@@ -120,7 +120,7 @@
   (let [v (binf/view view
                      offset)]
     (t/is (= offset
-             (binf/offset v)))
+             (binf/buffer-offset v)))
     (t/is (= 0
              (binf/position v)))
     (t/is (= (- size
@@ -136,7 +136,7 @@
                      offset
                      size-2)]
     (t/is (= offset
-             (binf/offset v)))
+             (binf/buffer-offset v)))
     (t/is (= 0
              (binf/position v)))
     (t/is (= size-2
@@ -303,11 +303,11 @@
   (t/is (= (take 7
                  binf.test.buffer/copy-target)
            (take 7
-                 (seq (binf/to-buffer (binf/wa-buffer view
-                                                      5
-                                                      (binf/to-buffer (binf.test.buffer/make-view))
-                                                      2
-                                                      2)))))
+                 (seq (binf/backing-buffer (binf/wa-buffer view
+                                                           5
+                                                           (binf/backing-buffer (binf.test.buffer/make-view))
+                                                           2
+                                                           2)))))
         "Absolute writing")
 
   (t/is (= (take 5
@@ -334,10 +334,10 @@
   (t/is (= (take 7
                  binf.test.buffer/copy-target)
            (take 7
-                 (seq (binf/to-buffer (binf/wr-buffer view
-                                                      (binf/to-buffer (binf.test.buffer/make-view))
-                                                      2
-                                                      2)))))
+                 (seq (binf/backing-buffer (binf/wr-buffer view
+                                                           (binf/backing-buffer (binf.test.buffer/make-view))
+                                                           2
+                                                           2)))))
         "Relative writing")
 
   (t/is (= (binf/position view)

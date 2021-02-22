@@ -71,7 +71,7 @@
     (ra-buffer [this position n-byte buffer offset]
       (binf.buffer/copy buffer
                         offset
-                        (binf.protocol/to-buffer this)
+                        (binf.protocol/backing-buffer this)
                         (+ (.-byteOffset this)
                            position)
                         n-byte))
@@ -137,7 +137,7 @@
   binf.protocol/IAbsoluteWriter
 
     (wa-buffer [this position buffer offset n-byte]
-      (binf.buffer/copy (binf.protocol/to-buffer this)
+      (binf.buffer/copy (binf.protocol/backing-buffer this)
                         (+ (.-byteOffset this)
                            position)
                         buffer
@@ -200,6 +200,15 @@
             read-UTF-16)
          (.-written res)
          read-UTF-16]))
+
+
+  binf.protocol/IBackingBuffer
+
+    (backing-buffer [this]
+      (.-buffer this))
+
+    (buffer-offset [this]
+      (.-byteOffset this))
 
 
   binf.protocol/IEndianess
@@ -450,9 +459,6 @@
     (limit [this]
       (.-byteLength this))
 
-    (offset [this]
-      (.-byteOffset this))
-
     (position [this]
       (goog.object/get this
                        -k-position))
@@ -470,9 +476,6 @@
                                            -k-position)
                           n-byte))
       this)
-
-    (to-buffer [this]
-      (.-buffer this))
 
 
   binf.protocol/IViewable

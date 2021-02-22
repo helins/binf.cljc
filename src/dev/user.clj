@@ -2,7 +2,10 @@
 
   "For daydreaming at the REPL."
 
-  (:require [kaocha.repl]
+  (:require [clojure.reflect]
+            [clojure.pprint]
+            [kaocha.repl]
+            [helins.binf       :as binf]
             [helins.binf.dev]))
 
 
@@ -17,5 +20,14 @@
 
 
   (kaocha.repl/run :jvm)
+
+
+  (->> (binf/view-native 42)
+       clojure.reflect/reflect
+       :members
+       (filter #(contains? (:flags %)
+                           :private))
+       clojure.pprint/pprint)
+
 
   )

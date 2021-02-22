@@ -9,7 +9,8 @@
   (:require [helins.binf.buffer         :as binf.buffer]
             [helins.binf.protocol       :as binf.protocol]
             [helins.binf.protocol.impl]
-            [helins.binf.string         :as binf.string]))
+            [helins.binf.string         :as binf.string])
+  #?(:clj (:import java.nio.ByteBuffer)))
 
 
 (declare remaining)
@@ -371,6 +372,28 @@
                            string))
 
 
+;;;;; IBackingBuffer
+
+
+(defn backing-buffer
+
+  ""
+
+  [view]
+
+  (binf.protocol/backing-buffer view))
+
+
+
+(defn buffer-offset
+
+  ""
+
+  [view]
+
+  (binf.protocol/buffer-offset view))
+
+
 ;;;;; IEndianess
 
 
@@ -676,19 +699,6 @@
 
 
 
-(defn offset
-  
-  "Returns the offset in the original buffer this view starts from.
-  
-   Views can be counted using Clojure's `count` which expresses the number of bytes wrapped by the view
-   starting from the offset."
-
-  [view]
-
-  (binf.protocol/offset view))
-
-
-
 (defn position
 
   "Returns the current position."
@@ -718,18 +728,6 @@
 
   (binf.protocol/skip view
                       n-byte))
-
-
-
-(defn to-buffer
-  
-  "Returns the buffer wrapped by the view.
-  
-   Also see [[offset]]."
-
-  [view]
-
-  (binf.protocol/to-buffer view))
 
 
 ;;;;; IViewable

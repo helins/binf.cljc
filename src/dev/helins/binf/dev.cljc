@@ -9,6 +9,7 @@
             [helins.binf.float         :as binf.float]
             [helins.binf.int           :as binf.int]
             [helins.binf.int64         :as binf.int64]
+            [helins.binf.native        :as binf.native]
             [helins.binf.protocol      :as binf.protocol]
             [helins.binf.protocol.impl :as binf.protocol.impl]
             [helins.binf.string        :as binf.string]))
@@ -20,13 +21,13 @@
 (comment
 
 
-  (.grow js/mem
-         1)
+ ; (.grow js/mem
+ ;        1)
 
-  (.-byteLength (.-buffer js/mem))
+ ; (.-byteLength (.-buffer js/mem))
 
-  (set! js/mem
-        (js/WebAssembly.Memory. #js {"initial" 1}))
+ ; (set! js/mem
+ ;       (js/WebAssembly.Memory. #js {"initial" 1}))
 
 
   (set! js/v

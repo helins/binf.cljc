@@ -5,7 +5,7 @@
   {:author "Adam Helinski"})
 
 
-;;;;;;;;;;
+;;;;;;;;;; Public
 
 
 (defprotocol IAbsoluteReader
@@ -59,6 +59,16 @@
   (wa-f64 [view position floating])
   
   (wa-string [view position string]))
+
+
+
+(defprotocol IBackingBuffer
+
+  ""
+
+  (backing-buffer [this])
+
+  (buffer-offset [this]))
 
 
 
@@ -134,15 +144,11 @@
 
   (limit [view])
 
-  (offset [view])
-
   (position [view])
 
   (seek [view position])
   
-  (skip [view n-byte])
-
-  (to-buffer [view]))
+  (skip [view n-byte]))
 
 
 
@@ -153,3 +159,17 @@
   (view [viewable]
         [viewable offset]
         [viewable offset n-byte]))
+
+
+;;;;;;;;;; Hidden
+
+
+#?(:clj (defprotocol ^:no-doc -IByteBuffer
+
+  ;; Direct ByteBuffer do not implement `.arrayOffset`.
+  ;; 
+  ;; Implementing this protocol in both direct and regular ByteBuffers allows for maximum code reuse.
+ 
+  (-array-index [this position]
+    ;; Given a position in a view (ie. ByteBuffer), returns the index in the backing array.
+    )))

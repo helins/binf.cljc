@@ -22,47 +22,57 @@
 (extend-type ByteBuffer
 
 
+  binf.protocol/-IByteBuffer
+
+    (-array-index [this position]
+      (+ (.arrayOffset this)
+         position))
+
+
   binf.protocol/IAbsoluteReader
 
     (ra-buffer [this position n-byte buffer offset]
-      (binf.buffer/copy buffer
-                        offset
-                        (binf.protocol/to-buffer this)
-                        (+ (.arrayOffset this)
-                           position)
-                        n-byte))
+      (let [position-cache (.position this)]
+        (.position this
+                   position)
+        (.get this
+              ^bytes buffer
+              offset
+              n-byte)
+        (.position this
+                   position-cache))
+      buffer)
 
     (ra-u8 [this position]
       (binf.int/u8 (.get this
-                         (int (+ (.arrayOffset this)
-                                  position)))))
+                         (int (binf.protocol/-array-index this
+                                                          position)))))
 
     (ra-i8 [this position]
       (.get this
-            (int (+ (.arrayOffset this)
-                    position))))
-
+            (int (binf.protocol/-array-index this
+                                             position))))
 
     (ra-u16 [this position]
       (binf.int/u16 (.getShort this
-                               (+ (.arrayOffset this)
-                                  position))))
+                               (binf.protocol/-array-index this
+                                                           position))))
 
     (ra-i16 [this position]
       (.getShort this
-                 (+ (.arrayOffset this)
-                    position)))
+                 (binf.protocol/-array-index this
+                                             position)))
 
 
     (ra-u32 [this position]
       (binf.int/u32 (.getInt this
-                             (+ (.arrayOffset this)
-                                position))))
+                             (binf.protocol/-array-index this
+                                                         position))))
 
     (ra-i32 [this position]
       (.getInt this
-               (+ (.arrayOffset this)
-                  position)))
+               (binf.protocol/-array-index this
+                                           position)))
 
     (ra-u64 [this position]
       (binf.protocol/ra-i64 this
@@ -70,23 +80,23 @@
 
     (ra-i64 [this position]
       (.getLong this
-                (+ (.arrayOffset this)
-                   position)))
+                (binf.protocol/-array-index this
+                                            position)))
 
     (ra-f32 [this position]
       (.getFloat this
-                 (+ (.arrayOffset this)
-                    position)))
+                 (binf.protocol/-array-index this
+                                             position)))
 
     (ra-f64 [this position]
       (.getDouble this
-                  (+ (.arrayOffset this)
-                     position)))
+                  (binf.protocol/-array-index this
+                                              position)))
 
     (ra-string [this decoder position n-byte]
       (String. (.array this)
-               (int (+ (.arrayOffset this)
-                       position))
+               (int (binf.protocol/-array-index this
+                                                position))
                ^long n-byte
                ^Charset decoder))
 
@@ -94,7 +104,7 @@
   binf.protocol/IAbsoluteWriter
 
     (wa-buffer [this position buffer offset n-byte]
-      (let [position-bb (.position this)]
+      (let [position-cache (.position this)]
         (.position this
                    position)
         (.put this
@@ -102,62 +112,71 @@
               offset
               n-byte)
         (.position this
-                   position-bb))
+                   position-cache))
       this)
 
     (wa-b8 [this position integer]
       (.put this
-            (+ (.arrayOffset this)
-               position)
+            (binf.protocol/-array-index this
+                                        position)
             (unchecked-byte integer))
       this)
 
     (wa-b16 [this position integer]
       (.putShort this
-                 (+ (.arrayOffset this)
-                    position)
+                 (binf.protocol/-array-index this
+                                             position)
                  (unchecked-short integer))
       this)
 
     (wa-b32 [this position integer]
       (.putInt this
-               (+ (.arrayOffset this)
-                  position)
+               (binf.protocol/-array-index this
+                                           position)
                (unchecked-int integer))
       this)
 
     (wa-b64 [this position integer]
       (.putLong this
-                (+ (.arrayOffset this)
-                   position)
+                (binf.protocol/-array-index this
+                                            position)
                 integer)
       this)
 
     (wa-f32 [this position floating]
       (.putFloat this
-                 (+ (.arrayOffset this)
-                    position)
+                 (binf.protocol/-array-index this
+                                             position)
                  floating)
       this)
 
     (wa-f64 [this position floating]
       (.putDouble this
-                  (+ (.arrayOffset this)
-                     position)
+                  (binf.protocol/-array-index this
+                                              position)
                   floating)
       this)
 
     (wa-string [this position string]
       (let [saved-position (.position this)]
         (.position this
-                   (+ (.arrayOffset this)
-                      position))
+                   (binf.protocol/-array-index this
+                                               position))
         (let [res (binf.protocol/wr-string this
                                            string)]
           (.position this
                      saved-position)
           res)))
     
+
+  binf.protocol/IBackingBuffer
+
+    (backing-buffer [this]
+      (.array this))
+
+    (buffer-offset [this]
+      (.arrayOffset this))
+
 
   binf.protocol/IEndianess
 
@@ -179,14 +198,11 @@
   binf.protocol/IRelativeReader
 
     (rr-buffer [this n-byte buffer offset]
-      (let [b (binf.buffer/copy buffer
-                                offset
-                                (binf.protocol/to-buffer this)
-                                (.position this)
-                                n-byte)]
-        (binf.protocol/skip this
-              n-byte)
-        b))
+      (.get this
+            ^bytes buffer
+            offset
+            n-byte)
+      buffer)
 
     (rr-u8 [this]
       (binf.int/u8 (.get this)))
@@ -289,8 +305,8 @@
           CoderResult/OVERFLOW  [false n-byte n-chars char-buffer]
           (throw (ex-info (str "Unable to write string: "
                                string)
-                          {::error  :string-encoding
-                           ::string string})))))
+                          {:binf/error  :string-encoding
+                           :binf/string string})))))
 
         ;; It seems the encoder does not need to be flushed when writing UTF-8
         ;;
@@ -312,16 +328,13 @@
     (limit [this]
       (.limit this))
 
-    (offset [this]
-      (.arrayOffset this))
-
     (position [this]
       (.position this))
 
     (seek [this position]
       (.position this
-                 (+ (.arrayOffset this)
-                    position))
+                 (binf.protocol/-array-index this
+                                             position))
       this)
 
     (skip [this n-byte]
@@ -329,9 +342,6 @@
                  (+ (.position this)
                     n-byte))
       this)
-
-    (to-buffer [this]
-      (.array this))
 
 
   binf.protocol/IViewable
