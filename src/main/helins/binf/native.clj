@@ -13,7 +13,7 @@
            sun.misc.Unsafe))
 
 
-(set! *warn-on-reflection*
+#_(set! *warn-on-reflection*
       true)
 
 
@@ -368,7 +368,7 @@
 
   (.putAddress -unsafe
                ptr
-               ptr-value))
+               (unchecked-long ptr-value)))
 
 
 
