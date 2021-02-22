@@ -42,18 +42,7 @@
   binf.protocol/-IByteBuffer
 
     (-array-index [_this position]
-      position)
-
-
-  ;binf.protocol/IPosition
-
-  ;  (offset [this]
-  ;    nil)
-
-
-  ;  (to-buffer [this]
-  ;    nil)
-    )
+      position))
 
 
 ;;;;;;;;;; Access to native memory
@@ -68,3 +57,62 @@
   [n-byte]
 
   (ByteBuffer/allocateDirect n-byte))
+
+
+;;;;;
+
+
+(defn native?
+
+  ""
+
+  ;; Also returns true on mmap'ed byte buffers
+
+  [^ByteBuffer view]
+
+  (.isDirect view))
+
+
+
+(defn pointer
+
+  ""
+
+  [view]
+
+  (.getLong -field-address
+            view))
+
+
+
+(defn pointer->view
+
+  ""
+
+  [pointer n-byte]
+
+  (let [view (-> (view 0)
+                 (.order (ByteOrder/nativeOrder)))]
+    (.setLong -field-address
+              view
+              pointer)
+    (.setInt -field-capacity
+             view
+             n-byte)
+    view))
+
+
+
+
+
+(comment
+
+  (require '[helins.binf :as binf])
+  (def v (view 5))
+
+  (-> v
+      (.position 1)
+      .slice
+      pointer)
+
+  )
