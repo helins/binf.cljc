@@ -43,12 +43,18 @@
 
 
 
-(def encoder-utf-8
+#?(:clj (def ^Charset encoder-utf-8
 
   ""
 
-  #?(:clj  StandardCharsets/UTF_8
-     :cljs (js/TextEncoder.)))
+  StandardCharsets/UTF_8))
+
+
+#?(:cljs (def encoder-utf-8
+
+  ""
+
+  (js/TextEncoder.)))
 
 
 ;;;;;;;;; Translation between strings and buffers
@@ -82,6 +88,6 @@
   [string]
 
   #?(:clj  (.getBytes ^String string
-                      encoder-utf-8)
+                      ^Charset encoder-utf-8)
      :cljs (.-buffer (.encode encoder-utf-8
                               string))))

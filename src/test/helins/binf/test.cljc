@@ -11,6 +11,10 @@
             [helins.binf.test.string :as binf.test.string]))
 
 
+#?(:clj (set! *warn-on-reflection*
+              true))
+
+
 ;;;;;;;;;; Creating views
 
 

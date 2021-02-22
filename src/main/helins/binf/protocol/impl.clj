@@ -12,7 +12,8 @@
    (:import (java.nio ByteBuffer
                       ByteOrder
                       CharBuffer)
-            (java.nio.charset CoderResult)))
+            (java.nio.charset Charset
+                              CoderResult)))
 
 
 ;;;;;;;;;; Implenting protocols
@@ -87,7 +88,7 @@
                (int (+ (.arrayOffset this)
                        position))
                ^long n-byte
-               decoder))
+               ^Charset decoder))
 
 
   binf.protocol/IAbsoluteWriter
@@ -218,7 +219,7 @@
       (let [string (String. (.array this)
                             (.position this)
                             ^long n-byte
-                            decoder)]
+                            ^Charset decoder)]
         (binf.protocol/skip this
                             n-byte)
         string))
