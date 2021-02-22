@@ -3,7 +3,8 @@
   ""
 
   {:author "Adam Helinski"}
-  #?(:cljs (:require [helins.binf.buffer :as binf.buffer]))
+  #?(:cljs (:require [goog.object]
+                     [helins.binf.buffer :as binf.buffer]))
   #?(:clj (:import java.nio.ByteOrder)))
 
 
@@ -60,6 +61,42 @@
 
 
 
+(defn b16
+
+  ""
+
+  [b16]
+
+  #?(:clj  (Short/reverseBytes (unchecked-short b16))
+     :cljs (do
+             (.setUint16 -data-view
+                         0
+                         b16
+                         false)
+             (.getUint16 -data-view
+                         0
+                         true))))
+
+
+
+(defn b32
+
+  ""
+
+  [b32]
+
+  #?(:clj  (Integer/reverseBytes (unchecked-int b32))
+     :cljs (do
+             (.setUint32 -data-view
+                         0
+                         b32
+                         false)
+             (.getUint32 -data-view
+                          0
+                          true))))
+
+
+
 (defn b64
 
   ""
@@ -72,42 +109,6 @@
                             0
                             b64
                             false)
-             (.getBitUint64 -data-view
+             (.getBigUint64 -data-view
                             0
                             true))))
-
-
-
-(defn b32
-
-  ""
-
-  [b32]
-
-  #?(:clj  (Integer/reverseBytes b32)
-     :cljs (do
-             (.setUint32 -data-view
-                         0
-                         b32
-                         false)
-             (.getUint32 -data-view
-                          0
-                          true))))
-
-
-
-(defn b16
-
-  ""
-
-  [b16]
-
-  #?(:clj  (Integer/reverseBytes b16)
-     :cljs (do
-             (.setUint16 -data-view
-                         0
-                         b16
-                         false)
-             (.getUint16 -data-view
-                         0
-                         true))))
