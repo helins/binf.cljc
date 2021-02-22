@@ -6,9 +6,10 @@
 
   {:author "Adam Helins"}
 
-  (:require [helins.binf.buffer           :as binf.buffer]
-            [helins.binf.protocol         :as binf.protocol]
-            [helins.binf.protocol.impl]))
+  (:require [helins.binf.buffer         :as binf.buffer]
+            [helins.binf.protocol       :as binf.protocol]
+            [helins.binf.protocol.impl]
+            [helins.binf.string         :as binf.string]))
 
 
 (declare remaining)
@@ -84,7 +85,7 @@
 
   [view]
 
-  (- (count view)
+  (- (binf.protocol/limit view)
      (binf.protocol/position view)))
 
 
@@ -249,7 +250,7 @@
   ([view position n-byte]
 
    (binf.protocol/ra-string view
-                            nil
+                            binf.string/decoder-utf-8
                             position
                             n-byte))
 
@@ -554,7 +555,7 @@
   
   "Reads a string consisting of `n-byte` from the current position.
 
-   A decoder may be provided (default is UTF-8).
+   A non-nil decoder may be provided (default is UTF-8).
   
    See [[text-decoder]]"
 
@@ -562,6 +563,7 @@
   ([view n-byte]
 
    (binf.protocol/rr-string view
+                            binf.string/decoder-utf-8
                             n-byte))
 
 
@@ -686,6 +688,16 @@
 
 
 ;;;; IPosition
+
+
+(defn limit
+
+  ""
+
+  [view]
+
+  (binf.protocol/limit view))
+
 
 
 (defn offset

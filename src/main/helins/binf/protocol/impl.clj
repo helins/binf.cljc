@@ -18,15 +18,7 @@
 ;;;;;;;;;; Implenting protocols
 
 
-(deftype View [^ByteBuffer byte-buffer
-                           -offset]
-
-
-  clojure.lang.Counted
-
-    (count [_]
-      (- (.limit byte-buffer)
-         -offset))
+(extend-type ByteBuffer
 
 
   binf.protocol/IAbsoluteReader
@@ -35,75 +27,74 @@
       (binf.buffer/copy buffer
                         offset
                         (binf.protocol/to-buffer this)
-                        (+ -offset
+                        (+ (.arrayOffset this)
                            position)
                         n-byte))
 
-    (ra-u8 [_ position]
-      (binf.int/u8 (.get byte-buffer
-                         (int (+ -offset
+    (ra-u8 [this position]
+      (binf.int/u8 (.get this
+                         (int (+ (.arrayOffset this)
                                   position)))))
 
-    (ra-i8 [_ position]
-      (.get byte-buffer
-            (int (+ -offset
+    (ra-i8 [this position]
+      (.get this
+            (int (+ (.arrayOffset this)
                     position))))
 
 
-    (ra-u16 [_ position]
-      (binf.int/u16 (.getShort byte-buffer
-                               (+ -offset
+    (ra-u16 [this position]
+      (binf.int/u16 (.getShort this
+                               (+ (.arrayOffset this)
                                   position))))
 
-    (ra-i16 [_ position]
-      (.getShort byte-buffer
-                 (+ -offset
+    (ra-i16 [this position]
+      (.getShort this
+                 (+ (.arrayOffset this)
                     position)))
 
 
-    (ra-u32 [_ position]
-      (binf.int/u32 (.getInt byte-buffer
-                             (+ -offset
+    (ra-u32 [this position]
+      (binf.int/u32 (.getInt this
+                             (+ (.arrayOffset this)
                                 position))))
 
-    (ra-i32 [_ position]
-      (.getInt byte-buffer
-               (+ -offset
+    (ra-i32 [this position]
+      (.getInt this
+               (+ (.arrayOffset this)
                   position)))
 
     (ra-u64 [this position]
       (binf.protocol/ra-i64 this
                             position))
 
-    (ra-i64 [_ position]
-      (.getLong byte-buffer
-                (+ -offset
+    (ra-i64 [this position]
+      (.getLong this
+                (+ (.arrayOffset this)
                    position)))
 
-    (ra-f32 [_ position]
-      (.getFloat byte-buffer
-                 (+ -offset
+    (ra-f32 [this position]
+      (.getFloat this
+                 (+ (.arrayOffset this)
                     position)))
 
-    (ra-f64 [_ position]
-      (.getDouble byte-buffer
-                  (+ -offset
+    (ra-f64 [this position]
+      (.getDouble this
+                  (+ (.arrayOffset this)
                      position)))
 
-    (ra-string [_this decoder position n-byte]
-      (String. (.array byte-buffer)
-               (int (+ -offset
+    (ra-string [this decoder position n-byte]
+      (String. (.array this)
+               (int (+ (.arrayOffset this)
                        position))
                ^long n-byte
-               (or decoder
-                   binf.string/decoder-utf-8)))
+               decoder))
 
 
   binf.protocol/IAbsoluteWriter
 
     (wa-buffer [this position buffer offset n-byte]
       (binf.buffer/copy (binf.protocol/to-buffer this)
-                        (+ -offset
+                        (+ (.arrayOffset this)
                            position)
                         buffer
                         offset
@@ -111,55 +102,55 @@
       this)
 
     (wa-b8 [this position integer]
-      (.put byte-buffer
-            (+ -offset
+      (.put this
+            (+ (.arrayOffset this)
                position)
             (unchecked-byte integer))
       this)
 
     (wa-b16 [this position integer]
-      (.putShort byte-buffer
-                 (+ -offset
+      (.putShort this
+                 (+ (.arrayOffset this)
                     position)
                  (unchecked-short integer))
       this)
 
     (wa-b32 [this position integer]
-      (.putInt byte-buffer
-               (+ -offset
+      (.putInt this
+               (+ (.arrayOffset this)
                   position)
                (unchecked-int integer))
       this)
 
     (wa-b64 [this position integer]
-      (.putLong byte-buffer
-                (+ -offset
+      (.putLong this
+                (+ (.arrayOffset this)
                    position)
                 integer)
       this)
 
     (wa-f32 [this position floating]
-      (.putFloat byte-buffer
-                 (+ -offset
+      (.putFloat this
+                 (+ (.arrayOffset this)
                     position)
                  floating)
       this)
 
     (wa-f64 [this position floating]
-      (.putDouble byte-buffer
-                  (+ -offset
+      (.putDouble this
+                  (+ (.arrayOffset this)
                      position)
                   floating)
       this)
 
     (wa-string [this position string]
-      (let [saved-position (.position byte-buffer)]
-        (.position byte-buffer
-                   (+ -offset
+      (let [saved-position (.position this)]
+        (.position this
+                   (+ (.arrayOffset this)
                       position))
         (let [res (binf.protocol/wr-string this
                                            string)]
-          (.position byte-buffer
+          (.position this
                      saved-position)
           res)))
     
@@ -167,14 +158,14 @@
   binf.protocol/IEndianess
 
 
-    (endian-get [_this]
+    (endian-get [this]
       (condp =
-             (.order byte-buffer)
+             (.order this)
         ByteOrder/BIG_ENDIAN    :big-endian
         ByteOrder/LITTLE_ENDIAN :little-endian))
 
     (endian-set [this endianess]
-      (.order byte-buffer
+      (.order this
               (case endianess
                 :big-endian    ByteOrder/BIG_ENDIAN
                 :little-endian ByteOrder/LITTLE_ENDIAN))
@@ -187,53 +178,47 @@
       (let [b (binf.buffer/copy buffer
                                 offset
                                 (binf.protocol/to-buffer this)
-                                (.position byte-buffer)
+                                (.position this)
                                 n-byte)]
         (binf.protocol/skip this
               n-byte)
         b))
 
-    (rr-u8 [_]
-      (binf.int/u8 (.get byte-buffer)))
+    (rr-u8 [this]
+      (binf.int/u8 (.get this)))
 
-    (rr-i8 [_]
-      (.get byte-buffer))
+    (rr-i8 [this]
+      (.get this))
 
-    (rr-u16 [_]
-      (binf.int/u16 (.getShort byte-buffer)))
+    (rr-u16 [this]
+      (binf.int/u16 (.getShort this)))
 
-    (rr-i16 [_]
-      (.getShort byte-buffer))
+    (rr-i16 [this]
+      (.getShort this))
 
-    (rr-u32 [_]
-      (binf.int/u32 (.getInt byte-buffer)))
+    (rr-u32 [this]
+      (binf.int/u32 (.getInt this)))
 
-    (rr-i32 [_]
-      (.getInt byte-buffer))
+    (rr-i32 [this]
+      (.getInt this))
 
-    (rr-u64 [_]
-      (.getLong byte-buffer))
+    (rr-u64 [this]
+      (.getLong this))
 
-    (rr-i64 [_]
-      (.getLong byte-buffer))
+    (rr-i64 [this]
+      (.getLong this))
 
-    (rr-f32 [_]
-      (.getFloat byte-buffer))
+    (rr-f32 [this]
+      (.getFloat this))
 
-    (rr-f64 [_]
-      (.getDouble byte-buffer))
-
-    (rr-string [this n-byte]
-      (binf.protocol/rr-string this
-                               nil
-                               n-byte))
+    (rr-f64 [this]
+      (.getDouble this))
 
     (rr-string [this decoder n-byte]
-      (let [string (String. (.array byte-buffer)
-                            (.position byte-buffer)
+      (let [string (String. (.array this)
+                            (.position this)
                             ^long n-byte
-                            (or decoder
-                                binf.string/encoder-utf-8))]
+                            decoder)]
         (binf.protocol/skip this
                             n-byte)
         string))
@@ -243,7 +228,7 @@
 
     (wr-buffer [this buffer offset n-byte]
       (binf.buffer/copy (binf.protocol/to-buffer this)
-                        (.position byte-buffer)
+                        (.position this)
                         buffer
                         offset
                         n-byte)
@@ -252,48 +237,48 @@
       this)
 
     (wr-b8 [this integer]
-      (.put byte-buffer
+      (.put this
             (unchecked-byte integer))
       this)
 
     (wr-b16 [this integer]
-      (.putShort byte-buffer
+      (.putShort this
                  (unchecked-short integer))
       this)
 
     (wr-b32 [this integer]
-      (.putInt byte-buffer
+      (.putInt this
                (unchecked-int integer))
       this)
 
     (wr-b64 [this integer]
-      (.putLong byte-buffer
+      (.putLong this
                 integer)
       this)
 
     (wr-f32 [this floating]
-      (.putFloat byte-buffer
+      (.putFloat this
                  floating)
       this)
 
     (wr-f64 [this floating]
-      (.putDouble byte-buffer
+      (.putDouble this
                   floating)
       this)
 
-    (wr-string [_this string]
+    (wr-string [this string]
       (let [encoder     (.newEncoder binf.string/encoder-utf-8)
             char-buffer (if (instance? CharBuffer
                                        string)
                           string
                           (CharBuffer/wrap ^String string))
-            position-bb (.position byte-buffer)
+            position-bb (.position this)
             position-cb (.position ^CharBuffer char-buffer)
             res         (.encode encoder
                                  char-buffer 
-                                 byte-buffer
+                                 this
                                  true)
-            n-byte      (- (.position byte-buffer)
+            n-byte      (- (.position this)
                            position-bb)
             n-chars     (- (.position ^CharBuffer char-buffer)
                            position-cb)]
@@ -310,8 +295,8 @@
         ;;
         ; (condp =
         ;        (.flush encoder
-        ;                byte-buffer)
-        ;   CoderResult/UNDERFLOW (- (.position byte-buffer)
+        ;                this)
+        ;   CoderResult/UNDERFLOW (- (.position this)
         ;                            offset)
         ;   CoderResult/OVERFLOW  (throw (ex-info "Not enough bytes to flush string encoder"
         ;                                         {::error  :insufficient-output
@@ -323,68 +308,76 @@
 
   binf.protocol/IPosition
 
-    (offset [_]
-      -offset)
+    (limit [this]
+      (.limit this))
 
-    (position [_]
-      (- (.position byte-buffer)
-         -offset))
+    (offset [this]
+      (.arrayOffset this))
+
+    (position [this]
+      (.position this))
 
     (seek [this position]
-      (.position byte-buffer
-                 (+ -offset
+      (.position this
+                 (+ (.arrayOffset this)
                     position))
       this)
 
     (skip [this n-byte]
-      (.position byte-buffer
-                 (+ (.position byte-buffer)
+      (.position this
+                 (+ (.position this)
                     n-byte))
       this)
 
-    (to-buffer [_]
-      (.array byte-buffer))
+    (to-buffer [this]
+      (.array this))
 
 
   binf.protocol/IViewable
 
 
-    (view [this]
-      this)
+    (view
+      
+      ([this]
+       (.duplicate this))
 
-    (view [_ offset]
-      (binf.protocol/view (.array byte-buffer)
-                          (+ -offset
-                             offset)))
+      ([this offset]
+        (-> this
+            .duplicate
+            (.position offset)
+            .slice))
 
-    (view [_ offset size]
-      (binf.protocol/view (.array byte-buffer)
-                          (+ -offset
-                             offset)
-                          size)))
+      ([this offset n-byte]
+        (-> this
+            (binf.protocol/view offset)
+            (.limit n-byte)))))
 
 
 ;;;;;;;;;; Creating views from objects
 
 
-(extend-protocol binf.protocol/IViewable
+(extend-type (Class/forName "[B")
 
-  (Class/forName "[B")
+  binf.protocol/IPosition
+
+    (limit [this]
+      (count this))
+
+
+  binf.protocol/IViewable
 
     (view
      
       ([this]
-       (View. (ByteBuffer/wrap this)
-              0))
+       (ByteBuffer/wrap this))
 
       ([this offset]
-       (View. (doto (ByteBuffer/wrap this)
-                (.position offset))
-              offset))
+       (-> (ByteBuffer/wrap this)
+           (.position offset)
+           .slice))
 
-      ([this offset size]
-       (View. (doto (ByteBuffer/wrap this)
-                (.position offset)
-                (.limit (+ offset
-                           size)))
-              offset))))
+      ([this offset n-byte]
+       (-> (ByteBuffer/wrap this
+                            offset
+                            n-byte)
+           .slice))))

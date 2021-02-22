@@ -34,33 +34,10 @@
 
 
 
-  
   (def v
-       (binf/view (binf/buffer-shared 32)))
-
-
-  (binf/wa-b16 v
-               0
-               4)
-
-  (binf/ra-u16 v
-               0)
-
-
-  (binf/ra-buffer v
-                  0
-                  10)
-
-  (binf/wa-buffer v
-                  2
-                  (binf/to-buffer v)
-                  0
-                  4)
-
-  (binf/wa-string v
-                  0
-                  "coucou")
-
+       (binf/view (binf.buffer/alloc 8)))
+  (binf/view v
+             4)
 
 
   )

@@ -18,12 +18,6 @@
                ^:mutable    -position]
 
 
-  ICounted
-
-    (-count [_]
-      (.-byteLength dataview))
-
-
   binf.protocol/IAbsoluteReader
 
     (ra-buffer [this position n-byte buffer offset]
@@ -85,8 +79,7 @@
                    little-endian?))
 
     (ra-string [_this decoder position n-byte]
-      (.decode (or decoder 
-                   binf.string/decoder-utf-8)
+      (.decode decoder 
                (js/Uint8Array. (.-buffer dataview)
                                (+ (.-byteOffset dataview)
                                   position)
@@ -267,11 +260,6 @@
                  8))
         ret))
 
-    (rr-string [this n-byte]
-      (binf.protocol/rr-string this
-                               nil
-                               n-byte))
-
     (rr-string [this decoder n-byte]
       (let [string (binf.protocol/ra-string this
                                             decoder
@@ -357,6 +345,9 @@
 
 
   binf.protocol/IPosition
+
+    (limit [_]
+      (.-byteLength dataview))
 
     (offset [_]
       (.-byteOffset dataview))

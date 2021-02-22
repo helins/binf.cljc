@@ -99,8 +99,7 @@
 
   (rr-f64 [view])
   
-  (rr-string [view n-byte]
-             [view decoder n-byte]))
+  (rr-string [view decoder n-byte]))
 
 
 
@@ -132,6 +131,8 @@
 (defprotocol IPosition
 
   "Handling the position of a view and its relation to its buffer."
+
+  (limit [view])
 
   (offset [view])
 

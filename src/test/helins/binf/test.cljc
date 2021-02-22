@@ -11,7 +11,7 @@
             [helins.binf.test.string :as binf.test.string]))
 
 
-;;;;;;;;;;
+;;;;;;;;;; Creating views
 
 
 (def offset
@@ -30,6 +30,7 @@
      (binf/view (binf.buffer/alloc size)))
 
 
+
 #?(:cljs (def view-shared
               (binf/view (binf.buffer/alloc-shared size))))
 
@@ -46,8 +47,8 @@
            (binf/position view)
            #?(:cljs (binf/position view-shared))))
   (t/is (= size
-           (count view)
-           #?(:cljs (count view-shared))))
+           (binf/limit view)
+           #?(:cljs (binf/limit view-shared))))
   (t/is (= size
            (binf/remaining view)
            #?(:cljs (binf/remaining view-shared))))
@@ -66,8 +67,8 @@
              #?(:cljs (binf/position v-shared))))
     (t/is (= (- size
                 offset)
-             (count v)
-             #?(:cljs (count v-shared))))
+             (binf/limit v)
+             #?(:cljs (binf/limit v-shared))))
     (t/is (= (- size
                 offset)
              (binf/remaining v)
@@ -88,8 +89,8 @@
              (binf/position v)
              #?(:cljs (binf/position v-shared))))
     (t/is (= size-2
-             (count v)
-             #?(:cljs (count v-shared))))
+             (binf/limit v)
+             #?(:cljs (binf/limit v-shared))))
     (t/is (= size-2
              (binf/remaining v)
              #?(:cljs (binf/remaining v-shared))))))
@@ -106,7 +107,7 @@
     (t/is (= 0
              (binf/position v)))
     (t/is (= size
-             (count v)))
+             (binf/limit v)))
     (t/is (= size
              (binf/remaining v))))
 
@@ -120,7 +121,7 @@
              (binf/position v)))
     (t/is (= (- size
                 offset)
-             (count v)))
+             (binf/limit v)))
     (t/is (= (- size
                 offset)
              (binf/remaining v))))
@@ -135,7 +136,7 @@
     (t/is (= 0
              (binf/position v)))
     (t/is (= size-2
-             (count v)))
+             (binf/limit v)))
     (t/is (= size-2
              (binf/remaining v)))))
 
