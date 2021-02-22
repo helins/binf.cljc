@@ -35,9 +35,8 @@
 
 
   (def v
-       (binf/view (binf.buffer/alloc 8)))
-  (binf/view v
-             4)
+       (binf/view (binf.buffer/alloc 128)))
+
 
 
   )

@@ -65,30 +65,6 @@
   8)
 
 
-;;;;;;;;;; Helper functions
-
-
-(defn garanteed?
-
-  ""
-
-  [view n-byte]
-
-  (>= (remaining view)
-      n-byte))
-
-
-
-(defn remaining
-
-  "Returns the number of bytes remaining until the end of the view."
-
-  [view]
-
-  (- (binf.protocol/limit view)
-     (binf.protocol/position view)))
-
-
 ;;;;;;;;;; Pointing to protocol implementations
 
 
@@ -800,16 +776,28 @@
                        n-byte)))
 
 
-;;;;;
+;;;;;;;;;; Helper functions
 
 
-;#?(:cljs (defn view->data-view
-;
-;  ""
-;
-;  [view]
-;
-;  ))
+(defn garanteed?
+
+  ""
+
+  [view n-byte]
+
+  (>= (remaining view)
+      n-byte))
+
+
+
+(defn remaining
+
+  "Returns the number of bytes remaining until the end of the view."
+
+  [view]
+
+  (- (binf.protocol/limit view)
+     (binf.protocol/position view)))
 
 
 ;;;;;;;;;; Used by other namespaces for casting primitive types in CLJS

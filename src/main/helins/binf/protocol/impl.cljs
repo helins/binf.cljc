@@ -13,9 +13,57 @@
 ;;;;;;;;;;
 
 
-(deftype View [^js/DataView dataview
-               ^:mutable    little-endian?
-               ^:mutable    -position]
+(def ^:private -k-little-endian?
+
+  ;;
+
+  (js/Symbol))
+
+
+
+(def ^:private -k-position
+
+  ;;
+
+  (js/Symbol))
+
+
+
+(defn- -little-endian?
+
+  ;;
+
+  [this]
+
+  (goog.object/get this
+                   -k-little-endian?))
+
+
+
+(defn- -init-view
+
+  ;;
+
+  ([view]
+
+   (goog.object/set view
+                    -k-position
+                    0)
+   view)
+
+
+  ([view view-parent]
+
+   (-> view
+       -init-view
+       (goog.object/set -k-little-endian?
+                        (goog.object/get view-parent
+                                         -k-little-endian?)))
+   view))
+
+
+
+(extend-type js/DataView
 
 
   binf.protocol/IAbsoluteReader
@@ -24,64 +72,64 @@
       (binf.buffer/copy buffer
                         offset
                         (binf.protocol/to-buffer this)
-                        (+ (.-byteOffset dataview)
+                        (+ (.-byteOffset this)
                            position)
                         n-byte))
 
-    (ra-u8 [_ position]
-      (.getUint8 dataview
+    (ra-u8 [this position]
+      (.getUint8 this
                  position
-                 little-endian?))
+                 (-little-endian? this)))
 
-    (ra-i8 [_ position]
-      (.getInt8 dataview
+    (ra-i8 [this position]
+      (.getInt8 this
                 position
-                little-endian?))
+                (-little-endian? this)))
 
-    (ra-u16 [_ position]
-      (.getUint16 dataview
+    (ra-u16 [this position]
+      (.getUint16 this
                   position
-                  little-endian?))
+                  (-little-endian? this)))
 
-    (ra-i16 [_ position]
-      (.getInt16 dataview
+    (ra-i16 [this position]
+      (.getInt16 this
                  position
-                 little-endian?))
+                 (-little-endian? this)))
 
-    (ra-u32 [_ position]
-      (.getUint32 dataview
+    (ra-u32 [this position]
+      (.getUint32 this
                   position
-                  little-endian?))
+                  (-little-endian? this)))
 
-    (ra-i32 [_ position]
-      (.getInt32 dataview
+    (ra-i32 [this position]
+      (.getInt32 this
                  position
-                 little-endian?))
+                 (-little-endian? this)))
 
-    (ra-u64 [_ position]
-      (.getBigUint64 dataview
+    (ra-u64 [this position]
+      (.getBigUint64 this
                      position
-                     little-endian?))
+                     (-little-endian? this)))
 
-    (ra-i64 [_ position]
-      (.getBigInt64 dataview
+    (ra-i64 [this position]
+      (.getBigInt64 this
                     position
-                    little-endian?))
+                    (-little-endian? this)))
 
-    (ra-f32 [_ position]
-      (.getFloat32 dataview
+    (ra-f32 [this position]
+      (.getFloat32 this
                    position
-                   little-endian?))
+                   (-little-endian? this)))
 
-    (ra-f64 [_ position]
-      (.getFloat64 dataview
+    (ra-f64 [this position]
+      (.getFloat64 this
                    position
-                   little-endian?))
+                   (-little-endian? this)))
 
-    (ra-string [_this decoder position n-byte]
+    (ra-string [this decoder position n-byte]
       (.decode decoder 
-               (js/Uint8Array. (.-buffer dataview)
-                               (+ (.-byteOffset dataview)
+               (js/Uint8Array. (.-buffer this)
+                               (+ (.-byteOffset this)
                                   position)
                                n-byte)))
 
@@ -90,7 +138,7 @@
 
     (wa-buffer [this position buffer offset n-byte]
       (binf.buffer/copy (binf.protocol/to-buffer this)
-                        (+ (.-byteOffset dataview)
+                        (+ (.-byteOffset this)
                            position)
                         buffer
                         offset
@@ -98,54 +146,54 @@
       this)
 
     (wa-b8 [this position integer]
-       (.setUint8 dataview
+       (.setUint8 this
                   position
                   integer
-                  little-endian?)
+                  (-little-endian? this))
         this)
 
     (wa-b16 [this position integer]
-      (.setUint16 dataview
+      (.setUint16 this
                   position
                   integer
-                  little-endian?)
+                  (-little-endian? this))
       this)
 
     (wa-b32 [this position integer]
-      (.setUint32 dataview
+      (.setUint32 this
                   position
                   integer
-                  little-endian?)
+                  (-little-endian? this))
       this)
 
     (wa-b64 [this position integer]
-      (.setBigInt64 dataview
+      (.setBigInt64 this
                     position
                     integer
-                    little-endian?)
+                    (-little-endian? this))
       this)
 
     (wa-f32 [this position floating]
-      (.setFloat32 dataview
+      (.setFloat32 this
                    position
                    floating
-                   little-endian?)
+                   (-little-endian? this))
       this)
 
     (wa-f64 [this position floating]
-      (.setFloat64 dataview
+      (.setFloat64 this
                    position
                    floating
-                   little-endian?)
+                   (-little-endian? this))
       this)
 
-    (wa-string [_this position string]
+    (wa-string [this position string]
       (let [res         (.encodeInto binf.string/encoder-utf-8
                                      string
-                                     (js/Uint8Array. (.-buffer dataview)
-                                                     (+ (.-byteOffset dataview)
+                                     (js/Uint8Array. (.-buffer this)
+                                                     (+ (.-byteOffset this)
                                                         position)
-                                                     (- (.-byteLength dataview)
+                                                     (- (.-byteLength this)
                                                         position)))
             read-UTF-16 (.-read res)]
         [(= (.-length string)
@@ -157,16 +205,17 @@
   binf.protocol/IEndianess
 
 
-    (endian-get [_]
-      (if little-endian?
+    (endian-get [this]
+      (if (-little-endian? this)
         :little-endian
         :big-endian))
 
     (endian-set [this endianess]
-      (set! little-endian?
-            (case endianess
-              :big-endian    false
-              :little-endian true))
+      (goog.object/set this
+                       -k-little-endian?
+                       (case endianess
+                         :big-endian    false
+                         :little-endian true))
       this)
 
 
@@ -183,87 +232,120 @@
         b))
 
     (rr-u8 [this]
-      (let [ret (binf.protocol/ra-u8 this
-                                     -position)]
-        (set! -position
-              (inc -position))
+      (let [position (goog.object/get this
+                                      -k-position)
+            ret      (binf.protocol/ra-u8 this
+                                          position)]
+        (goog.object/set this
+                         -k-position
+                         (inc position))
         ret))
 
     (rr-i8 [this]
-      (let [ret (binf.protocol/ra-i8 this
-                                     -position)]
-        (set! -position
-              (inc -position))
+      (let [position (goog.object/get this
+                                      -k-position)
+            ret      (binf.protocol/ra-i8 this
+                                          position)]
+        (goog.object/set this
+                         -k-position
+                         (inc position))
         ret))
 
     (rr-u16 [this]
-      (let [ret (binf.protocol/ra-u16 this
-                                      -position)]
-        (set! -position
-              (+ -position
-                 2))
+      (let [position (goog.object/get this
+                                      -k-position)
+            ret      (binf.protocol/ra-u16 this
+                                           position)]
+
+        (goog.object/set this
+                         -k-position
+                         (+ position
+                            2))
         ret))
 
     (rr-i16 [this]
-      (let [ret (binf.protocol/ra-i16 this
-                                      -position)]
-        (set! -position
-              (+ -position
-                 2))
+      (let [position (goog.object/get this
+                                      -k-position)
+            ret      (binf.protocol/ra-i16 this
+                                           position)]
+        
+        (goog.object/set this
+                         -k-position
+                         (+ position
+                            2))
         ret))
 
     (rr-u32 [this]
-      (let [ret (binf.protocol/ra-u32 this
-                                      -position)]
-        (set! -position
-              (+ -position
-                 4))
+      (let [position (goog.object/get this
+                                      -k-position)
+            ret      (binf.protocol/ra-u32 this
+                                           position)]
+        (goog.object/set this
+                         -k-position
+                         (+ position
+                            4))
         ret))
 
     (rr-i32 [this]
-      (let [ret (binf.protocol/ra-i32 this
-                                      -position)]
-        (set! -position
-              (+ -position
-                 4))
+      (let [position (goog.object/get this
+                                      -k-position)
+            ret      (binf.protocol/ra-i32 this
+                                           position)]
+        (goog.object/set this
+                         -k-position
+                         (+ position
+                            4))
         ret))
 
     (rr-u64 [this]
-      (let [ret (binf.protocol/ra-u64 this
-                                      -position)]
-        (set! -position
-              (+ -position
-                 8))
+      (let [position (goog.object/get this
+                                      -k-position)
+            ret      (binf.protocol/ra-u64 this
+                                           position)]
+        (goog.object/set this
+                         -k-position
+                         (+ position
+                            8))
         ret))
 
     (rr-i64 [this]
-      (let [ret (binf.protocol/ra-i64 this
-                                      -position)]
-        (set! -position
-              (+ -position
-                 8))
+      (let [position (goog.object/get this
+                                      -k-position)
+            ret      (binf.protocol/ra-i64 this
+                                           position)]
+        (goog.object/set this
+                         -k-position
+                         (+ position
+                            8))
         ret))
 
     (rr-f32 [this]
-      (let [ret (binf.protocol/ra-f32 this
-                                      -position)]
-        (set! -position
-              (+ -position
-                 8))
+      (let [position (goog.object/get this
+                                      -k-position)
+            ret      (binf.protocol/ra-f32 this
+                                           position)]
+        (goog.object/set this
+                         -k-position
+                         (+ position
+                            4))
         ret))
 
     (rr-f64 [this]
-      (let [ret (binf.protocol/ra-f64 this
-                                      -position)]
-        (set! -position
-              (+ -position
-                 8))
+      (let [position (goog.object/get this
+                                      -k-position)
+            ret      (binf.protocol/ra-f64 this
+                                           position)]
+        (goog.object/set this
+                         -k-position
+                         (+ position
+                            8))
         ret))
 
     (rr-string [this decoder n-byte]
       (let [string (binf.protocol/ra-string this
                                             decoder
-                                            -position
+                                            (goog.object/get this
+                                                             -k-position)
                                             n-byte)]
         (binf.protocol/skip this
                             n-byte)
@@ -283,61 +365,80 @@
       this)
 
     (wr-b8 [this integer]
-      (binf.protocol/wa-b8 this
-                           -position
-                           integer)
-      (set! -position
-            (inc -position))
+      (let [position (goog.object/get this
+                                      -k-position)]
+         (binf.protocol/wa-b8 this
+                              position
+                              integer)
+         (goog.object/set this
+                          -k-position
+                          (inc position)))
       this)
 
     (wr-b16 [this integer]
-      (binf.protocol/wa-b16 this
-                            -position
-                            integer)
-      (set! -position
-            (+ -position
-               2))
+      (let [position (goog.object/get this
+                                      -k-position)]
+        (binf.protocol/wa-b16 this
+                              position
+                              integer)
+        (goog.object/set this
+                         -k-position
+                         (+ position
+                            2)))
       this)
 
     (wr-b32 [this integer]
-      (binf.protocol/wa-b32 this
-                            -position
-                            integer)
-      (set! -position
-            (+ -position
-               4))
+      (let [position (goog.object/get this
+                                      -k-position)]
+        (binf.protocol/wa-b32 this
+                              position
+                              integer)
+        (goog.object/set this
+                         -k-position
+                         (+ position
+                            4)))
       this)
 
     (wr-b64 [this integer]
-      (binf.protocol/wa-b64 this
-                            -position
-                            integer)
-      (set! -position
-            (+ -position
-               8))
+      (let [position (goog.object/get this
+                                      -k-position)]
+        (binf.protocol/wa-b64 this
+                              position
+                              integer)
+        (goog.object/set this
+                         -k-position
+                         (+ position
+                            8)))
       this)
 
     (wr-f32 [this floating]
-      (binf.protocol/wa-f32 this
-                            -position
-                            floating)
-      (set! -position
-            (+ -position
-               8))
+      (let [position (goog.object/get this
+                                      -k-position)]
+        (binf.protocol/wa-f32 this
+                              position
+                              floating)
+        (goog.object/set this
+                         -k-position
+                         (+ position
+                            4)))
       this)
 
     (wr-f64 [this floating]
-      (binf.protocol/wa-f64 this
-                            -position
-                            floating)
-      (set! -position
-            (+ -position
-               8))
+      (let [position (goog.object/get this
+                                      -k-position)]
+        (binf.protocol/wa-f64 this
+                              position
+                              floating)
+        (goog.object/set this
+                         -k-position
+                         (+ position
+                            8)))
       this)
 
     (wr-string [this string]
       (let [res (binf.protocol/wa-string this
-                                         -position
+                                         (goog.object/get this
+                                                          -k-position)
                                          string)]
         (binf.protocol/skip this
                             (res 1))
@@ -346,49 +447,58 @@
 
   binf.protocol/IPosition
 
-    (limit [_]
-      (.-byteLength dataview))
+    (limit [this]
+      (.-byteLength this))
 
-    (offset [_]
-      (.-byteOffset dataview))
+    (offset [this]
+      (.-byteOffset this))
 
-    (position [_]
-      -position)
+    (position [this]
+      (goog.object/get this
+                       -k-position))
 
     (seek [this position]
-      (set! -position
-            position)
+      (goog.object/set this
+                       -k-position
+                       position)
       this)
 
     (skip [this n-byte]
-      (set! -position
-            (+ -position
-               n-byte))
+      (goog.object/set this
+                       -k-position
+                       (+ (goog.object/get this
+                                           -k-position)
+                          n-byte))
       this)
 
-    (to-buffer [_]
-      (.-buffer dataview))
+    (to-buffer [this]
+      (.-buffer this))
 
 
   binf.protocol/IViewable
 
-    (view [this]
-      this)
+    (view
+      
+      ([this]
+       (-init-view (js/DataView. (.-buffer this)
+                                 (.-byteOffset this)
+                                 (.-byteLength this))
+                   this))
 
-    (view [_this offset]
-      (View. (js/DataView. (.-buffer dataview)
-                           (+ (.-byteOffset dataview)
-                              offset))
-             little-endian?
-             0))
+      ([this offset]
+       (-init-view (js/DataView. (.-buffer this)
+                                 (+ (.-byteOffset this)
+                                    offset)
+                                 (- (.-byteLength this)
+                                    offset))
+                   this))
 
-    (view [_this offset size]
-      (View. (js/DataView. (.-buffer dataview)
-                           (+ (.-byteOffset dataview)
-                              offset)
-                           size)
-             little-endian?
-             0)))
+      ([this offset n-byte]
+       (-init-view (js/DataView. (.-buffer this)
+                                 (+ (.-byteOffset this)
+                                    offset)
+                                 n-byte)
+                   this))))
 
 
 ;;;;;;;;;;
@@ -401,26 +511,20 @@
 
   ([buffer]
 
-   (View. (js/DataView. buffer)
-          false
-          0))
+   (-init-view (js/DataView. buffer)))
 
 
   ([buffer offset]
 
-   (View. (js/DataView. buffer
-                        offset)
-          false
-          0))
+   (-init-view (js/DataView. buffer
+                             offset)))
 
 
   ([buffer offset n-byte]
 
-   (View. (js/DataView. buffer
-                        offset
-                        n-byte)
-          false
-          0)))
+   (-init-view (js/DataView. buffer
+                             offset
+                             n-byte))))
 
 
 
@@ -444,18 +548,18 @@
                       n-byte)))
 
 
-    js/SharedArrayBuffer
+  js/SharedArrayBuffer
 
-      (view
+    (view
 
-        ([this]
-         (-buffer->view this))
+      ([this]
+       (-buffer->view this))
 
-        ([this offset]
-         (-buffer->view this
-                        offset))
+      ([this offset]
+       (-buffer->view this
+                      offset))
 
-        ([this offset n-byte]
-         (-buffer->view this
-                        offset
-                        n-byte))))
+      ([this offset n-byte]
+       (-buffer->view this
+                      offset
+                      n-byte))))
