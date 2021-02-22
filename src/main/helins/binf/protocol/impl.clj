@@ -94,11 +94,11 @@
                                               position)))
 
     (ra-string [this decoder position n-byte]
-      (String. (.array this)
-               (int (binf.protocol/-array-index this
-                                                position))
-               ^long n-byte
-               ^Charset decoder))
+      (.toString (.decode ^Charset decoder
+                          (-> this
+                              .duplicate
+                              (.position position)
+                              (.limit n-byte)))))
 
 
   binf.protocol/IAbsoluteWriter
@@ -247,10 +247,10 @@
       (.getDouble this))
 
     (rr-string [this decoder n-byte]
-      (let [string (String. (.array this)
-                            (.position this)
-                            ^long n-byte
-                            ^Charset decoder)]
+      (let [string (.toString (.decode ^Charset decoder
+                                       (-> this
+                                           .duplicate
+                                           (.limit n-byte))))]
         (binf.protocol/skip this
                             n-byte)
         string))

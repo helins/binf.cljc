@@ -7,6 +7,7 @@
             [helins.binf.buffer      :as binf.buffer]
             [helins.binf.int         :as binf.int]
             [helins.binf.int64       :as binf.int64]
+            [helins.binf.native      :as binf.native]
             [helins.binf.test.buffer :as binf.test.buffer]
             [helins.binf.test.string :as binf.test.string]))
 
@@ -34,6 +35,9 @@
      (binf/view (binf.buffer/alloc size)))
 
 
+#?(:clj (def view-native
+             (binf.native/view size)))
+
 
 #?(:cljs (def view-shared
               (binf/view (binf.buffer/alloc-shared size))))
@@ -49,12 +53,15 @@
            #?(:cljs (binf/buffer-offset view-shared))))
   (t/is (= 0
            (binf/position view)
+           #?(:clj (binf/position view-native))
            #?(:cljs (binf/position view-shared))))
   (t/is (= size
            (binf/limit view)
+           #?(:clj (binf/limit view-native))
            #?(:cljs (binf/limit view-shared))))
   (t/is (= size
            (binf/remaining view)
+           #?(:clj (binf/remaining view-native))
            #?(:cljs (binf/remaining view-shared))))
 
   ;; With offset
@@ -118,31 +125,42 @@
   ;; With offset
 
   (let [v (binf/view view
-                     offset)]
+                     offset)
+        #?@(:clj [v-native (binf/view view-native
+                                      offset)])]
     (t/is (= offset
              (binf/buffer-offset v)))
     (t/is (= 0
-             (binf/position v)))
+             (binf/position v)
+             #?(:clj (binf/position v-native))))
     (t/is (= (- size
                 offset)
-             (binf/limit v)))
+             (binf/limit v)
+             #?(:clj (binf/limit v-native))))
     (t/is (= (- size
                 offset)
-             (binf/remaining v))))
+             (binf/remaining v)
+             #?(:clj (binf/remaining v-native)))))
 
   ;; With offset and size
 
   (let [v (binf/view view
                      offset
-                     size-2)]
+                     size-2)
+        #?@(:clj [v-native (binf/view view-native
+                                      offset
+                                      size-2)])]
     (t/is (= offset
              (binf/buffer-offset v)))
     (t/is (= 0
-             (binf/position v)))
+             (binf/position v)
+             #?(:clj (binf/position v-native))))
     (t/is (= size-2
-             (binf/limit v)))
+             (binf/limit v)
+             #?(:clj (binf/limit v-native))))
     (t/is (= size-2
-             (binf/remaining v)))))
+             (binf/remaining v)
+             #?(:clj (binf/remaining v-native))))))
 
 
 ;;;;;;;;; Numerical R/W
@@ -153,6 +171,14 @@
   []
   
   (binf/view (binf.buffer/alloc 8)))
+
+
+
+#?(:clj (defn view-8-native
+
+  []
+
+  (binf.native/view 8)))
 
 
 
@@ -258,15 +284,27 @@
 
 
 
+#?(:clj (t/deftest view-uints-native
+
+  (-view-uints view-8-native)))
+
+
+
 #?(:cljs (t/deftest view-uints-shared
 
-  (-view-uints view-8)))
+  (-view-uints view-8-shared)))
 
 
 
 (t/deftest view-i64
 
   (-view-i64 view-8))
+
+
+
+#?(:clj (t/deftest view-i64-native
+
+  (-view-i64 view-8-native)))
 
 
 
@@ -282,9 +320,21 @@
 
 
 
+#?(:clj (t/deftest view-f32-native
+
+  (-view-f32 view-8-native)))
+
+
+
 (t/deftest view-f64
 
   (-view-f64 view-8))
+
+
+
+(:cljs (t/deftest view-f64-native
+
+  (-view-f64 view-8-native)))
 
 
 
@@ -296,18 +346,24 @@
 ;;;;;;;;;; Copying from/to buffers
 
 
+(def copy-size
+     10)
+
+
+
 (defn- -rwa-buffer
 
   [view]
 
   (t/is (= (take 7
                  binf.test.buffer/copy-target)
-           (take 7
-                 (seq (binf/backing-buffer (binf/wa-buffer view
-                                                           5
-                                                           (binf/backing-buffer (binf.test.buffer/make-view))
-                                                           2
-                                                           2)))))
+           (seq (binf/ra-buffer (binf/wa-buffer view
+                                                5
+                                                (binf/backing-buffer (binf.test.buffer/make-view))
+                                                2
+                                                2)
+                                0
+                                7)))
         "Absolute writing")
 
   (t/is (= (take 5
@@ -333,11 +389,12 @@
 
   (t/is (= (take 7
                  binf.test.buffer/copy-target)
-           (take 7
-                 (seq (binf/backing-buffer (binf/wr-buffer view
-                                                           (binf/backing-buffer (binf.test.buffer/make-view))
-                                                           2
-                                                           2)))))
+           (seq (binf/ra-buffer (binf/wr-buffer view
+                                                (binf/backing-buffer (binf.test.buffer/make-view))
+                                                2
+                                                2)
+                                0
+                                7)))
         "Relative writing")
 
   (t/is (= (binf/position view)
@@ -361,25 +418,37 @@
 
 (t/deftest rwa-buffer
 
-  (-rwa-buffer (binf/view (binf.buffer/alloc 10))))
+  (-rwa-buffer (binf/view (binf.buffer/alloc copy-size))))
+
+
+
+#?(:clj (t/deftest rwa-buffer-native
+
+  (-rwa-buffer (binf.native/view copy-size))))
 
 
 
 #?(:cljs (t/deftest rwa-buffer-shared
 
-  (-rwa-buffer (binf/view (binf.buffer/alloc-shared 10)))))
+  (-rwa-buffer (binf/view (binf.buffer/alloc-shared copy-size)))))
 
 
 
 (t/deftest rwr-buffer
 
-  (-rwr-buffer (binf/view (binf.buffer/alloc 10))))
+  (-rwr-buffer (binf/view (binf.buffer/alloc copy-size))))
+
+
+
+#?(:clj (t/deftest rwr-buffer-shared
+
+  (-rwr-buffer (binf.native/view copy-size))))
 
 
 
 #?(:cljs (t/deftest rwr-buffer-shared
 
-  (-rwr-buffer (binf/view (binf.buffer/alloc-shared 10)))))
+  (-rwr-buffer (binf/view (binf.buffer/alloc-shared copy-size)))))
 
 
 ;;;;;;;;;; Encoding and decoding strings
@@ -406,6 +475,10 @@
   
   [f-view]
 
+  (t/is (false? (first (binf/wa-string (binf/view (binf.buffer/alloc 10))
+                                       0
+                                       binf.test.string/string)))
+        "Not enough bytes to write everything")
   (let [view (f-view)
         res  (binf/wa-string view
                              0
@@ -432,6 +505,9 @@
 
   [f-view]
 
+  (t/is (false? (first (binf/wr-string (binf/view (binf.buffer/alloc 10))
+                                       binf.test.string/string)))
+        "Not enough bytes to write everything")
   (let [view (f-view)
         res  (binf/wr-string view
                              binf.test.string/string)]
@@ -458,23 +534,26 @@
 
 
 (t/deftest a-string
-  
-  (t/is (false? (first (binf/wa-string (binf/view (binf.buffer/alloc 10))
-                                       0
-                                       binf.test.string/string)))
-        "Not enough bytes to write everything")
 
   (-a-string #(binf/view (binf.buffer/alloc 1024))))
 
 
 
-(t/deftest r-string
+#?(:clj (t/deftest a-string-native
 
-  (t/is (false? (first (binf/wr-string (binf/view (binf.buffer/alloc 10))
-                                       binf.test.string/string)))
-        "Not enough bytes to write everything")
+  (-a-string #(binf.native/view 1024))))
+
+
+
+#_(t/deftest r-string
 
   (-r-string #(binf/view (binf.buffer/alloc 1024))))
+
+
+
+#?(:clj (t/deftest r-string-native
+
+  (-r-string #(binf.native/view 1024))))
 
 
 ;;;;;;;;;; Reallocating views
