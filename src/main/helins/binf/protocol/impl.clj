@@ -94,12 +94,15 @@
   binf.protocol/IAbsoluteWriter
 
     (wa-buffer [this position buffer offset n-byte]
-      (binf.buffer/copy (binf.protocol/to-buffer this)
-                        (+ (.arrayOffset this)
-                           position)
-                        buffer
-                        offset
-                        n-byte)
+      (let [position-bb (.position this)]
+        (.position this
+                   position)
+        (.put this
+              ^bytes buffer
+              offset
+              n-byte)
+        (.position this
+                   position-bb))
       this)
 
     (wa-b8 [this position integer]
@@ -228,13 +231,10 @@
   binf.protocol/IRelativeWriter
 
     (wr-buffer [this buffer offset n-byte]
-      (binf.buffer/copy (binf.protocol/to-buffer this)
-                        (.position this)
-                        buffer
-                        offset
-                        n-byte)
-      (binf.protocol/skip this
-                          n-byte)
+      (.put this
+            ^bytes buffer
+            offset
+            n-byte)
       this)
 
     (wr-b8 [this integer]
