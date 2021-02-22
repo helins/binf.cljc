@@ -10,7 +10,7 @@
                             bit-test]))
 
 
-;;;;;;;;;;
+;;;;;;;;;; Casting to ints <= 32-bits
 
 
 (t/deftest casting-smaller
@@ -30,7 +30,7 @@
           "Unsigned")))
 
 
-;;;;;;;;;;
+;;;;;;;;;; Bitwise operations from standard lib which does not work with js/BigInt
 
 
 (t/deftest bit-clear
@@ -69,3 +69,77 @@
 
   (t/is (false? (binf.int64/bit-test (binf.int64/u* 0)
                                      (binf.int64/u* 1)))))
+
+
+;;;;;;;;;; Unsigned logic and math
+
+
+(def u64-max
+     (binf.int64/u* 0xffffffffffffffff))
+
+
+
+(def u64-min
+     (binf.int64/u* 0))
+
+
+
+(t/deftest u=
+
+  (t/is (binf.int64/u= u64-max
+                       u64-max))
+
+  (t/is (false? (binf.int64/u= u64-min
+                               u64-max))))
+
+
+
+(t/deftest u<
+
+  (t/is (binf.int64/u< u64-min
+                       u64-max))
+
+  (t/is (false? (binf.int64/u< u64-max
+                               u64-min)))
+
+  (t/is (false? (binf.int64/u< u64-max
+                               u64-max))))
+
+
+
+(t/deftest u<=
+
+  (t/is (binf.int64/u<= u64-min
+                        u64-max))
+
+  (t/is (false? (binf.int64/u<= u64-max
+                                u64-min)))
+
+  (t/is (binf.int64/u<= u64-max
+                        u64-max)))
+
+
+
+(t/deftest u>
+
+  (t/is (binf.int64/u> u64-max
+                       u64-min))
+
+  (t/is (false? (binf.int64/u> u64-min
+                               u64-max)))
+
+  (t/is (false? (binf.int64/u> u64-max
+                               u64-max))))
+
+
+
+(t/deftest u>=
+
+  (t/is (binf.int64/u>= u64-max
+                        u64-min))
+
+  (t/is (false? (binf.int64/u>= u64-min
+                                u64-max)))
+
+  (t/is (binf.int64/u>= u64-max
+                        u64-max)))

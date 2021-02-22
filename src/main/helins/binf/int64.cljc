@@ -15,7 +15,7 @@
                   :rename  {bit-shift-left <<}))
 
 
-;;;;;;;;;;
+;;;;;;;;;; Private
 
 
 #?(:cljs (defn ^:private -ix
@@ -41,7 +41,7 @@
       js/Number)))
 
 
-;;;;;;;;;;
+;;;;;;;;;; Casting to ints <= 32-bits
 
 
 (defn i8
@@ -103,7 +103,7 @@
                 b64)))
 
 
-;;;;;;;;;;
+;;;;;;;;;; Macros for declaring 64-bit integers
 
 
 #?(:clj (defn- -b64*
@@ -143,7 +143,7 @@
          n)))
 
 
-;;;;;;;;;;
+;;;;;;;;;; Bitwise operations from standard lib which does not work with js/BigInt
 
 
 (defn bit-clear
@@ -199,3 +199,72 @@
                             (<< (u* 1)
                                       n))
                    (u* 0)))))
+
+
+;;;;;;;;;; Unsigned logic and math
+
+
+(defn u=
+
+  ""
+
+  [u64-1 u64-2]
+
+  #?(:clj  (zero? (Long/compareUnsigned u64-1
+                                        u64-2))
+     :cljs (= u64-1
+              u64-2)))
+
+
+
+(defn u<
+
+  ""
+
+  [u64-1 u64-2]
+
+  #?(:clj  (neg? (Long/compareUnsigned u64-1
+                                       u64-2))
+     :cljs (< u64-1
+              u64-2)))
+
+
+
+(defn u<=
+
+  ""
+
+  [u64-1 u64-2]
+
+  #?(:clj  (<= (Long/compareUnsigned u64-1
+                                     u64-2)
+               0)
+     :cljs (<= u64-1
+               u64-2)))
+
+
+
+(defn u>
+
+  ""
+
+  [u64-1 u64-2]
+
+  #?(:clj  (pos? (Long/compareUnsigned u64-1
+                                       u64-2))
+     :cljs (> u64-1
+              u64-2)))
+
+
+
+(defn u>=
+
+  ""
+
+  [u64-1 u64-2]
+
+  #?(:clj  (>= (Long/compareUnsigned u64-1
+                                     u64-2)
+               0)
+     :cljs (>= u64-1
+               u64-2)))
