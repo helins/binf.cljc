@@ -488,4 +488,10 @@
                                                     (binf/wr-b8 1)
                                                     (binf/wr-b8 2)
                                                     (binf/wr-b8 42))
-                                                2))))))
+                                                2)))
+           #?(:cljs (seq (binf/backing-buffer (binf/grow (-> (binf.buffer/alloc-shared 4)
+                                                             binf/view
+                                                             (binf/wr-b8 1)
+                                                             (binf/wr-b8 2)
+                                                             (binf/wr-b8 42))
+                                                         2)))))))

@@ -228,6 +228,14 @@
       this)
 
 
+  binf.protocol/IGrow
+
+    (grow [this n-additional-byte]
+      (-init-view (js/DataView. (binf.protocol/grow (.-buffer this)
+                                                    n-additional-byte))
+                  this))
+
+
   binf.protocol/IRelativeReader
 
     (rr-buffer [this n-byte buffer offset]

@@ -376,7 +376,7 @@
             (.limit n-byte)))))
 
 
-;;;;;;;;;; Creating views from objects
+;;;;;;;;;; Creating views from byte arrays
 
 
 (extend-type (Class/forName "[B")

@@ -2,7 +2,9 @@
 
   ""
 
-  {:author "Adam Helinski"})
+  {:author "Adam Helinski"}
+
+  #?(:cljs (:require [helins.binf.protocol :as binf.protocol])))
 
 
 ;;;;;;;;;; Creating new buffers
@@ -107,9 +109,7 @@
 ;;;;;;;;;; Making it easier to work with buffers and testing them
 
 
-#?(:cljs
-
-(extend-type js/ArrayBuffer
+#?(:cljs (extend-type js/ArrayBuffer
 
   ICounted
 
@@ -120,13 +120,21 @@
   ISeqable
 
     (-seq [this]
-      (array-seq (js/Int8Array. this)))))
+      (array-seq (js/Int8Array. this)))
+
+
+  binf.protocol/IGrow
+
+    (grow [this n-additional-byte]
+      (let [buffer-new (js/ArrayBuffer. (+ (.-byteLength this)
+                                           n-additional-byte))]
+          (copy buffer-new
+                this)
+          buffer-new))))
 
 
 
-#?(:cljs (when js/SharedArrayBuffer
-
-(extend-type js/SharedArrayBuffer
+#?(:cljs (when js/SharedArrayBuffer (extend-type js/SharedArrayBuffer
 
   ICounted
 
@@ -137,4 +145,14 @@
   ISeqable
 
     (-seq [this]
-      (array-seq (js/Int8Array. this))))))
+      (array-seq (js/Int8Array. this)))
+
+
+  binf.protocol/IGrow
+
+   (grow [this n-additional-byte]
+      (let [buffer-new (js/SharedArrayBuffer. (+ (.-byteLength this)
+                                                 n-additional-byte))]
+          (copy buffer-new
+                this)
+          buffer-new)))))

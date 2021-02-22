@@ -2,17 +2,17 @@
 
   "For daydreaming in the repl."
 
-  (:require [helins.binf               :as binf]
-            [helins.binf.base64        :as binf.base64]
-            [helins.binf.buffer        :as binf.buffer]
-            [helins.binf.endian        :as binf.endian]
-            [helins.binf.float         :as binf.float]
-            [helins.binf.int           :as binf.int]
-            [helins.binf.int64         :as binf.int64]
-            [helins.binf.native        :as binf.native]
-            [helins.binf.protocol      :as binf.protocol]
-            [helins.binf.protocol.impl :as binf.protocol.impl]
-            [helins.binf.string        :as binf.string]))
+  (:require [helins.binf                :as binf]
+            [helins.binf.base64         :as binf.base64]
+            [helins.binf.buffer         :as binf.buffer]
+            [helins.binf.endian         :as binf.endian]
+            [helins.binf.float          :as binf.float]
+            [helins.binf.int            :as binf.int]
+            [helins.binf.int64          :as binf.int64]
+            #?(:clj [helins.binf.native :as binf.native])
+            [helins.binf.protocol       :as binf.protocol]
+            [helins.binf.protocol.impl  :as binf.protocol.impl]
+            [helins.binf.string         :as binf.string]))
 
 
 ;;;;;;;;;;
