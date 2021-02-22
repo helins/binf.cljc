@@ -94,10 +94,10 @@
 
   ""
 
-  [pointer]
+  [ptr]
 
   (.freeMemory -unsafe
-               pointer)
+               ptr)
   nil)
 
 
@@ -106,17 +106,17 @@
 
   ""
 
-  [pointer n-byte]
+  [ptr n-byte]
 
   (.reallocateMemory -unsafe
-                     pointer
+                     ptr
                      n-byte))
 
 
 ;;;;; Translation between views and pointer
 
 
-(defn view->pointer
+(defn view->ptr
 
   ""
 
@@ -127,17 +127,17 @@
 
 
 
-(defn pointer->view
+(defn ptr->view
 
   ""
 
-  [pointer ^long n-byte]
+  [ptr ^long n-byte]
 
   (let [view (-> (view 0)
                  (.order (ByteOrder/nativeOrder)))]
     (.setLong -field-address
               view
-              pointer)
+              ptr)
     (.setInt -field-capacity
              view
              n-byte)
@@ -153,10 +153,10 @@
 
   ""
 
-  [pointer]
+  [ptr]
 
   (.getByte -unsafe
-            pointer))
+            ptr))
 
 
 
@@ -164,9 +164,9 @@
 
   ""
 
-  [pointer]
+  [ptr]
 
-  (binf.int/u8 (r-i8 pointer)))
+  (binf.int/u8 (r-i8 ptr)))
 
 
 
@@ -174,10 +174,10 @@
 
   ""
 
-  [pointer b8]
+  [ptr b8]
 
   (.putByte -unsafe
-            pointer
+            ptr
             b8))
 
 
@@ -188,10 +188,10 @@
 
   ""
 
-  [pointer]
+  [ptr]
 
   (.getShort -unsafe
-             pointer))
+             ptr))
 
 
 
@@ -199,9 +199,9 @@
 
   ""
 
-  [pointer]
+  [ptr]
 
-  (binf.int/u16 (r-i16 pointer)))
+  (binf.int/u16 (r-i16 ptr)))
 
 
 
@@ -209,10 +209,10 @@
 
   ""
 
-  [pointer b16]
+  [ptr b16]
 
   (.putShort -unsafe
-             pointer
+             ptr
              b16))
 
 
@@ -223,10 +223,10 @@
 
   ""
 
-  [pointer]
+  [ptr]
 
   (.getInt -unsafe
-           pointer))
+           ptr))
 
 
 
@@ -234,9 +234,9 @@
 
   ""
 
-  [pointer]
+  [ptr]
 
-  (binf.int/u32 (r-i32 pointer)))
+  (binf.int/u32 (r-i32 ptr)))
 
 
 
@@ -244,10 +244,10 @@
 
   ""
 
-  [pointer b32]
+  [ptr b32]
 
   (.putInt -unsafe
-           pointer
+           ptr
            b32))
 
 
@@ -258,10 +258,10 @@
 
   ""
 
-  [pointer]
+  [ptr]
 
   (.getLong -unsafe
-            pointer))
+            ptr))
 
 
 
@@ -269,10 +269,10 @@
 
   ""
 
-  [pointer b64]
+  [ptr b64]
 
   (.putLong -unsafe
-            pointer
+            ptr
             b64))
 
 
@@ -283,10 +283,10 @@
 
   ""
 
-  [pointer]
+  [ptr]
 
   (.getFloat -unsafe
-             pointer))
+             ptr))
 
 
 
@@ -294,10 +294,10 @@
 
   ""
 
-  [pointer f32]
+  [ptr f32]
 
   (.putFloat -unsafe
-             pointer
+             ptr
              f32))
 
 
@@ -308,10 +308,10 @@
 
   ""
 
-  [pointer]
+  [ptr]
 
   (.getDouble -unsafe
-              pointer))
+              ptr))
 
 
 
@@ -319,15 +319,43 @@
 
   ""
 
-  [pointer f64]
+  [ptr f64]
 
   (.putDouble -unsafe
-              pointer
+              ptr
               f64))
 
+;;;;;;;;;; Reading and writing pointers
+
+
+(def sz-ptr
+
+  ""
+
+  (.addressSize -unsafe))
 
 
 
+(defn r-ptr
+
+  ""
+
+  [ptr]
+
+  (.getAddress -unsafe
+               ptr))
+
+
+
+(defn w-ptr
+
+  ""
+
+  [ptr ptr-value]
+
+  (.putAddress -unsafe
+               ptr
+               ptr-value))
 
 
 
@@ -339,7 +367,7 @@
 
 
   (def pt (alloc 10))
-  (def v (pointer->view pt 5000))
+  (def v (ptr->view pt 5000))
 
   (binf/wa-b8 v
               4999
