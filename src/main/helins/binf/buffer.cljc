@@ -25,13 +25,23 @@
 
 
 
-#?(:cljs (defn alloc-shared
+#?(:cljs (def ^{:arglists '([n-byte])}
+              alloc-shared
 
   "Akin to [[alloc]], allocates a JS `SharedArrayBuffer`."
 
-  [n-byte]
+  (if js/SharedArrayBuffer
+    (fn [n-byte]
+      (js/SharedArrayBuffer. n-byte))
+    (fn [_n-byte]
+      (throw (js/Error. "SharedArrayBuffer are not supported by this browser"))))))
 
-  (js/SharedArrayBuffer. n-byte)))
+
+#?(:cljs (def alloc-shared?
+
+  ""
+
+  (boolean js/SharedArrayBuffer)))
 
 
 ;;;;;;;;;; Copying between buffers
@@ -114,7 +124,7 @@
 
 
 
-#?(:cljs
+#?(:cljs (when js/SharedArrayBuffer
 
 (extend-type js/SharedArrayBuffer
 
@@ -127,4 +137,4 @@
   ISeqable
 
     (-seq [this]
-      (array-seq (js/Int8Array. this)))))
+      (array-seq (js/Int8Array. this))))))

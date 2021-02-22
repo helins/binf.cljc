@@ -545,21 +545,26 @@
       ([this offset n-byte]
        (-buffer->view this
                       offset
-                      n-byte)))
-
-
-  js/SharedArrayBuffer
-
-    (view
-
-      ([this]
-       (-buffer->view this))
-
-      ([this offset]
-       (-buffer->view this
-                      offset))
-
-      ([this offset n-byte]
-       (-buffer->view this
-                      offset
                       n-byte))))
+
+
+
+(when js/SharedArrayBuffer
+
+  (extend-protocol binf.protocol/IViewable
+
+    js/SharedArrayBuffer
+
+      (view
+
+        ([this]
+         (-buffer->view this))
+
+        ([this offset]
+         (-buffer->view this
+                        offset))
+
+        ([this offset n-byte]
+         (-buffer->view this
+                        offset
+                        n-byte)))))
