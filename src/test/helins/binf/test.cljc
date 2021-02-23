@@ -2,14 +2,14 @@
 
   {:author "Adam Helins"}
 
-  (:require [clojure.test            :as t]
-            [helins.binf             :as binf]
-            [helins.binf.buffer      :as binf.buffer]
-            [helins.binf.int         :as binf.int]
-            [helins.binf.int64       :as binf.int64]
-            [helins.binf.native      :as binf.native]
-            [helins.binf.test.buffer :as binf.test.buffer]
-            [helins.binf.test.string :as binf.test.string]))
+  (:require [clojure.test               :as t]
+            [helins.binf                :as binf]
+            [helins.binf.buffer         :as binf.buffer]
+            [helins.binf.int            :as binf.int]
+            [helins.binf.int64          :as binf.int64]
+            #?(:clj [helins.binf.native :as binf.native])
+            [helins.binf.test.buffer    :as binf.test.buffer]
+            [helins.binf.test.string    :as binf.test.string]))
 
 
 #?(:clj (set! *warn-on-reflection*

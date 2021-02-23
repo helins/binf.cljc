@@ -102,6 +102,20 @@
                    n-byte))
 
 
+
+(defn copy
+
+  ""
+
+  [ptr-dest ptr-src n-byte]
+
+  (.copyMemory -unsafe
+               ptr-src
+               ptr-dest
+               n-byte))
+
+
+
 (defn free
 
   ""

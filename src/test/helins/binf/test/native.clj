@@ -22,6 +22,41 @@
 ;;;;;
 
 
+(t/deftest copy
+
+  (let [ptr (binf.native/alloc 64)]
+
+    (binf.native/w-b64 ptr
+                       42)
+    (binf.native/copy (+ ptr
+                         8)
+                      ptr
+                      8)
+    (t/is (= 42
+             (binf.native/r-b64 (+ ptr
+                                   8)))
+          "From low address to high")
+
+    (binf.native/w-b64 (+ ptr
+                          8)
+                       100)
+    (binf.native/copy ptr
+                      (+ ptr
+                         8)
+                      8)
+    (t/is (= 100
+             (binf.native/r-b64 ptr))
+          "From high address to low")
+
+    (binf.native/copy (inc ptr)
+                      ptr
+                      24)
+    (t/is (= 100
+             (binf.native/r-b64 (inc ptr)))
+          "No corruption when dest address overlaps src address")))
+
+
+
 (t/deftest free
 
   (t/is (nil? (binf.native/free (binf.native/alloc 4)))))
