@@ -9,8 +9,8 @@
   <url>https://github.com/helins-io/binf.cljc</url>
   <licenses>
     <license>
-      <name>Eclipse Public License</name>
-      <url>http://www.eclipse.org/legal/epl-v10.html</url>
+      <name>Mozilla Public License Version 2.0</name>
+      <url>https://www.mozilla.org/en-US/MPL/2.0/</url>
     </license>
   </licenses>
   <developers>
