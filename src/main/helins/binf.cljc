@@ -5,17 +5,19 @@
 
 (ns helins.binf
 
-  "Uninhibited library for handling any kind binary format or protocol.
+  "Uninhibited library for handling any kind of binary format or protocol.
   
    See README for an overview."
 
   {:author "Adam Helins"}
 
   (:require [helins.binf.buffer         :as binf.buffer]
+            [helins.binf.int            :as binf.int]
             [helins.binf.protocol       :as binf.protocol]
             [helins.binf.protocol.impl]
             [helins.binf.string         :as binf.string])
-  #?(:clj (:import java.nio.ByteBuffer)))
+  (:refer-clojure :rename {bit-shift-left  <<
+                           bit-shift-right >>}))
 
 
 (declare remaining)
@@ -816,7 +818,89 @@
      (binf.protocol/position view)))
 
 
-;;;;;;;;;; Used by other namespaces for casting primitive types in CLJS
+;;;;;;;;;; R/W LEB128
 
 
-#?(:cljs (def ^:no-doc -view-cast (binf.protocol/view (binf.buffer/alloc 8))))
+(defn rr-leb128-i32
+
+  ""
+
+  [view]
+
+  (loop [i32   0
+         shift 0]
+    (let [b8      (rr-u8 view)
+          i32-2   (bit-or i32
+                          (<< (bit-and b8
+                                       0x7f)
+                              shift))
+          shift-2 (+ shift
+                     7)]
+      (if (zero? (bit-and b8
+                          0x80))
+        (if (and (< shift-2
+                    32)
+                 (not (zero? (bit-and b8
+                                      0x40))))
+          (binf.int/i32 (bit-or i32-2
+                               (<< (bit-not 0)
+                                   shift-2)))
+          (binf.int/i32 i32-2))
+        (recur i32-2
+               shift-2)))))
+
+
+
+(defn wr-leb128-i32
+
+  ""
+
+  [view i32]
+
+  (loop [i32-2 i32]
+    (let [b8    (bit-and i32-2
+                         0x7f)
+          i32-3 (>> i32-2
+                    7)]
+      (if (or (and (zero? i32-3)
+                   (zero? (bit-and b8
+                                   0x40)))
+              (and (= i32-3
+                      -1)
+                   (not (zero? (bit-and b8
+                                        0x40)))))
+        (do
+          (wr-b8 view
+                 b8)
+          view)
+        (do
+          (wr-b8 view
+                 (bit-or b8
+                         0x80))
+          (recur i32-3))))))
+
+
+
+(comment
+
+
+  (def buf
+       (binf.buffer/alloc 32))
+
+  (def v
+       (view buf))
+
+  (wr-leb128-i32 v
+                 42000)
+
+  (seek v
+        0)
+
+  (rr-leb128-i32 v)
+
+
+
+  (seq buf)
+
+
+  )

@@ -27,12 +27,5 @@
   (kaocha.repl/run :jvm)
 
 
-  (->> (binf/view-native 42)
-       clojure.reflect/reflect
-       :members
-       (filter #(contains? (:flags %)
-                           :private))
-       clojure.pprint/pprint)
-
 
   )
