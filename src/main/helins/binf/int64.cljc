@@ -113,15 +113,20 @@
 
 #?(:clj (defn- -b64*
 
-  ;;
+  ;; In JS, optimize if `x` is a number between `Number.MIN_SAFE_INTEGER´ and `Number.MAX_SAFE_INTEGER`.
 
   [env as-xint x]
 
-  (let [x-2 (unchecked-long x)]
-    (if (:ns env)
-      `(~as-xint 64
-                 (js/BigInt ~(str x-2)))
-      x-2))))
+  (if (:ns env)
+    `(~as-xint 64
+               (js/BigInt ~(if (number? x)
+                             (if (<= -9007199254740991
+                                     x
+                                     9007199254740991)
+                               x
+                               (str x))
+                             x)))
+    `(unchecked-long ~x))))
 
 
 
