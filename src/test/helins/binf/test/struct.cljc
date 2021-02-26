@@ -22,9 +22,9 @@
                       8]
             :n-byte  16}
            (binf.struct/c 8
-                          [binf.struct/u8
-                           binf.struct/i16
-                           binf.struct/f64])))
+                          [(binf.struct/u8  :a)
+                           (binf.struct/i16 :b)
+                           (binf.struct/f64 :c)])))
 
   (t/is (= {:align   4
             :offset+ [0
@@ -33,8 +33,8 @@
                       12]
             :n-byte  16}
            (binf.struct/c 4
-                          [binf.struct/i8
-                           binf.struct/u16
-                           binf.struct/i64
-                           binf.struct/u8])))
+                          [(binf.struct/i8  :a)
+                           (binf.struct/u16 :b)
+                           (binf.struct/i64 :c)
+                           (binf.struct/u8  :d)])))
   )

@@ -33,103 +33,158 @@
 ;;;;;;;;;;
 
 
-(def i8
+(defn name-get
 
   ""
 
-  {:binf.struct/align  1
-   :binf.struct/n-byte 1
-   :binf.struct/type   'i8})
+  [member]
+
+  (get member
+       :binf.struct/name))
 
 
 
-(def i16
+(defn name-set
+
+  ""
+  
+  [member name]
+
+  (assoc member
+         :binf.struct/name
+         name))
+
+
+;;;;;;;;;;
+
+
+(defn i8
 
   ""
 
-  {:binf.struct/align  2
-   :binf.struct/n-byte 2
-   :binf.struct/type   'i16})
+  [name]
+
+  (name-set {:binf.struct/align  1
+             :binf.struct/n-byte 1
+             :binf.struct/type   'i8}
+            name))
 
 
 
-(def i32
-
-  ""
-
-  {:binf.struct/align  4
-   :binf.struct/n-byte 4
-   :binf.struct/type   'i32})
-
-
-
-(def i64
+(defn i16
 
   ""
 
-  {:binf.struct/align  8
-   :binf.struct/n-byte 8
-   :binf.struct/type   'i64})
+  [name]
+
+  (name-set {:binf.struct/align  2
+             :binf.struct/n-byte 2
+             :binf.struct/type   'i16}
+            name))
 
 
 
-(def u8
-
-  ""
-
-  {:binf.struct/align  1
-   :binf.struct/n-byte 1
-   :binf.struct/type   'u8})
-
-
-
-(def u16
+(defn i32
 
   ""
 
-  {:binf.struct/align  2
-   :binf.struct/n-byte 2
-   :binf.struct/type   'u16})
+  [name]
+
+  (name-set {:binf.struct/align  4
+             :binf.struct/n-byte 4
+             :binf.struct/type   'i32}
+            name))
 
 
 
-(def u32
-
-  ""
-
-  {:binf.struct/align  4
-   :binf.struct/n-byte 4
-   :binf.struct/type   'u32})
-
-
-
-(def u64
+(defn i64
 
   ""
 
-  {:binf.struct/align  8
-   :binf.struct/n-byte 8
-   :binf.struct/type   'u64})
+  [name]
+
+  (name-set {:binf.struct/align  8
+             :binf.struct/n-byte 8
+             :binf.struct/type   'i64}
+            name))
 
 
 
-(def f32
-
-  ""
-
-  {:binf.struct/align  4
-   :binf.struct/n-byte 4
-   :binf.struct/type   'f32})
-
-
-
-(def f64
+(defn u8
 
   ""
 
-  {:binf.struct/align  8
-   :binf.struct/n-byte 8
-   :binf.struct/type   'f64})
+  [name]
+
+  (name-set {:binf.struct/align  1
+             :binf.struct/n-byte 1
+             :binf.struct/type   'u8}
+            name))
+
+
+
+(defn u16
+
+  ""
+
+  [name]
+
+  (name-set {:binf.struct/align  2
+             :binf.struct/n-byte 2
+             :binf.struct/type   'u16}
+            name))
+
+
+
+(defn u32
+
+  ""
+
+  [name]
+
+  (name-set {:binf.struct/align  4
+             :binf.struct/n-byte 4
+             :binf.struct/type   'u32}
+            name))
+
+
+
+(defn u64
+
+  ""
+
+  [name]
+
+  (name-set {:binf.struct/align  8
+             :binf.struct/n-byte 8
+             :binf.struct/type   'u64}
+            name))
+
+
+
+(defn f32
+
+  ""
+
+  [name]
+
+  (name-set {:binf.struct/align  4
+             :binf.struct/n-byte 4
+             :binf.struct/type   'f32}
+            name))
+
+
+
+(defn f64
+
+  ""
+
+  [name]
+
+  (name-set {:binf.struct/align  8
+             :binf.struct/n-byte 8
+             :binf.struct/type   'f64}
+            name))
 
 
 ;;;;;;;;;;
