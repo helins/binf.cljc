@@ -228,35 +228,43 @@
 
   ""
 
-  [type max-align member+]
+  ([type max-align member+]
 
-  (loop [align        1
-         layout       []
-         member-2+    member+
-         name->member {}
-         offset       0]
-    (if (seq member-2+)
-      (let [member        (first member-2+)
-            member-align  (min max-align
-                               (member :binf.struct/align))
-            member-offset (aligned member-align
-                                   offset)
-            member-name   (name-get member)]
-        (recur (max align
-                    member-align)
-               (conj layout
-                     member-name)
-               (rest member-2+)
-               (assoc name->member
-                      member-name
-                      (assoc member
-                             :binf.struct/align  member-align
-                             :binf.struct/offset member-offset))
-               (+ member-offset
-                  (member :binf.struct/n-byte))))
-      {:binf.struct/align        align
-       :binf.struct/layout       layout
-       :binf.struct/n-byte       (aligned align
-                                          offset)
-       :binf.struct/name->member name->member
-       :binf.struct/type         type})))
+   (loop [align        1
+          layout       []
+          member-2+    member+
+          name->member {}
+          offset       0]
+     (if (seq member-2+)
+       (let [member        (first member-2+)
+             member-align  (min max-align
+                                (member :binf.struct/align))
+             member-offset (aligned member-align
+                                    offset)
+             member-name   (name-get member)]
+         (recur (max align
+                     member-align)
+                (conj layout
+                      member-name)
+                (rest member-2+)
+                (assoc name->member
+                       member-name
+                       (assoc member
+                              :binf.struct/align  member-align
+                              :binf.struct/offset member-offset))
+                (+ member-offset
+                   (member :binf.struct/n-byte))))
+       {:binf.struct/align        align
+        :binf.struct/layout       layout
+        :binf.struct/n-byte       (aligned align
+                                           offset)
+        :binf.struct/name->member name->member
+        :binf.struct/type         type})))
+
+
+  ([type max-align name member+]
+
+   (name-set (c type
+                max-align
+                member+)
+             name)))

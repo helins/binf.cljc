@@ -24,7 +24,7 @@
 
 
 
-(defn prim
+(defn member
 
   ""
 
@@ -35,7 +35,7 @@
          :binf.struct/offset offset))
 
 
-;;;;;;;;;;
+;;;;;;;;;; Unnested structs
 
 
 (t/deftest struct-unnested
@@ -46,22 +46,22 @@
                                        :b
                                        :c
                                        :d]
-            :binf.struct/name->member {:a (prim binf.struct/u8
-                                                :a
-                                                1
-                                                0)
-                                       :b (prim binf.struct/i16
-                                                :b
-                                                2
-                                                2)
-                                       :c (prim binf.struct/u32
-                                                :c
-                                                4
-                                                4)
-                                       :d (prim binf.struct/i8
-                                                :d
-                                                1
-                                                8)}
+            :binf.struct/name->member {:a (member binf.struct/u8
+                                                  :a
+                                                  1
+                                                  0)
+                                       :b (member binf.struct/i16
+                                                  :b
+                                                  2
+                                                  2)
+                                       :c (member binf.struct/u32
+                                                  :c
+                                                  4
+                                                  4)
+                                       :d (member binf.struct/i8
+                                                  :d
+                                                  1
+                                                  8)}
             :binf.struct/n-byte       12
             :binf.struct/type         'foo}
            (binf.struct/c 'foo
@@ -76,18 +76,18 @@
             :binf.struct/layout       [:a
                                        :b
                                        :c]
-            :binf.struct/name->member {:a (prim binf.struct/u8
-                                                :a
-                                                1
-                                                0)
-                                       :b (prim binf.struct/f64
-                                                :b
-                                                8
-                                                8)
-                                       :c (prim binf.struct/i16
-                                                :c
-                                                2
-                                                16)}
+            :binf.struct/name->member {:a (member binf.struct/u8
+                                                  :a
+                                                  1
+                                                  0)
+                                       :b (member binf.struct/f64
+                                                  :b
+                                                  8
+                                                  8)
+                                       :c (member binf.struct/i16
+                                                  :c
+                                                  2
+                                                  16)}
             :binf.struct/n-byte       24
             :binf.struct/type         'foo}
            (binf.struct/c 'foo
@@ -102,21 +102,22 @@
                                        :b
                                        :c
                                        :d]
-            :binf.struct/name->member {:a (prim binf.struct/i8
-                                                :a
-                                                1
-                                                0)
-                                       :b (prim binf.struct/u16
-                                                :b
-                                                2
-                                                2)
-                                       :c (prim binf.struct/i64
-                                                :c
-                                                4
-                                                4)
-                                       :d (prim binf.struct/u8 :d
-                                                1
-                                                12)}
+            :binf.struct/name->member {:a (member binf.struct/i8
+                                                  :a
+                                                  1
+                                                  0)
+                                       :b (member binf.struct/u16
+                                                  :b
+                                                  2
+                                                  2)
+                                       :c (member binf.struct/i64
+                                                  :c
+                                                  4
+                                                  4)
+                                       :d (member binf.struct/u8
+                                                  :d
+                                                  1
+                                                  12)}
             :binf.struct/n-byte       16
             :binf.struct/type         'foo}
            (binf.struct/c 'foo
@@ -157,15 +158,15 @@
   (t/is (= {:binf.struct/align        2
             :binf.struct/layout       [:a
                                        :b]
-            :binf.struct/name->member {:a (prim binf.struct/u8
-                                                :a
-                                                1
-                                                0)
-                                       :b (prim #(binf.struct/array (binf.struct/u16 %)
+            :binf.struct/name->member {:a (member binf.struct/u8
+                                                  :a
+                                                  1
+                                                  0)
+                                       :b (member #(binf.struct/array (binf.struct/u16 %)
                                                                     10)
-                                                :b
-                                                2
-                                                2)}
+                                                  :b
+                                                  2
+                                                  2)}
             :binf.struct/n-byte       22
             :binf.struct/type         'foo}
            (binf.struct/c 'foo
@@ -179,16 +180,16 @@
    (t/is (= {:binf.struct/align        2
              :binf.struct/layout       [:a
                                         :b]
-             :binf.struct/name->member {:a (prim binf.struct/u8
-                                                 :a
-                                                 1
-                                                 0)
-                                        :b (prim #(binf.struct/array (binf.struct/array (binf.struct/u16 %)
+             :binf.struct/name->member {:a (member binf.struct/u8
+                                                   :a
+                                                   1
+                                                   0)
+                                        :b (member #(binf.struct/array (binf.struct/array (binf.struct/u16 %)
                                                                                         10)
                                                                      5)
-                                                 :b
-                                                 2
-                                                 2)}
+                                                   :b
+                                                   2
+                                                   2)}
              :binf.struct/n-byte       102
              :binf.struct/type         'foo}
             (binf.struct/c 'foo
@@ -198,3 +199,35 @@
                                                                   10)
                                                5)]))
          "2D"))
+
+
+;;;;;;;;;; Nested structs
+
+
+(t/deftest struct-nested
+
+  (t/is (= {:binf.struct/align        w32
+            :binf.struct/layout       [:a
+                                       :b]
+            :binf.struct/name->member {:a (member binf.struct/u16
+                                                  :a
+                                                  2
+                                                  0)
+                                       :b (member #(binf.struct/c 'bar
+                                                                  w32
+                                                                  %
+                                                                  [(binf.struct/i8  :c)
+                                                                   (binf.struct/f64 :d)])
+                                                  :b
+                                                  4
+                                                  4)}
+            :binf.struct/n-byte       16
+            :binf.struct/type         'foo}
+           (binf.struct/c 'foo
+                          w32
+                          [(binf.struct/u16 :a)
+                           (binf.struct/c 'bar
+                                          w32
+                                          :b
+                                          [(binf.struct/i8  :c)
+                                           (binf.struct/f64 :d)])]))))
