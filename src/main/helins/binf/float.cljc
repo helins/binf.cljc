@@ -7,10 +7,7 @@
 
   ""
 
-  {:author "Adam Helinski"}
-
-  #?(:cljs (:require [helins.binf          :as binf]
-                     [helins.binf.protocol :as binf.protocol])))
+  {:author "Adam Helinski"})
 
 
 ;;;;;;;;;; 
@@ -25,10 +22,11 @@
   [f32]
 
   #?(:clj  (Float/floatToIntBits f32)
-     :cljs (-> binf/-view-cast
-               (binf.protocol/wa-f32 0
-                                     f32)
-               (binf.protocol/ra-u32 0))))
+     :cljs (let [data-view (js/DataView. (js/ArrayBuffer. 4))]
+             (.setFloat32 data-view
+                          0
+                          f32)
+             (.getUint32 data-view))))
 
 
 
@@ -41,10 +39,12 @@
   [f64]
 
   #?(:clj  (Double/doubleToLongBits f64)
-     :cljs (-> binf/-view-cast
-               (binf.protocol/wa-f64 0
-                                     f64)
-               (binf.protocol/ra-i64 0))))
+     :cljs (let [data-view (js/DataView. (js/ArrayBuffer. 8))]
+             (.setFloat64 data-view
+                          0
+                          f64)
+             (.getBigUint64 data-view
+                            0))))
 
 
 
@@ -54,13 +54,16 @@
   
    Opposite of [[bits-f32]]."
 
-  [bits]
+  [b32]
 
-  #?(:clj  (Float/intBitsToFloat bits)
-     :cljs (-> binf/-view-cast
-               (binf.protocol/wa-b32 0
-                                     bits)
-               (binf.protocol/ra-f32 0))))
+  #?(:clj  (Float/intBitsToFloat b32)
+     :cljs (let [data-view (js/DataView. (js/ArrayBuffer. 4))]
+             (.setUint32 data-view
+                         0
+                         b32)
+             (.getFloat32 data-view
+                          0))))
+
 
 
 (defn from-b64
@@ -69,13 +72,15 @@
   
    Opposite of [[bits-64]]."
 
-  [bits]
+  [b64]
 
-  #?(:clj  (Double/longBitsToDouble bits)
-     :cljs (-> binf/-view-cast
-               (binf.protocol/wa-b64 0
-                                     bits)
-               (binf.protocol/ra-f64 0))))
+  #?(:clj  (Double/longBitsToDouble b64)
+     :cljs (let [data-view (js/DataView. (js/ArrayBuffer. 8))]
+             (.setBigUint64 data-view
+                            0
+                            b64)
+             (.getFloat64 data-view
+                          0))))
 
 
 ;;;;;;;;;;

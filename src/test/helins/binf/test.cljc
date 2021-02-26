@@ -337,7 +337,7 @@
 
 
 
-(:cljs (t/deftest view-f64-native
+#?(:clj (t/deftest view-f64-native
 
   (-view-f64 view-8-native)))
 
