@@ -197,6 +197,7 @@
   [max-align member+]
 
   (loop [align     1
+         layout    []
          offset    0
          offset+   []
          member-2+ member+]
@@ -209,17 +210,20 @@
                                   member-align))]
         (recur (max align
                     member-align)
+               (conj layout
+                     (name-get member))
                (+ member-offset
                   (member :binf.struct/n-byte))
                (conj offset+
                      member-offset)
                (rest member-2+)))
-      {:align   align
-       :offset+ offset+
-       :n-byte  (let [mismatch (rem offset
-                                    align)]
-                  (if (zero? mismatch)
-                    offset
-                    (+ offset
-                       (- align
-                          mismatch))))})))
+      {:binf.struct/align   align
+       :binf.struct/layout  layout
+       :binf.struct/offset+ offset+
+       :binf.struct/n-byte  (let [mismatch (rem offset
+                                                align)]
+                              (if (zero? mismatch)
+                                offset
+                                (+ offset
+                                   (- align
+                                      mismatch))))})))

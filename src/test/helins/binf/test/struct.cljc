@@ -16,22 +16,29 @@
 
 (t/deftest unnested
 
-  (t/is (= {:align   8
-            :offset+ [0
-                      2
-                      8]
-            :n-byte  16}
+  (t/is (= {:binf.struct/align   8
+            :binf.struct/layout  [:a
+                                  :b
+                                  :c]
+            :binf.struct/offset+ [0
+                                  2
+                                  8]
+            :binf.struct/n-byte  16}
            (binf.struct/c 8
                           [(binf.struct/u8  :a)
                            (binf.struct/i16 :b)
                            (binf.struct/f64 :c)])))
 
-  (t/is (= {:align   4
-            :offset+ [0
-                      2
-                      4
-                      12]
-            :n-byte  16}
+  (t/is (= {:binf.struct/align   4
+            :binf.struct/layout  [:a
+                                  :b
+                                  :c
+                                  :d]
+            :binf.struct/offset+ [0
+                                  2
+                                  4
+                                  12]
+            :binf.struct/n-byte  16}
            (binf.struct/c 4
                           [(binf.struct/i8  :a)
                            (binf.struct/u16 :b)
