@@ -196,34 +196,38 @@
 
   [max-align member+]
 
-  (loop [align     1
-         layout    []
-         offset    0
-         offset+   []
-         member-2+ member+]
+  (loop [align        1
+         layout       []
+         member-2+    member+
+         name->member {}
+         offset       0]
     (if (seq member-2+)
       (let [member        (first member-2+)
             member-align  (min max-align
                                (member :binf.struct/align))
             member-offset (+ offset
                              (rem offset
-                                  member-align))]
+                                  member-align))
+            member-name   (name-get member)]
         (recur (max align
                     member-align)
                (conj layout
-                     (name-get member))
+                     member-name)
+               (rest member-2+)
+               (assoc name->member
+                      member-name
+                      (assoc member
+                             :binf.struct/offset
+                             member-offset))
                (+ member-offset
-                  (member :binf.struct/n-byte))
-               (conj offset+
-                     member-offset)
-               (rest member-2+)))
-      {:binf.struct/align   align
-       :binf.struct/layout  layout
-       :binf.struct/offset+ offset+
-       :binf.struct/n-byte  (let [mismatch (rem offset
-                                                align)]
-                              (if (zero? mismatch)
-                                offset
-                                (+ offset
-                                   (- align
-                                      mismatch))))})))
+                  (member :binf.struct/n-byte))))
+      {:binf.struct/align        align
+       :binf.struct/layout       layout
+       :binf.struct/n-byte       (let [mismatch (rem offset
+                                                     align)]
+                                   (if (zero? mismatch)
+                                     offset
+                                     (+ offset
+                                        (- align
+                                           mismatch))))
+       :binf.struct/name->member name->member})))
