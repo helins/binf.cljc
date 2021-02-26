@@ -14,6 +14,7 @@
             [helins.binf.float          :as binf.float]
             [helins.binf.int            :as binf.int]
             [helins.binf.int64          :as binf.int64]
+            [helins.binf.leb128         :as binf.leb128]
             #?(:clj [helins.binf.native :as binf.native])
             [helins.binf.protocol       :as binf.protocol]
             [helins.binf.protocol.impl  :as binf.protocol.impl]
