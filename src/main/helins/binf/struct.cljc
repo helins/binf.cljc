@@ -9,7 +9,8 @@
 
   {:author "Adam Helinski"}
 
-  (:refer-clojure :exclude [struct]))
+  (:refer-clojure :exclude [array
+                            struct]))
 
 
 ;;;;;;;;;;
@@ -186,6 +187,23 @@
              :binf.struct/type   'f64}
             name))
 
+
+;;;;;;;;;;
+
+
+(defn array
+
+  ""
+
+  [member n]
+
+  (-> member
+      (update :binf.struct/n-byte
+              #(* n
+                  %))
+      (update :binf.struct/type
+              #(vector %
+                       n))))
 
 ;;;;;;;;;;
 
