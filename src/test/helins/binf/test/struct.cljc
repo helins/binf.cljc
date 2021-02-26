@@ -22,28 +22,45 @@
      binf.struct/word-64)
 
 
+
+(defn prim
+
+  ""
+
+  [f name align offset]
+
+  (assoc (f name)
+         :binf.struct/align  align
+         :binf.struct/offset offset))
+
+
 ;;;;;;;;;;
 
 
 (t/deftest unnested
+
 
   (t/is (= {:binf.struct/align        w32
             :binf.struct/layout       [:a
                                        :b
                                        :c
                                        :d]
-            :binf.struct/name->member {:a (assoc (binf.struct/u8 :a)
-                                                 :binf.struct/offset
-                                                 0)
-                                       :b (assoc (binf.struct/i16 :b)
-                                                 :binf.struct/offset
-                                                 2)
-                                       :c (assoc (binf.struct/u32 :c)
-                                                 :binf.struct/offset
-                                                 4)
-                                       :d (assoc (binf.struct/i8 :d)
-                                                 :binf.struct/offset
-                                                 8)}
+            :binf.struct/name->member {:a (prim binf.struct/u8
+                                                :a
+                                                1
+                                                0)
+                                       :b (prim binf.struct/i16
+                                                :b
+                                                2
+                                                2)
+                                       :c (prim binf.struct/u32
+                                                :c
+                                                4
+                                                4)
+                                       :d (prim binf.struct/i8
+                                                :d
+                                                1
+                                                8)}
             :binf.struct/n-byte       12}
            (binf.struct/c w32
                           [(binf.struct/u8  :a)
@@ -56,38 +73,45 @@
             :binf.struct/layout       [:a
                                        :b
                                        :c]
-            :binf.struct/name->member {:a (assoc (binf.struct/u8 :a)
-                                                 :binf.struct/offset
-                                                 0)
-                                       :b (assoc (binf.struct/f64 :b)
-                                                 :binf.struct/offset
-                                                 8)
-                                       :c (assoc (binf.struct/i16 :c)
-                                                 :binf.struct/offset
-                                                 16)}
+            :binf.struct/name->member {:a (prim binf.struct/u8
+                                                :a
+                                                1
+                                                0)
+                                       :b (prim binf.struct/f64
+                                                :b
+                                                8
+                                                8)
+                                       :c (prim binf.struct/i16
+                                                :c
+                                                2
+                                                16)}
             :binf.struct/n-byte       24}
            (binf.struct/c w64
                           [(binf.struct/u8  :a)
                            (binf.struct/f64 :b)
                            (binf.struct/i16 :c)])))
 
+
   (t/is (= {:binf.struct/align        w32
             :binf.struct/layout       [:a
                                        :b
                                        :c
                                        :d]
-            :binf.struct/name->member {:a (assoc (binf.struct/i8 :a)
-                                                 :binf.struct/offset
-                                                 0)
-                                       :b (assoc (binf.struct/u16 :b)
-                                                 :binf.struct/offset
-                                                 2)
-                                       :c (assoc (binf.struct/i64 :c)
-                                                 :binf.struct/offset
-                                                 4)
-                                       :d (assoc (binf.struct/u8 :d)
-                                                 :binf.struct/offset
-                                                 12)}
+            :binf.struct/name->member {:a (prim binf.struct/i8
+                                                :a
+                                                1
+                                                0)
+                                       :b (prim binf.struct/u16
+                                                :b
+                                                2
+                                                2)
+                                       :c (prim binf.struct/i64
+                                                :c
+                                                4
+                                                4)
+                                       :d (prim binf.struct/u8 :d
+                                                1
+                                                12)}
             :binf.struct/n-byte       16}
            (binf.struct/c w32
                           [(binf.struct/i8  :a)

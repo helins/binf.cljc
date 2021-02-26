@@ -232,8 +232,8 @@
                (assoc name->member
                       member-name
                       (assoc member
-                             :binf.struct/offset
-                             member-offset))
+                             :binf.struct/align  member-align
+                             :binf.struct/offset member-offset))
                (+ member-offset
                   (member :binf.struct/n-byte))))
       {:binf.struct/align        align
