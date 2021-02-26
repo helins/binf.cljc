@@ -30,6 +30,110 @@
   8)
 
 
+;;;;;;;;;;
+
+
+(def i8
+
+  ""
+
+  {:binf.struct/align  1
+   :binf.struct/n-byte 1
+   :binf.struct/type   'i8})
+
+
+
+(def i16
+
+  ""
+
+  {:binf.struct/align  2
+   :binf.struct/n-byte 2
+   :binf.struct/type   'i16})
+
+
+
+(def i32
+
+  ""
+
+  {:binf.struct/align  4
+   :binf.struct/n-byte 4
+   :binf.struct/type   'i32})
+
+
+
+(def i64
+
+  ""
+
+  {:binf.struct/align  8
+   :binf.struct/n-byte 8
+   :binf.struct/type   'i64})
+
+
+
+(def u8
+
+  ""
+
+  {:binf.struct/align  1
+   :binf.struct/n-byte 1
+   :binf.struct/type   'u8})
+
+
+
+(def u16
+
+  ""
+
+  {:binf.struct/align  2
+   :binf.struct/n-byte 2
+   :binf.struct/type   'u16})
+
+
+
+(def u32
+
+  ""
+
+  {:binf.struct/align  4
+   :binf.struct/n-byte 4
+   :binf.struct/type   'u32})
+
+
+
+(def u64
+
+  ""
+
+  {:binf.struct/align  8
+   :binf.struct/n-byte 8
+   :binf.struct/type   'u64})
+
+
+
+(def f32
+
+  ""
+
+  {:binf.struct/align  4
+   :binf.struct/n-byte 4
+   :binf.struct/type   'f32})
+
+
+
+(def f64
+
+  ""
+
+  {:binf.struct/align  8
+   :binf.struct/n-byte 8
+   :binf.struct/type   'f64})
+
+
+;;;;;;;;;;
+
 
 (defn c
 
@@ -44,14 +148,14 @@
     (if (seq member-2+)
       (let [member        (first member-2+)
             member-align  (min max-align
-                               member)
+                               (member :binf.struct/align))
             member-offset (+ offset
                              (rem offset
                                   member-align))]
         (recur (max align
                     member-align)
                (+ member-offset
-                  member)
+                  (member :binf.struct/n-byte))
                (conj offset+
                      member-offset)
                (rest member-2+)))
