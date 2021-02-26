@@ -584,6 +584,26 @@
 ;;;;;;;;;; R/W LEB128
 
 
+(t/deftest leb128-u32
+
+  (let [v (binf/view (binf.buffer/alloc 32))]
+
+    (t/is (= 0
+             (-> v
+                 (binf/seek 0)
+                 (binf/wr-leb128-u32 0)
+                 (binf/seek 0)
+                 (binf/rr-leb128-u32))))
+
+    (t/is (= 4294967295
+             (-> v
+                 (binf/seek 0)
+                 (binf/wr-leb128-u32 4294967295)
+                 (binf/seek 0)
+                 (binf/rr-leb128-u32))))))
+
+
+
 (t/deftest leb128-i32
 
   (let [v (binf/view (binf.buffer/alloc 32))]

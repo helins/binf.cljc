@@ -16,8 +16,9 @@
             [helins.binf.protocol       :as binf.protocol]
             [helins.binf.protocol.impl]
             [helins.binf.string         :as binf.string])
-  (:refer-clojure :rename {bit-shift-left  <<
-                           bit-shift-right >>}))
+  (:refer-clojure :rename {bit-shift-left           <<
+                           bit-shift-right          >>
+                           unsigned-bit-shift-right >>>}))
 
 
 (declare remaining)
@@ -821,6 +822,30 @@
 ;;;;;;;;;; R/W LEB128
 
 
+(defn rr-leb128-u32
+
+  ""
+
+  [view]
+
+  (loop [u32   0
+         shift 0]
+    (let [b8    (rr-u8 view)
+          u32-2 (bit-or u32
+                        (<< (bit-and b8
+                                     0x7f)
+                            shift))
+          ]
+      (if (zero? (bit-and b8
+                          0x80))
+        #?(:clj  u32-2
+           :cljs (binf.int/u32 u32-2))
+        (recur u32-2
+               (+ shift
+                  7))))))
+
+
+
 (defn rr-leb128-i32
 
   ""
@@ -848,6 +873,30 @@
           (binf.int/i32 i32-2))
         (recur i32-2
                shift-2)))))
+
+
+
+(defn wr-leb128-u32
+
+  ""
+
+  [view u32]
+
+  (loop [u32-2 u32]
+    (let [b8    (bit-and u32-2
+                         0x7f)
+          u32-3 (>>> u32-2
+                     7)]
+      (if (zero? u32-3)
+        (do
+          (wr-b8 view
+                 b8)
+          view)
+        (do
+          (wr-b8 view
+                 (bit-or b8
+                         0x80))
+          (recur u32-3))))))
 
 
 
