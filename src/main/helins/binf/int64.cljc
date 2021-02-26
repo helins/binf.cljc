@@ -17,7 +17,9 @@
                             bit-flip
                             bit-set
                             bit-test]
-                  :rename  {bit-shift-left <<}))
+                  :rename  {bit-shift-left           <<
+                            bit-shift-right          >>
+                            unsigned-bit-shift-right >>>}))
 
 
 ;;;;;;;;;; Private
@@ -155,6 +157,17 @@
 
 ;;;;;;;;;; Bitwise operations from standard lib which does not work with js/BigInt
 
+
+(defn u>>
+
+  ""
+
+  [x n]
+
+  #?(:clj  (>>> x
+                n)
+     :cljs (>> x
+               n)))
 
 (defn bit-clear
 
