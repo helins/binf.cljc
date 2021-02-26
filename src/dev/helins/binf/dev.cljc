@@ -18,7 +18,11 @@
             #?(:clj [helins.binf.native :as binf.native])
             [helins.binf.protocol       :as binf.protocol]
             [helins.binf.protocol.impl  :as binf.protocol.impl]
-            [helins.binf.string         :as binf.string]))
+            [helins.binf.string         :as binf.string]
+			[helins.binf.struct			:as binf.struct]
+            [helins.binf.test           :as binf.test]
+            [helins.binf.test.base64    :as binf.test.base64]
+            [helins.binf.test.struct    :as binf.test.struct]))
 
 
 ;;;;;;;;;;
