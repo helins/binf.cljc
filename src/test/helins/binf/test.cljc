@@ -648,3 +648,30 @@
                  (binf/wr-leb128-u64 (binf.int64/u* 18446744073709551615))
                  (binf/seek 0)
                  (binf/rr-leb128-u64))))))
+
+
+
+(t/deftest leb128-i64
+
+  (let [v (binf/view (binf.buffer/alloc 32))]
+
+    (t/is (= (binf.int64/i* 0)
+             (-> v
+                 (binf/seek 0)
+                 (binf/wr-leb128-i64 (binf.int64/i* 0))
+                 (binf/seek 0)
+                 (binf/rr-leb128-i64))))
+
+    (t/is (= (binf.int64/i* 9223372036854775807)
+             (-> v
+                 (binf/seek 0)
+                 (binf/wr-leb128-i64 (binf.int64/i* 9223372036854775807))
+                 (binf/seek 0)
+                 (binf/rr-leb128-i64))))
+
+    (t/is (= (binf.int64/i* -9223372036854775808)
+             (-> v
+                 (binf/seek 0)
+                 (binf/wr-leb128-i64 (binf.int64/i* -9223372036854775808))
+                 (binf/seek 0)
+                 (binf/rr-leb128-i64))))))

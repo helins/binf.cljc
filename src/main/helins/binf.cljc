@@ -898,7 +898,32 @@
 
 
 
+(defn rr-leb128-i64
 
+  ""
+
+  [view]
+
+  (loop [i64   (binf.int64/u* 0)
+         shift (binf.int64/u* 0)]
+    (let [b8      (rr-u8 view)
+          i64-2   (bit-or i64
+                          (<< (binf.int64/u* (bit-and b8
+                                                      0x7f))
+                              shift))
+          shift-2 (+ shift
+                     (binf.int64/u* 7))]
+      (if (zero? (bit-and b8
+                          0x80))
+        (binf.int64/i* (if (and (< shift-2
+                                   (binf.int64/u* 64))
+                                (not (zero? (bit-and b8
+                                                     0x40))))
+                         (binf.int64/bit-set i64-2
+                                             64)
+                         i64-2))
+        (recur i64-2
+               shift-2)))))
 
 
 
@@ -981,4 +1006,33 @@
 
 
 
+(defn wr-leb128-i64
 
+  ""
+
+  [view i64]
+
+  (loop [i64-2 i64]
+    (let [b8    (bit-and i64-2
+                         (binf.int64/i* 0x7f))
+          i64-3 (>> i64-2
+                    (binf.int64/i* 7))]
+      (if (or (and (= (binf.int64/i* 0)
+                      i64-3)
+                   (= (binf.int64/i* 0)
+                      (bit-and b8
+                               (binf.int64/i* 0x40))))
+              (and (= i64-3
+                      (binf.int64/i* -1))
+                   (not= (binf.int64/i* 0)
+                         (bit-and b8
+                                  (binf.int64/i* 0x40)))))
+        (do
+          (wr-b8 view
+                 (binf.int64/u8 b8))
+          view)
+        (do
+          (wr-b8 view
+                 (bit-or (binf.int64/u8 b8)
+                         0x80))
+          (recur i64-3))))))
