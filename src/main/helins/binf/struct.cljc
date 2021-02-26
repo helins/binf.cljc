@@ -228,7 +228,7 @@
 
   ""
 
-  [max-align member+]
+  [type max-align member+]
 
   (loop [align        1
          layout       []
@@ -258,4 +258,5 @@
        :binf.struct/layout       layout
        :binf.struct/n-byte       (aligned align
                                           offset)
-       :binf.struct/name->member name->member})))
+       :binf.struct/name->member name->member
+       :binf.struct/type         type})))

@@ -62,8 +62,10 @@
                                                 :d
                                                 1
                                                 8)}
-            :binf.struct/n-byte       12}
-           (binf.struct/c w32
+            :binf.struct/n-byte       12
+            :binf.struct/type         'foo}
+           (binf.struct/c 'foo
+                          w32
                           [(binf.struct/u8  :a)
                            (binf.struct/i16 :b)
                            (binf.struct/u32 :c)
@@ -86,8 +88,10 @@
                                                 :c
                                                 2
                                                 16)}
-            :binf.struct/n-byte       24}
-           (binf.struct/c w64
+            :binf.struct/n-byte       24
+            :binf.struct/type         'foo}
+           (binf.struct/c 'foo
+                          w64
                           [(binf.struct/u8  :a)
                            (binf.struct/f64 :b)
                            (binf.struct/i16 :c)])))
@@ -113,8 +117,10 @@
                                        :d (prim binf.struct/u8 :d
                                                 1
                                                 12)}
-            :binf.struct/n-byte       16}
-           (binf.struct/c w32
+            :binf.struct/n-byte       16
+            :binf.struct/type         'foo}
+           (binf.struct/c 'foo
+                          w32
                           [(binf.struct/i8  :a)
                            (binf.struct/u16 :b)
                            (binf.struct/i64 :c)
@@ -160,8 +166,10 @@
                                                 :b
                                                 2
                                                 2)}
-            :binf.struct/n-byte       22}
-           (binf.struct/c w64
+            :binf.struct/n-byte       22
+            :binf.struct/type         'foo}
+           (binf.struct/c 'foo
+                          w64
                           [(binf.struct/u8 :a)
                            (binf.struct/array (binf.struct/u16 :b)
                                               10)]))
@@ -181,8 +189,10 @@
                                                  :b
                                                  2
                                                  2)}
-             :binf.struct/n-byte       102}
-            (binf.struct/c w64
+             :binf.struct/n-byte       102
+             :binf.struct/type         'foo}
+            (binf.struct/c 'foo
+                           w64
                            [(binf.struct/u8 :a)
                             (binf.struct/array (binf.struct/array (binf.struct/u16 :b)
                                                                   10)
