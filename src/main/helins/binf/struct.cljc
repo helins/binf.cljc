@@ -15,7 +15,7 @@
 ;;;;;;;;;;
 
 
-(def max-align-b32
+(def word-32
 
   ""
 
@@ -23,7 +23,7 @@
 
 
 
-(def max-align-b64
+(def word-64
 
   ""
 
@@ -190,6 +190,22 @@
 ;;;;;;;;;;
 
 
+(defn aligned
+
+  ""
+
+  [align offset]
+
+  (let [mismatch (rem offset
+                      align)]
+    (if (zero? mismatch)
+      offset
+      (+ offset
+         (- align
+            mismatch)))))
+
+
+
 (defn c
 
   ""
@@ -205,9 +221,8 @@
       (let [member        (first member-2+)
             member-align  (min max-align
                                (member :binf.struct/align))
-            member-offset (+ offset
-                             (rem offset
-                                  member-align))
+            member-offset (aligned member-align
+                                   offset)
             member-name   (name-get member)]
         (recur (max align
                     member-align)
@@ -223,11 +238,6 @@
                   (member :binf.struct/n-byte))))
       {:binf.struct/align        align
        :binf.struct/layout       layout
-       :binf.struct/n-byte       (let [mismatch (rem offset
-                                                     align)]
-                                   (if (zero? mismatch)
-                                     offset
-                                     (+ offset
-                                        (- align
-                                           mismatch))))
+       :binf.struct/n-byte       (aligned align
+                                          offset)
        :binf.struct/name->member name->member})))
