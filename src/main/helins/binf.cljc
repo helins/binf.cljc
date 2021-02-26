@@ -13,6 +13,7 @@
 
   (:require [helins.binf.buffer         :as binf.buffer]
             [helins.binf.int            :as binf.int]
+            [helins.binf.int64          :as binf.int64]
             [helins.binf.protocol       :as binf.protocol]
             [helins.binf.protocol.impl]
             [helins.binf.string         :as binf.string])
@@ -834,8 +835,7 @@
           u32-2 (bit-or u32
                         (<< (bit-and b8
                                      0x7f)
-                            shift))
-          ]
+                            shift))]
       (if (zero? (bit-and b8
                           0x80))
         #?(:clj  u32-2
@@ -843,6 +843,28 @@
         (recur u32-2
                (+ shift
                   7))))))
+
+
+
+(defn rr-leb128-u64
+
+  ""
+
+  [view]
+
+  (loop [u64   (binf.int64/u* 0)
+         shift (binf.int64/u* 0)]
+    (let [b8    (rr-u8 view)
+          u64-2 (bit-or u64
+                        (<< (binf.int64/u* (bit-and b8
+                                                    0x7f))
+                            shift))]
+      (if (zero? (bit-and b8
+                          0x80))
+        u64-2
+        (recur u64-2
+               (+ shift
+                  (binf.int64/u* 7)))))))
 
 
 
@@ -873,6 +895,10 @@
           (binf.int/i32 i32-2))
         (recur i32-2
                shift-2)))))
+
+
+
+
 
 
 
@@ -930,26 +956,29 @@
 
 
 
-(comment
+(defn wr-leb128-u64
+
+  ""
+
+  [view u64]
+
+  (loop [u64-2 u64]
+    (let [b8    (bit-and u64-2
+                         (binf.int64/u* 0x7f))
+          u64-3 (binf.int64/u>> u64-2
+                                (binf.int64/u* 7))]
+      (if (= (binf.int64/u* 0)
+             u64-3)
+        (do
+          (wr-b8 view
+                 (binf.int64/u8 b8))
+          view)
+        (do
+          (wr-b8 view
+                 (binf.int64/u8 (bit-or b8
+                                        (binf.int64/u* 0x80))))
+          (recur u64-3))))))
 
 
-  (def buf
-       (binf.buffer/alloc 32))
-
-  (def v
-       (view buf))
-
-  (wr-leb128-i32 v
-                 42000)
-
-  (seek v
-        0)
-
-  (rr-leb128-i32 v)
 
 
-
-  (seq buf)
-
-
-  )

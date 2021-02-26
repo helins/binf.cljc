@@ -11,7 +11,8 @@
             [clojure.pprint]
             [kaocha.repl]
             [helins.binf       :as binf]
-            [helins.binf.dev]))
+            [helins.binf.dev]
+            [helins.binf.int64 :as binf.int64]))
 
 
 (set! *warn-on-reflection*
@@ -27,5 +28,7 @@
   (kaocha.repl/run :jvm)
 
 
+  (unsigned-bit-shift-right (unchecked-long -4)
+                            1)
 
   )
