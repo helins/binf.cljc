@@ -13,10 +13,21 @@
                             struct]))
 
 
+(declare force-env)
+
+
 ;;;;;;;;;;
 
 
-(def word-32
+(def sz-word16
+
+  ""
+
+  2)
+
+
+
+(def sz-word32
 
   ""
 
@@ -24,7 +35,7 @@
 
 
 
-(def word-64
+(def sz-word64
 
   ""
 
@@ -32,6 +43,32 @@
 
 
 ;;;;;;;;;;
+
+
+(defn env
+
+  ""
+
+  [sz-word]
+
+  {:binf.cabi/align          sz-word
+   :binf.cabi.pointer/n-byte sz-word})
+
+
+;;;;;;;;;;
+
+
+(defn force-align
+
+  ""
+
+  [f align]
+
+  (fn merge-align [env-given]
+    (f (assoc env-given
+              :binf.cabi/align
+              align))))
+
 
 
 (defn force-env

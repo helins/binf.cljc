@@ -16,22 +16,22 @@
 
 
 (def w32
-     binf.cabi/word-32)
+     binf.cabi/sz-word32)
 
 
 
 (def w64
-     binf.cabi/word-64)
+     binf.cabi/sz-word64)
 
 
 
 (def env32
-     {:binf.cabi/align w32})
+     (binf.cabi/env w32))
 
 
 
 (def env64
-     {:binf.cabi/align w64})
+     (binf.cabi/env w64))
 
 
 
