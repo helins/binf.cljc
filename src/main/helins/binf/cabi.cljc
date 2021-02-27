@@ -48,6 +48,28 @@
 ;;;;;;;;;;
 
 
+(defn type-composite?
+
+  ""
+
+  [type]
+
+  (sequential? type))
+
+
+
+(defn type-primitive?
+
+  ""
+
+  [type]
+
+  (not (type-composite? type)))
+
+
+;;;;;;;;;;
+
+
 (defn name-get
 
   ""
@@ -277,6 +299,7 @@
         {:binf.cabi/align          align
          :binf.cabi/n-byte         (aligned align
                                               offset)
-         :binf.cabi/type           type
+         :binf.cabi/type           'struct
          :binf.cabi.struct/layout  layout
-         :binf.cabi.struct/member+ name->member}))))
+         :binf.cabi.struct/member+ name->member
+         :binf.cabi.struct/type    type}))))
