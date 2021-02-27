@@ -131,7 +131,22 @@
             env32))))
 
 
+;;;;;;;;;; Pointers
 
+
+(t/deftest ptr
+
+  (t/is (= {:binf.cabi/align          4
+            :binf.cabi/n-byte         w32
+            :binf.cabi/type           'ptr
+            :binf.cabi.pointer/target ((binf.cabi/struct 'foo
+                                                         [[:a binf.cabi/u64]])
+                                       env32)}
+           ((binf.cabi/ptr (binf.cabi/struct 'foo
+                                             [[:a binf.cabi/u64]]))
+            (assoc env32
+                   :binf.cabi.pointer/n-byte
+                   w32)))))
 
 ;;;;;;;;;; Arrays
 

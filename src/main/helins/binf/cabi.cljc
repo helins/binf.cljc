@@ -207,6 +207,21 @@
              env))
 
 
+
+(defn ptr
+
+  ""
+
+  [type]
+
+  (fn def-ptr [env]
+    (assoc (primitive 'ptr
+                      (env :binf.cabi.pointer/n-byte)
+                      env)
+           :binf.cabi.pointer/target
+           (type env))))
+
+
 ;;;;;;;;;;
 
 
