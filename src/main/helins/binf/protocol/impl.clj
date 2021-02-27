@@ -103,7 +103,8 @@
                           (-> this
                               .duplicate
                               (.position position)
-                              (.limit n-byte)))))
+                              (.limit (+ position
+                                         n-byte))))))
 
 
   binf.protocol/IAbsoluteWriter
@@ -255,7 +256,8 @@
       (let [string (.toString (.decode ^Charset decoder
                                        (-> this
                                            .duplicate
-                                           (.limit n-byte))))]
+                                           (.limit (+ (.position this)
+                                                        n-byte)))))]
         (binf.protocol/skip this
                             n-byte)
         string))
