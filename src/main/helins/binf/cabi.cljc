@@ -34,6 +34,20 @@
 ;;;;;;;;;;
 
 
+(defn force-env
+
+  ""
+
+  [f env]
+
+  (fn merge-env [env-given]
+    (f (merge env-given
+              env))))
+
+
+;;;;;;;;;;
+
+
 (defn name-get
 
   ""
@@ -59,16 +73,30 @@
 ;;;;;;;;;;
 
 
+(defn primitive
+
+  ;;
+
+  [type n-byte {:binf.cabi/keys [align]}]
+
+  {:binf.cabi/align  (min align
+                          n-byte)
+   :binf.cabi/n-byte n-byte
+   :binf.cabi/type   type})
+
+
+;;;;;
+
+
 (defn i8
 
   ""
 
-  [name]
+  [_env]
 
-  (name-set {:binf.cabi/align  1
-             :binf.cabi/n-byte 1
-             :binf.cabi/type   'i8}
-            name))
+  {:binf.cabi/align  1
+   :binf.cabi/n-byte 1
+   :binf.cabi/type   'i8})
 
 
 
@@ -76,12 +104,11 @@
 
   ""
 
-  [name]
+  [env]
 
-  (name-set {:binf.cabi/align  2
-             :binf.cabi/n-byte 2
-             :binf.cabi/type   'i16}
-            name))
+  (primitive 'i16
+             2
+             env))
 
 
 
@@ -89,12 +116,11 @@
 
   ""
 
-  [name]
+  [env]
 
-  (name-set {:binf.cabi/align  4
-             :binf.cabi/n-byte 4
-             :binf.cabi/type   'i32}
-            name))
+  (primitive 'i32
+             4
+             env))
 
 
 
@@ -102,12 +128,11 @@
 
   ""
 
-  [name]
+  [env]
 
-  (name-set {:binf.cabi/align  8
-             :binf.cabi/n-byte 8
-             :binf.cabi/type   'i64}
-            name))
+  (primitive 'i64
+             8
+             env))
 
 
 
@@ -115,12 +140,11 @@
 
   ""
 
-  [name]
+  [_env]
 
-  (name-set {:binf.cabi/align  1
-             :binf.cabi/n-byte 1
-             :binf.cabi/type   'u8}
-            name))
+  {:binf.cabi/align  1
+   :binf.cabi/n-byte 1
+   :binf.cabi/type   'u8})
 
 
 
@@ -128,12 +152,11 @@
 
   ""
 
-  [name]
+  [env]
 
-  (name-set {:binf.cabi/align  2
-             :binf.cabi/n-byte 2
-             :binf.cabi/type   'u16}
-            name))
+  (primitive 'u16
+             2
+             env))
 
 
 
@@ -141,12 +164,11 @@
 
   ""
 
-  [name]
+  [env]
 
-  (name-set {:binf.cabi/align  4
-             :binf.cabi/n-byte 4
-             :binf.cabi/type   'u32}
-            name))
+  (primitive 'u32
+             4
+             env))
 
 
 
@@ -154,12 +176,11 @@
 
   ""
 
-  [name]
+  [env]
 
-  (name-set {:binf.cabi/align  8
-             :binf.cabi/n-byte 8
-             :binf.cabi/type   'u64}
-            name))
+  (primitive 'u64
+             8
+             env))
 
 
 
@@ -167,12 +188,11 @@
 
   ""
 
-  [name]
+  [env]
 
-  (name-set {:binf.cabi/align  4
-             :binf.cabi/n-byte 4
-             :binf.cabi/type   'f32}
-            name))
+  (primitive 'f32
+             4
+             env))
 
 
 
@@ -180,12 +200,11 @@
 
   ""
 
-  [name]
+  [env]
 
-  (name-set {:binf.cabi/align  8
-             :binf.cabi/n-byte 8
-             :binf.cabi/type   'f64}
-            name))
+  (primitive 'f64
+             8
+             env))
 
 
 ;;;;;;;;;;
@@ -228,43 +247,36 @@
 
   ""
 
-  ([type max-align member+]
+  [type member+]
 
-   (loop [align        1
-          layout       []
-          member-2+    member+
-          name->member {}
-          offset       0]
-     (if (seq member-2+)
-       (let [member        (first member-2+)
-             member-align  (min max-align
-                                (member :binf.cabi/align))
-             member-offset (aligned member-align
-                                    offset)
-             member-name   (name-get member)]
-         (recur (max align
-                     member-align)
-                (conj layout
-                      member-name)
-                (rest member-2+)
-                (assoc name->member
-                       member-name
-                       (assoc member
-                              :binf.cabi/align  member-align
-                              :binf.cabi/offset member-offset))
-                (+ member-offset
-                   (member :binf.cabi/n-byte))))
-       {:binf.cabi/align        align
-        :binf.cabi/layout       layout
-        :binf.cabi/n-byte       (aligned align
-                                           offset)
-        :binf.cabi/name->member name->member
-        :binf.cabi/type         type})))
-
-
-  ([type max-align name member+]
-
-   (name-set (struct type
-                     max-align
-                     member+)
-             name)))
+  (fn make-struct [env]
+    (loop [align        1
+           layout       []
+           member-2+    member+
+           name->member {}
+           offset       0]
+      (if (seq member-2+)
+        (let [[member-name
+               f-member]    (first member-2+)
+              member        (f-member env)
+              member-align  (member :binf.cabi/align)
+              member-offset (aligned member-align
+                                     offset)]
+          (recur (max align
+                      member-align)
+                 (conj layout
+                       member-name)
+                 (rest member-2+)
+                 (assoc name->member
+                        member-name
+                        (assoc member
+                               :binf.cabi/offset
+                               member-offset))
+                 (+ member-offset
+                    (member :binf.cabi/n-byte))))
+        {:binf.cabi/align          align
+         :binf.cabi/n-byte         (aligned align
+                                              offset)
+         :binf.cabi/type           type
+         :binf.cabi.struct/layout  layout
+         :binf.cabi.struct/member+ name->member}))))
