@@ -10,6 +10,7 @@
   (:require [helins.binf                :as binf]
             [helins.binf.base64         :as binf.base64]
             [helins.binf.buffer         :as binf.buffer]
+			[helins.binf.cabi			:as binf.cabi]
             [helins.binf.endian         :as binf.endian]
             [helins.binf.float          :as binf.float]
             [helins.binf.int            :as binf.int]
@@ -19,10 +20,9 @@
             [helins.binf.protocol       :as binf.protocol]
             [helins.binf.protocol.impl  :as binf.protocol.impl]
             [helins.binf.string         :as binf.string]
-			[helins.binf.struct			:as binf.struct]
             [helins.binf.test           :as binf.test]
             [helins.binf.test.base64    :as binf.test.base64]
-            [helins.binf.test.struct    :as binf.test.struct]))
+            [helins.binf.test.cabi      :as binf.test.cabi]))
 
 
 ;;;;;;;;;;

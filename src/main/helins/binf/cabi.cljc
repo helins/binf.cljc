@@ -3,7 +3,7 @@
 ;; file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 
-(ns helins.binf.struct
+(ns helins.binf.cabi
 
   "Base64 encoding and decoding."
 
@@ -41,7 +41,7 @@
   [member]
 
   (get member
-       :binf.struct/name))
+       :binf.cabi/name))
 
 
 
@@ -52,7 +52,7 @@
   [member name]
 
   (assoc member
-         :binf.struct/name
+         :binf.cabi/name
          name))
 
 
@@ -65,9 +65,9 @@
 
   [name]
 
-  (name-set {:binf.struct/align  1
-             :binf.struct/n-byte 1
-             :binf.struct/type   'i8}
+  (name-set {:binf.cabi/align  1
+             :binf.cabi/n-byte 1
+             :binf.cabi/type   'i8}
             name))
 
 
@@ -78,9 +78,9 @@
 
   [name]
 
-  (name-set {:binf.struct/align  2
-             :binf.struct/n-byte 2
-             :binf.struct/type   'i16}
+  (name-set {:binf.cabi/align  2
+             :binf.cabi/n-byte 2
+             :binf.cabi/type   'i16}
             name))
 
 
@@ -91,9 +91,9 @@
 
   [name]
 
-  (name-set {:binf.struct/align  4
-             :binf.struct/n-byte 4
-             :binf.struct/type   'i32}
+  (name-set {:binf.cabi/align  4
+             :binf.cabi/n-byte 4
+             :binf.cabi/type   'i32}
             name))
 
 
@@ -104,9 +104,9 @@
 
   [name]
 
-  (name-set {:binf.struct/align  8
-             :binf.struct/n-byte 8
-             :binf.struct/type   'i64}
+  (name-set {:binf.cabi/align  8
+             :binf.cabi/n-byte 8
+             :binf.cabi/type   'i64}
             name))
 
 
@@ -117,9 +117,9 @@
 
   [name]
 
-  (name-set {:binf.struct/align  1
-             :binf.struct/n-byte 1
-             :binf.struct/type   'u8}
+  (name-set {:binf.cabi/align  1
+             :binf.cabi/n-byte 1
+             :binf.cabi/type   'u8}
             name))
 
 
@@ -130,9 +130,9 @@
 
   [name]
 
-  (name-set {:binf.struct/align  2
-             :binf.struct/n-byte 2
-             :binf.struct/type   'u16}
+  (name-set {:binf.cabi/align  2
+             :binf.cabi/n-byte 2
+             :binf.cabi/type   'u16}
             name))
 
 
@@ -143,9 +143,9 @@
 
   [name]
 
-  (name-set {:binf.struct/align  4
-             :binf.struct/n-byte 4
-             :binf.struct/type   'u32}
+  (name-set {:binf.cabi/align  4
+             :binf.cabi/n-byte 4
+             :binf.cabi/type   'u32}
             name))
 
 
@@ -156,9 +156,9 @@
 
   [name]
 
-  (name-set {:binf.struct/align  8
-             :binf.struct/n-byte 8
-             :binf.struct/type   'u64}
+  (name-set {:binf.cabi/align  8
+             :binf.cabi/n-byte 8
+             :binf.cabi/type   'u64}
             name))
 
 
@@ -169,9 +169,9 @@
 
   [name]
 
-  (name-set {:binf.struct/align  4
-             :binf.struct/n-byte 4
-             :binf.struct/type   'f32}
+  (name-set {:binf.cabi/align  4
+             :binf.cabi/n-byte 4
+             :binf.cabi/type   'f32}
             name))
 
 
@@ -182,9 +182,9 @@
 
   [name]
 
-  (name-set {:binf.struct/align  8
-             :binf.struct/n-byte 8
-             :binf.struct/type   'f64}
+  (name-set {:binf.cabi/align  8
+             :binf.cabi/n-byte 8
+             :binf.cabi/type   'f64}
             name))
 
 
@@ -198,10 +198,10 @@
   [member n]
 
   (-> member
-      (update :binf.struct/n-byte
+      (update :binf.cabi/n-byte
               #(* n
                   %))
-      (update :binf.struct/type
+      (update :binf.cabi/type
               #(vector %
                        n))))
 
@@ -224,7 +224,7 @@
 
 
 
-(defn c
+(defn struct
 
   ""
 
@@ -238,7 +238,7 @@
      (if (seq member-2+)
        (let [member        (first member-2+)
              member-align  (min max-align
-                                (member :binf.struct/align))
+                                (member :binf.cabi/align))
              member-offset (aligned member-align
                                     offset)
              member-name   (name-get member)]
@@ -250,21 +250,21 @@
                 (assoc name->member
                        member-name
                        (assoc member
-                              :binf.struct/align  member-align
-                              :binf.struct/offset member-offset))
+                              :binf.cabi/align  member-align
+                              :binf.cabi/offset member-offset))
                 (+ member-offset
-                   (member :binf.struct/n-byte))))
-       {:binf.struct/align        align
-        :binf.struct/layout       layout
-        :binf.struct/n-byte       (aligned align
+                   (member :binf.cabi/n-byte))))
+       {:binf.cabi/align        align
+        :binf.cabi/layout       layout
+        :binf.cabi/n-byte       (aligned align
                                            offset)
-        :binf.struct/name->member name->member
-        :binf.struct/type         type})))
+        :binf.cabi/name->member name->member
+        :binf.cabi/type         type})))
 
 
   ([type max-align name member+]
 
-   (name-set (c type
-                max-align
-                member+)
+   (name-set (struct type
+                     max-align
+                     member+)
              name)))
