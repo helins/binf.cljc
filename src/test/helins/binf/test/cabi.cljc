@@ -275,3 +275,25 @@
                               [[:a binf.cabi/u16]
                                [:b struct-inner]])
             env32))))
+
+
+;;;;;;;;;; Unions
+
+
+(t/deftest union
+
+  (t/is (= {:binf.cabi/align         8
+            :binf.cabi/n-byte        16
+            :binf.cabi/type          'union
+            :binf.cabi.union/member+ {:a (binf.cabi/i8 env64)
+                                      :b ((binf.cabi/struct 'bar
+                                                            [[:c binf.cabi/u16]
+                                                             [:d binf.cabi/f64]])
+                                          env64)}
+            :binf.cabi.union/type    'foo}
+           ((binf.cabi/union 'foo
+                             {:a binf.cabi/i8
+                              :b (binf.cabi/struct 'bar
+                                                   [[:c binf.cabi/u16]
+                                                    [:d binf.cabi/f64]])})
+            env64))))

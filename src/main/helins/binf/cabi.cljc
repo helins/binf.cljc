@@ -332,8 +332,39 @@
                     (member :binf.cabi/n-byte))))
         {:binf.cabi/align          align
          :binf.cabi/n-byte         (aligned align
-                                              offset)
+                                            offset)
          :binf.cabi/type           'struct
          :binf.cabi.struct/layout  layout
          :binf.cabi.struct/member+ name->member
          :binf.cabi.struct/type    type}))))
+
+
+
+(defn union
+
+  ""
+
+  [type member+]
+
+  (fn def-union [env]
+    (loop [align        1
+           member-2+    member+
+           n-byte       0
+           name->member {}]
+      (if (seq member-2+)
+        (let [[member-name
+               f-member]   (first member-2+)
+              member       (f-member env)]
+          (recur (max align
+                      (member :binf.cabi/align))
+                 (rest member-2+)
+                 (max n-byte
+                      (member :binf.cabi/n-byte))
+                 (assoc name->member
+                        member-name
+                        member)))
+        {:binf.cabi/align         align
+         :binf.cabi/n-byte        n-byte
+         :binf.cabi/type          'union
+         :binf.cabi.union/member+ name->member
+         :binf.cabi.union/type    type}))))
