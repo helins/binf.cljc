@@ -133,7 +133,6 @@ longer term. Behavior is configurable (by default, the new buffer is 1.5 the siz
 
 ## License
 
-Copyright © 2020 Adam Helinski
+Copyright © 2020 Adam Helinski and Contributors
 
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
+Licensed under the term of the Mozilla Public License 2.0, see LICENSE.
