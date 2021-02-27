@@ -110,6 +110,24 @@
 ;;;;;;;;;;
 
 
+(defn aligned
+
+  ""
+
+  [align offset]
+
+  (let [mismatch (rem offset
+                      align)]
+    (if (zero? mismatch)
+      offset
+      (+ offset
+         (- align
+            mismatch)))))
+
+
+;;;;;;;;;;
+
+
 (defn primitive
 
   ;;
@@ -283,19 +301,43 @@
 ;;;;;;;;;;
 
 
-(defn aligned
+(defn enum
 
   ""
 
-  [align offset]
+  [type constant+]
 
-  (let [mismatch (rem offset
-                      align)]
-    (if (zero? mismatch)
-      offset
-      (+ offset
-         (- align
-            mismatch)))))
+  (fn def-struct [env]
+    (loop [constant-2+ constant+
+           max-value   0
+           tag->value  {}
+           value       0]
+      (if (seq constant-2+)
+        (let [constant (first constant-2+)
+              [constant-tag
+               constant-value
+               value-next]    (if (vector? constant)
+                                (let [[constant-tag
+                                       constant-value] constant]
+                                  [constant-tag
+                                   constant-value
+                                   (inc constant-value)])
+                                [constant
+                                 value
+                                 (inc value)])]
+          (recur (rest constant-2+)
+                 (max constant-value
+                      max-value)
+                 (assoc tag->value
+                        constant-tag
+                        constant-value)
+                 value-next))
+        {:binf.cabi/align          (min 4
+                                        (env :binf.cabi/align))
+         :binf.cabi/n-byte         4
+         :binf.cabi/type           'enum
+         :binf.cabi.enum/constant+ tag->value
+         :binf.cabi.enum/type      type}))))
 
 
 

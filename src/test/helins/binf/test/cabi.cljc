@@ -46,6 +46,31 @@
          offset))
 
 
+;;;;;;;;;; Enums
+
+
+(t/deftest enum
+
+  (t/is (= {:binf.cabi/align          w32
+            :binf.cabi/n-byte         4
+            :binf.cabi/type           'enum
+            :binf.cabi.enum/constant+ {:a 0
+                                       :b 1
+                                       :c 1000
+                                       :d 1001
+                                       :e 42
+                                       :f 43}
+            :binf.cabi.enum/type      'foo}
+           ((binf.cabi/enum 'foo
+                            [:a
+                             :b
+                             [:c 1000]
+                             :d
+                             [:e 42]
+                             :f])
+            env64))))
+
+
 ;;;;;;;;;; Unnested structs
 
 
