@@ -48,28 +48,6 @@
 ;;;;;;;;;;
 
 
-(defn type-composite?
-
-  ""
-
-  [type]
-
-  (sequential? type))
-
-
-
-(defn type-primitive?
-
-  ""
-
-  [type]
-
-  (not (type-composite? type)))
-
-
-;;;;;;;;;;
-
-
 (defn name-get
 
   ""
@@ -236,15 +214,19 @@
 
   ""
 
-  [member n]
+  [element n-element]
 
-  (-> member
-      (update :binf.cabi/n-byte
-              #(* n
-                  %))
-      (update :binf.cabi/type
-              #(vector %
-                       n))))
+  (fn def-array [env]
+    (let [{:as             element-2
+           :binf.cabi/keys [align
+                            n-byte]} (element env)]
+      {:binf.cabi/align           align
+       :binf.cabi/n-byte          (* n-element
+                                     n-byte)
+       :binf.cabi/type            'array
+       :binf.cabi.array/element   element-2
+       :binf.cabi.array/n-element n-element})))
+
 
 ;;;;;;;;;;
 
@@ -271,7 +253,7 @@
 
   [type member+]
 
-  (fn make-struct [env]
+  (fn def-struct [env]
     (loop [align        1
            layout       []
            member-2+    member+

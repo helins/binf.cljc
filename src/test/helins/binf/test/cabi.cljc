@@ -132,28 +132,35 @@
 
 
 
-(comment
 
 ;;;;;;;;;; Arrays
 
 
-(t/deftest array
+(t/deftest array-primitive
 
-  (t/is (= {:binf.cabi/align  4
-            :binf.cabi/name   :a
-            :binf.cabi/n-byte 40
-            :binf.cabi/type   ['f32 10]}
-           (binf.cabi/array (binf.cabi/f32 :a)
-                              10))
+  (t/is (= {:binf.cabi/align           4
+            :binf.cabi/n-byte          40
+            :binf.cabi/type            'array
+            :binf.cabi.array/element   (binf.cabi/f32 env64)
+            :binf.cabi.array/n-element 10}
+           ((binf.cabi/array binf.cabi/f32
+                             10)
+            env64))
         "1D")
 
-  (t/is (= {:binf.cabi/align  4
-            :binf.cabi/name   :a
-            :binf.cabi/n-byte 80
-            :binf.cabi/type   [['f32 10] 2]}
-           (-> (binf.cabi/f32 :a)
-               (binf.cabi/array 10)
-               (binf.cabi/array 2)))
+  (t/is (= {:binf.cabi/align           4
+            :binf.cabi/n-byte          160
+            :binf.cabi/type            'array
+            :binf.cabi.array/element   {:binf.cabi/align           4
+                                        :binf.cabi/n-byte          80
+                                        :binf.cabi/type            'array
+                                        :binf.cabi.array/element   (binf.cabi/f64 env32)
+                                        :binf.cabi.array/n-element 10}
+            :binf.cabi.array/n-element 2}
+           ((-> binf.cabi/f64
+                (binf.cabi/array 10)
+                (binf.cabi/array 2))
+            env32))
         "2D"))
 
 
@@ -161,54 +168,69 @@
 (t/deftest struct-with-array
 
 
-  (t/is (= {:binf.cabi/align        2
-            :binf.cabi/layout       [:a
-                                     :b]
-            :binf.cabi/name->member {:a (member binf.cabi/u8
-                                                :a
-                                                1
-                                                0)
-                                     :b (member #(binf.cabi/array (binf.cabi/u16 %)
-                                                                  10)
-                                                :b
-                                                2
-                                                2)}
-            :binf.cabi/n-byte       22
-            :binf.cabi/type         'foo}
-           (binf.cabi/struct 'foo
-                             w64
-                             [(binf.cabi/u8 :a)
-                              (binf.cabi/array (binf.cabi/u16 :b)
-                                                 10)]))
+  (t/is (= {:binf.cabi/align          2
+            :binf.cabi/n-byte         22
+            :binf.cabi/type           'struct
+            :binf.cabi.struct/member+ {:a (member binf.cabi/u8
+                                                  0
+                                                  env64)
+                                       :b (member (fn [env]
+                                                    ((binf.cabi/array binf.cabi/u16
+                                                                      10)
+                                                     env))
+                                                  2
+                                                  env64)}
+            :binf.cabi.struct/layout  [:a
+                                       :b]
+            :binf.cabi.struct/type    'foo}
+           ((binf.cabi/struct 'foo
+                              [[:a binf.cabi/u8]
+                               [:b (binf.cabi/array binf.cabi/u16
+                                                    10)]])
+            env64))
         "1D")
 
 
-  (t/is (= {:binf.cabi/align        2
-            :binf.cabi/layout       [:a
-                                     :b]
-            :binf.cabi/name->member {:a (member binf.cabi/u8
-                                                :a
-                                                1
-                                                0)
-                                     :b (member #(binf.cabi/array (binf.cabi/array (binf.cabi/u16 %)
-                                                                                     10)
-                                                                  5)
-                                                :b
-                                                2
-                                                2)}
-            :binf.cabi/n-byte       102
-            :binf.cabi/type         'foo}
-           (binf.cabi/struct 'foo
-                             w64
-                             [(binf.cabi/u8 :a)
-                              (binf.cabi/array (binf.cabi/array (binf.cabi/u16 :b)
-                                                                    10)
-                                                 5)]))
+  (t/is (= {:binf.cabi/align          2
+            :binf.cabi/n-byte         102
+            :binf.cabi/type           'struct
+            :binf.cabi.struct/layout  [:a
+                                       :b]
+            :binf.cabi.struct/member+ {:a (member binf.cabi/u8
+                                                  0
+                                                  env64)
+                                       :b (member (fn [env]
+                                                    ((-> binf.cabi/u16
+                                                         (binf.cabi/array 10)
+                                                         (binf.cabi/array 5))
+                                                     env))
+                                                  2
+                                                  env64)}
+            :binf.cabi.struct/type    'foo}
+           ((binf.cabi/struct 'foo
+                              [[:a binf.cabi/u8]
+                               [:b (-> binf.cabi/u16
+                                       (binf.cabi/array 10)
+                                       (binf.cabi/array 5))]])
+            env64))
         "2D"))
 
 
 
-)
+(t/deftest array-struct
+
+  (t/is (= {:binf.cabi/align           4
+            :binf.cabi/n-byte          40
+            :binf.cabi/type            'array
+            :binf.cabi.array/element   ((binf.cabi/struct 'foo
+                                                          [[:a binf.cabi/u32]])
+                                        env64)
+            :binf.cabi.array/n-element 10}
+           ((binf.cabi/array (binf.cabi/struct 'foo
+                                               [[:a binf.cabi/u32]])
+                             10)
+            env64))))
+
 
 ;;;;;;;;;; Nested structs
 
