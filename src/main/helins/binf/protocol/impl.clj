@@ -10,8 +10,7 @@
    {:author "Adam Helinski"
     :no-doc true}
 
-   (:require [helins.binf.buffer   :as binf.buffer]
-             [helins.binf.int      :as binf.int]
+   (:require [helins.binf.int      :as binf.int]
              [helins.binf.protocol :as binf.protocol]
              [helins.binf.string   :as binf.string])
    (:import (java.nio ByteBuffer

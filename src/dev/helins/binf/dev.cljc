@@ -49,5 +49,10 @@
        (binf/view (binf.buffer/alloc 128)))
 
 
+  (binf.leb128/rr-i32 (-> (binf/view (binf.buffer/alloc 10))
+                          (binf/wa-b8 0
+                                      (binf.int/i8 0x7E)))
+                      33)
+
 
   )

@@ -14,7 +14,7 @@
             [helins.binf.leb128 :as binf.leb128]))
 
 
-;;;;;;;;;; R/W LEB128
+;;;;;;;;;; int32
 
 
 (t/deftest u32
@@ -60,8 +60,17 @@
                  (binf/seek 0)
                  (binf.leb128/wr-i32 -2147483648)
                  (binf/seek 0)
+                 (binf.leb128/rr-i32))))
+
+    (t/is (= -42
+             (-> v
+                 (binf/seek 0)
+                 (binf.leb128/wr-i32 -42)
+                 (binf/seek 0)
                  (binf.leb128/rr-i32))))))
 
+
+;;;;;;;;;; int64
 
 
 (t/deftest u64

@@ -17,6 +17,19 @@
                            unsigned-bit-shift-right >>>}))
 
 
+;;;;;;;;;; Miscellaneous
+
+
+(defn n-max-b8
+
+  ""
+
+  [n-bit]
+
+  (Math/ceil (double (/ n-bit
+                        7))))
+
+
 ;;;;;;;;;; i32
 
 
@@ -24,29 +37,36 @@
 
   ""
 
-  [view]
 
-  (loop [i32   0
-         shift 0]
-    (let [b8      (binf.protocol/rr-u8 view)
-          i32-2   (bit-or i32
-                          (<< (bit-and b8
-                                       0x7f)
-                              shift))
-          shift-2 (+ shift
-                     7)]
-      (if (zero? (bit-and b8
-                          0x80))
-        (if (and (< shift-2
-                    32)
-                 (not (zero? (bit-and b8
-                                      0x40))))
-          (binf.int/i32 (bit-or i32-2
-                               (<< (bit-not 0)
-                                   shift-2)))
-          (binf.int/i32 i32-2))
-        (recur i32-2
-               shift-2)))))
+  ([view]
+
+   (rr-i32 view
+           32))
+
+
+  ([view n-bit]
+
+   (loop [i32   0
+          shift 0]
+     (let [b8      (binf.protocol/rr-u8 view)
+           i32-2   (bit-or i32
+                           (<< (bit-and b8
+                                        0x7f)
+                               shift))
+           shift-2 (+ shift
+                      7)]
+       (if (zero? (bit-and b8
+                           0x80))
+         (if (and (< shift-2
+                     n-bit)
+                  (not (zero? (bit-and b8
+                                       0x40))))
+           (binf.int/i32 (bit-or i32-2
+                                 (<< (bit-not 0)
+                                     shift-2)))
+           (binf.int/i32 i32-2))
+         (recur i32-2
+                shift-2))))))
 
 
 
@@ -184,28 +204,35 @@
 
   ""
 
-  [view]
 
-  (loop [i64   (binf.int64/u* 0)
-         shift (binf.int64/u* 0)]
-    (let [b8      (binf.protocol/rr-u8 view)
-          i64-2   (bit-or i64
-                          (<< (binf.int64/u* (bit-and b8
-                                                      0x7f))
-                              shift))
-          shift-2 (+ shift
-                     (binf.int64/u* 7))]
-      (if (zero? (bit-and b8
-                          0x80))
-        (binf.int64/i* (if (and (< shift-2
-                                   (binf.int64/u* 64))
-                                (not (zero? (bit-and b8
-                                                     0x40))))
-                         (binf.int64/bit-set i64-2
-                                             64)
-                         i64-2))
-        (recur i64-2
-               shift-2)))))
+  ([view]
+
+   (rr-i64 view
+           64))
+
+
+  ([view n-bit]
+
+   (loop [i64   (binf.int64/u* 0)
+          shift (binf.int64/u* 0)]
+     (let [b8      (binf.protocol/rr-u8 view)
+           i64-2   (bit-or i64
+                           (<< (binf.int64/u* (bit-and b8
+                                                       0x7f))
+                               shift))
+           shift-2 (+ shift
+                      (binf.int64/u* 7))]
+       (if (zero? (bit-and b8
+                           0x80))
+         (binf.int64/i* (if (and (< shift-2
+                                    (binf.int64/u* n-bit))
+                                 (not (zero? (bit-and b8
+                                                      0x40))))
+                          (binf.int64/bit-set i64-2
+                                              64)
+                          i64-2))
+         (recur i64-2
+                shift-2))))))
 
 
 
