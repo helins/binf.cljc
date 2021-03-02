@@ -67,7 +67,15 @@
                  (binf/seek 0)
                  (binf.leb128/wr-i32 -42)
                  (binf/seek 0)
-                 (binf.leb128/rr-i32))))))
+                 (binf.leb128/rr-i32))))
+
+    (t/is (= -1
+             (-> v
+                 (binf/seek 0)
+                 (binf/wr-b8 0x7F)
+                 (binf/seek 0)
+                 (binf.leb128/rr-i32))))
+    ))
 
 
 ;;;;;;;;;; int64
@@ -115,5 +123,19 @@
              (-> v
                  (binf/seek 0)
                  (binf.leb128/wr-i64 (binf.int64/i* -9223372036854775808))
+                 (binf/seek 0)
+                 (binf.leb128/rr-i64))))
+
+    (t/is (= (binf.int64/i* -42)
+             (-> v
+                 (binf/seek 0)
+                 (binf.leb128/wr-i64 (binf.int64/i* -42))
+                 (binf/seek 0)
+                 (binf.leb128/rr-i64))))
+
+    (t/is (= (binf.int64/i* -1)
+             (-> v
+                 (binf/seek 0)
+                 (binf/wr-b8 0x7F)
                  (binf/seek 0)
                  (binf.leb128/rr-i64))))))

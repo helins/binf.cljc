@@ -62,7 +62,7 @@
                   (not (zero? (bit-and b8
                                        0x40))))
            (binf.int/i32 (bit-or i32-2
-                                 (<< (bit-not 0)
+                                 (<< -1
                                      shift-2)))
            (binf.int/i32 i32-2))
          (recur i32-2
@@ -228,8 +228,9 @@
                                     (binf.int64/u* n-bit))
                                  (not (zero? (bit-and b8
                                                       0x40))))
-                          (binf.int64/bit-set i64-2
-                                              64)
+                          (bit-or i64-2
+                                  (<< (binf.int64/i* -1)
+                                      shift-2))
                           i64-2))
          (recur i64-2
                 shift-2))))))
