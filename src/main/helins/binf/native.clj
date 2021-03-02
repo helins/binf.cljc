@@ -11,37 +11,9 @@
 
   (:require [helins.binf.int      :as binf.int]
             [helins.binf.protocol :as binf.protocol])
-  (:import (java.nio Buffer
-                     ByteBuffer
-                     ByteOrder
+  (:import (java.nio ByteBuffer
                      DirectByteBuffer)
            sun.misc.Unsafe))
-
-
-#_(set! *warn-on-reflection*
-      true)
-
-
-;;;;;;;;;; Reflection
-
-
-(def ^:no-doc ^java.lang.reflect.Field -field-address
-
-  ;;
-
-  (doto (.getDeclaredField Buffer
-                           "address")
-    (.setAccessible true)))
-
-
-
-(def ^:no-doc ^java.lang.reflect.Field -field-capacity
-
-  ;;
-
-  (doto (.getDeclaredField Buffer
-                           "capacity")
-    (.setAccessible true)))
 
 
 ;;;;;;;;;; Implementing necessary protocols
@@ -142,39 +114,6 @@
   (.reallocateMemory -unsafe
                      ptr
                      n-byte))
-
-
-;;;;; Translation between views and pointer
-
-
-(defn view->ptr
-
-  ""
-
-  [view]
-
-  (.getLong -field-address
-            view))
-
-
-
-(defn ptr->view
-
-  ""
-
-  [ptr ^long n-byte]
-
-  (let [view (-> (view 0)
-                 (.order (ByteOrder/nativeOrder)))]
-    (.setLong -field-address
-              view
-              ptr)
-    (.setInt -field-capacity
-             view
-             n-byte)
-    (.limit view
-            n-byte)
-    view))
 
 
 ;;;;;;;;;; Reading and writing values using raw pointers
@@ -388,21 +327,3 @@
   (.putAddress -unsafe
                ptr
                (unchecked-long ptr-value)))
-
-
-
-
-
-(comment
-
-  (require '[helins.binf :as binf])
-
-
-  (def pt (alloc 10))
-  (def v (ptr->view pt 5000))
-
-  (binf/wa-b8 v
-              4999
-              42)
-
-  )

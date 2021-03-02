@@ -68,15 +68,6 @@
 
 
 
-(t/deftest ptr<->view
-
-  (t/is (= ptr
-           (-> ptr
-               (binf.native/ptr->view n-byte)
-               binf.native/view->ptr))))
-
-
-
 (t/deftest realloc
 
   (t/is (not (zero? (binf.native/realloc (binf.native/alloc 4)
