@@ -37,15 +37,20 @@
 
 
 (def view
-     (binf/view (binf.buffer/alloc size)))
+     (-> (binf.buffer/alloc size)
+         binf/view
+         (binf/endian-set :little-endian)))
 
 
 #?(:clj (def view-native
-             (binf.native/view size)))
+             (binf/endian-set (binf.native/view size)
+                              :little-endian)))
 
 
 #?(:cljs (def view-shared
-              (binf/view (binf.buffer/alloc-shared size))))
+              (-> (binf.buffer/alloc-shared size)
+                  binf/view
+                  (binf/endian-set :little-endian))))
 
 
 
@@ -118,6 +123,9 @@
   ;; Without offset nor size
   
   (let [v (binf/view view)]
+    (t/is (= :little-endian
+             (binf/endian-get v))
+          "Endianess is duplicated")
     (t/is (= 0
              (binf/buffer-offset v)))
     (t/is (= 0
@@ -133,6 +141,12 @@
                      offset)
         #?@(:clj [v-native (binf/view view-native
                                       offset)])]
+    (t/is (= :little-endian
+             (binf/endian-get v))
+          "Endianess is duplicated")
+    #?(:clj (t/is (= :little-endian
+                     (binf/endian-get v-native))
+                  "Endianess is duplicated in native view"))
     (t/is (= offset
              (binf/buffer-offset v)))
     (t/is (= 0
@@ -155,6 +169,12 @@
         #?@(:clj [v-native (binf/view view-native
                                       offset
                                       size-2)])]
+    (t/is (= :little-endian
+             (binf/endian-get v))
+          "Endianess is duplicated")
+    #?(:clj (t/is (= :little-endian
+                     (binf/endian-get v-native))
+                  "Endianess is duplicated in native view"))
     (t/is (= offset
              (binf/buffer-offset v)))
     (t/is (= 0

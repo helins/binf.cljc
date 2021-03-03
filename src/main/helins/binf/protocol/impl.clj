@@ -368,13 +368,15 @@
     (view
       
       ([this]
-       (.duplicate this))
+       (doto (.duplicate this)
+         (.order (.order this))))
 
       ([this offset]
-        (-> this
-            .duplicate
-            (.position offset)
-            .slice))
+       (doto (-> this
+                 .duplicate
+                 (.position offset)
+                 .slice)
+         (.order (.order this))))
 
       ([this offset n-byte]
         (-> this
