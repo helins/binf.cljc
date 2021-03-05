@@ -369,7 +369,9 @@
       
       ([this]
        (doto (.duplicate this)
-         (.order (.order this))))
+         (.order (.order this))
+         (.position 0)))
+
 
       ([this offset]
        (doto (-> this

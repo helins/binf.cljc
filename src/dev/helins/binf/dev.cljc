@@ -56,4 +56,13 @@
                       #_33)
 
 
+  (def v
+       (binf/view (binf.buffer/alloc 42)))
+
+  (-> v
+      (binf/wr-b32 42)
+      binf/view
+      binf/position)
+
+
   )

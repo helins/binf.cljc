@@ -10,9 +10,10 @@
   (:require [clojure.reflect]
             [clojure.pprint]
             [kaocha.repl]
-            [helins.binf       :as binf]
+            [helins.binf        :as binf]
+            [helins.binf.buffer :as binf.buffer]
             [helins.binf.dev]
-            [helins.binf.int64 :as binf.int64]))
+            [helins.binf.int64  :as binf.int64]))
 
 
 (set! *warn-on-reflection*
@@ -30,5 +31,6 @@
 
   (unsigned-bit-shift-right (unchecked-long -4)
                             1)
+
 
   )
