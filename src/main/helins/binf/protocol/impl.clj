@@ -203,13 +203,13 @@
   binf.protocol/IGrow
 
     (grow [this n-additional-byte]
-      (.position this
-                 0)
-      (let [bb-new (ByteBuffer/allocate (+ (binf.protocol/limit this)
-                                           n-additional-byte))]
-        (.put bb-new
-              this)
-        bb-new))
+      (let [position (.position this)]
+        (.position this
+                   0)
+        (doto (ByteBuffer/allocate (+ (binf.protocol/limit this)
+                                      n-additional-byte))
+          (.put this)
+          (.position position))))
 
 
   binf.protocol/IRelativeReader

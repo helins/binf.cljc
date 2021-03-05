@@ -598,4 +598,11 @@
                                                              (binf/wr-b8 1)
                                                              (binf/wr-b8 2)
                                                              (binf/wr-b8 42))
-                                                         2)))))))
+                                                         2))))))
+
+  (t/is (= 42
+           (-> (binf/view (binf.buffer/alloc 100))
+               (binf/seek 42)
+               (binf/grow 200)
+               binf/position))
+        "Position is the same than in the original view"))

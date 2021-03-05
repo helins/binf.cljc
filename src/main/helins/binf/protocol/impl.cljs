@@ -45,26 +45,49 @@
 
 
 
-(defn- -init-view
+(defn- -duplicate-endianess
 
   ;;
 
+  [view view-from]
+
+  (goog.object/set view
+                   -k-little-endian?
+                   (goog.object/get view-from
+                                    -k-little-endian?))
+  view)
+
+
+
+(defn- -set-position
+
+  ;;
+
+  [view position]
+
+  (goog.object/set view
+                   -k-position
+                   position)
+  view)
+
+
+
+(defn- -init-view
+
+  ;;
+  
+
   ([view]
 
-   (goog.object/set view
-                    -k-position
-                    0)
-   view)
+   (-set-position view
+                  0))
 
 
   ([view view-parent]
 
    (-> view
        -init-view
-       (goog.object/set -k-little-endian?
-                        (goog.object/get view-parent
-                                         -k-little-endian?)))
-   view))
+       (-duplicate-endianess view-parent))))
 
 
 
@@ -236,9 +259,10 @@
   binf.protocol/IGrow
 
     (grow [this n-additional-byte]
-      (-init-view (js/DataView. (binf.protocol/grow (.-buffer this)
-                                                    n-additional-byte))
-                  this))
+      (-> (js/DataView. (binf.protocol/grow (.-buffer this)
+                                            n-additional-byte))
+          (-set-position (binf.protocol/position this))
+          (-duplicate-endianess this)))
 
 
   binf.protocol/IRelativeReader
