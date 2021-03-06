@@ -209,7 +209,8 @@
         (doto (ByteBuffer/allocate (+ (binf.protocol/limit this)
                                       n-additional-byte))
           (.put this)
-          (.position position))))
+          (.position position)
+          (.order (.order this)))))
 
 
   binf.protocol/IRelativeReader

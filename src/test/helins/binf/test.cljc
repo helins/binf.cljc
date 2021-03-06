@@ -605,4 +605,12 @@
                (binf/seek 42)
                (binf/grow 200)
                binf/position))
-        "Position is the same than in the original view"))
+        "Position is the same than in the original view")
+
+  (t/is (= :little-endian
+           (-> (binf.buffer/alloc 42)
+               binf/view
+               (binf/endian-set :little-endian)
+               (binf/grow 24)
+               binf/endian-get))
+        "Endianess is duplicated"))
