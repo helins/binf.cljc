@@ -20,14 +20,102 @@
 ;;;;;;;;;; Miscellaneous
 
 
-(defn n-max-b8
+(defn n-byte-max
 
   ""
 
   [n-bit]
 
-  (Math/ceil (double (/ n-bit
-                        7))))
+  (long (Math/ceil (double (/ n-bit
+                              7)))))
+
+
+
+(defn n-byte-i32
+
+  ""
+
+  [i32]
+
+  (loop [i32-2  i32
+         n-byte 1]
+    (let [b8    (bit-and i32-2
+                         0x7f)
+          i32-3 (>> i32-2
+                    7)]
+      (if (or (and (zero? i32-3)
+                   (zero? (bit-and b8
+                                   0x40)))
+              (and (= i32-3
+                      -1)
+                   (not (zero? (bit-and b8
+                                        0x40)))))
+        n-byte
+        (recur i32-3
+               (inc n-byte))))))
+
+
+
+(defn n-byte-u32
+
+  ""
+
+  [u32]
+
+  (loop [n-byte 1
+         u32-2  u32]
+    (let [u32-3 (>>> u32-2
+                     7)]
+      (if (zero? u32-3)
+        n-byte
+        (recur (inc n-byte)
+               u32-3)))))
+
+
+
+(defn n-byte-i64
+
+  ""
+
+  [i64]
+
+  (loop [i64-2  i64
+         n-byte 1]
+    (let [b8    (bit-and i64-2
+                         (binf.int64/i* 0x7f))
+          i64-3 (>> i64-2
+                    (binf.int64/i* 7))]
+      (if (or (and (= (binf.int64/i* 0)
+                      i64-3)
+                   (= (binf.int64/i* 0)
+                      (bit-and b8
+                               (binf.int64/i* 0x40))))
+              (and (= i64-3
+                      (binf.int64/i* -1))
+                   (not= (binf.int64/i* 0)
+                         (bit-and b8
+                                  (binf.int64/i* 0x40)))))
+        n-byte
+        (recur i64-3
+               (inc n-byte))))))
+
+
+
+(defn n-byte-u64
+
+  ""
+
+  [u64]
+
+  (loop [n-byte 1
+         u64-2  u64]
+    (let [u64-3 (binf.int64/u>> u64-2
+                                (binf.int64/u* 7))]
+      (if (= (binf.int64/u* 0)
+             u64-3)
+        n-byte
+        (recur (inc n-byte)
+               u64-3)))))
 
 
 ;;;;;;;;;; i32

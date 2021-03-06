@@ -21,17 +21,30 @@
 
   (let [v (binf/view (binf.buffer/alloc 32))]
 
+    (-> v
+        (binf/seek 0)
+        (binf.leb128/wr-u32 0))
+
+    (t/is (= 1
+             (binf/position v)
+             (binf.leb128/n-byte-u32 0)))
+
     (t/is (= 0
              (-> v
                  (binf/seek 0)
-                 (binf.leb128/wr-u32 0)
-                 (binf/seek 0)
                  (binf.leb128/rr-u32))))
+
+
+    (-> v
+        (binf/seek 0)
+        (binf.leb128/wr-u32 4294967295))
+
+    (t/is (= (binf.leb128/n-byte-max 32)
+             (binf/position v)
+             (binf.leb128/n-byte-u32 4294967295)))
 
     (t/is (= 4294967295
              (-> v
-                 (binf/seek 0)
-                 (binf.leb128/wr-u32 4294967295)
                  (binf/seek 0)
                  (binf.leb128/rr-u32))))))
 
@@ -41,41 +54,70 @@
 
   (let [v (binf/view (binf.buffer/alloc 32))]
 
+    (-> v
+        (binf/seek 0)
+        (binf.leb128/wr-i32 0))
+
+    (t/is (= 1
+             (binf/position v)
+             (binf.leb128/n-byte-i32 0)))
+
     (t/is (= 0
              (-> v
                  (binf/seek 0)
-                 (binf.leb128/wr-i32 0)
-                 (binf/seek 0)
                  (binf.leb128/rr-i32))))
+
+    (-> v
+        (binf/seek 0)
+        (binf.leb128/wr-i32 2147483647))
+
+    (t/is (= (binf.leb128/n-byte-max 32)
+             (binf/position v)
+             (binf.leb128/n-byte-i32 2147483647)))
 
     (t/is (= 2147483647
              (-> v
                  (binf/seek 0)
-                 (binf.leb128/wr-i32 2147483647)
-                 (binf/seek 0)
                  (binf.leb128/rr-i32))))
+
+    (-> v
+        (binf/seek 0)
+        (binf.leb128/wr-i32 -2147483648))
+
+    (t/is (= (binf.leb128/n-byte-max 32)
+             (binf/position v)
+             (binf.leb128/n-byte-i32 -2147483648)))
 
     (t/is (= -2147483648
              (-> v
                  (binf/seek 0)
-                 (binf.leb128/wr-i32 -2147483648)
-                 (binf/seek 0)
                  (binf.leb128/rr-i32))))
+
+    (-> v
+        (binf/seek 0)
+        (binf.leb128/wr-i32 -42))
+
+    (t/is (= 1
+             (binf/position v)
+             (binf.leb128/n-byte-i32 0)))
 
     (t/is (= -42
              (-> v
                  (binf/seek 0)
-                 (binf.leb128/wr-i32 -42)
-                 (binf/seek 0)
                  (binf.leb128/rr-i32))))
+
+    (-> v
+        (binf/seek 0)
+        (binf/wr-b8 0x7F))
+
+    (t/is (= 1
+             (binf/position v)
+             (binf.leb128/n-byte-i32 0)))
 
     (t/is (= -1
              (-> v
                  (binf/seek 0)
-                 (binf/wr-b8 0x7F)
-                 (binf/seek 0)
-                 (binf.leb128/rr-i32))))
-    ))
+                 (binf.leb128/rr-i32))))))
 
 
 ;;;;;;;;;; int64
@@ -85,17 +127,29 @@
 
   (let [v (binf/view (binf.buffer/alloc 32))]
 
+    (-> v
+        (binf/seek 0)
+        (binf.leb128/wr-u64 (binf.int64/u* 0)))
+
+    (t/is (= 1
+             (binf/position v)
+             (binf.leb128/n-byte-u64 (binf.int64/u* 0))))
+
     (t/is (= (binf.int64/u* 0)
              (-> v
                  (binf/seek 0)
-                 (binf.leb128/wr-u64 (binf.int64/u* 0))
-                 (binf/seek 0)
                  (binf.leb128/rr-u64))))
+
+    (-> v
+        (binf/seek 0)
+        (binf.leb128/wr-u64 (binf.int64/u* 18446744073709551615)))
+
+    (t/is (= (binf.leb128/n-byte-max 64)
+             (binf/position v)
+             (binf.leb128/n-byte-u64 (binf.int64/u* 18446744073709551615))))
 
     (t/is (= (binf.int64/u* 18446744073709551615)
              (-> v
-                 (binf/seek 0)
-                 (binf.leb128/wr-u64 (binf.int64/u* 18446744073709551615))
                  (binf/seek 0)
                  (binf.leb128/rr-u64))))))
 
@@ -105,37 +159,67 @@
 
   (let [v (binf/view (binf.buffer/alloc 32))]
 
+    (-> v
+        (binf/seek 0)
+        (binf.leb128/wr-i64 (binf.int64/i* 0)))
+
+    (t/is (= 1
+             (binf/position v)
+             (binf.leb128/n-byte-i64 (binf.int64/i* 0))))
+
     (t/is (= (binf.int64/i* 0)
              (-> v
                  (binf/seek 0)
-                 (binf.leb128/wr-i64 (binf.int64/i* 0))
-                 (binf/seek 0)
                  (binf.leb128/rr-i64))))
+
+    (-> v
+        (binf/seek 0)
+        (binf.leb128/wr-i64 (binf.int64/i* 9223372036854775807)))
+
+    (t/is (= (binf.leb128/n-byte-max 64)
+             (binf/position v)
+             (binf.leb128/n-byte-i64 (binf.int64/i* 9223372036854775807))))
 
     (t/is (= (binf.int64/i* 9223372036854775807)
              (-> v
                  (binf/seek 0)
-                 (binf.leb128/wr-i64 (binf.int64/i* 9223372036854775807))
-                 (binf/seek 0)
                  (binf.leb128/rr-i64))))
+
+    (-> v
+        (binf/seek 0)
+        (binf.leb128/wr-i64 (binf.int64/i* -9223372036854775808)))
+
+    (t/is (= (binf.leb128/n-byte-max 64)
+             (binf/position v)
+             (binf.leb128/n-byte-i64 (binf.int64/i* -9223372036854775808))))
 
     (t/is (= (binf.int64/i* -9223372036854775808)
              (-> v
                  (binf/seek 0)
-                 (binf.leb128/wr-i64 (binf.int64/i* -9223372036854775808))
-                 (binf/seek 0)
                  (binf.leb128/rr-i64))))
+
+    (-> v
+        (binf/seek 0)
+        (binf.leb128/wr-i64 (binf.int64/i* -42)))
+
+    (t/is (= 1
+             (binf/position v)
+             (binf.leb128/n-byte-i64 (binf.int64/i* -42))))
 
     (t/is (= (binf.int64/i* -42)
              (-> v
                  (binf/seek 0)
-                 (binf.leb128/wr-i64 (binf.int64/i* -42))
-                 (binf/seek 0)
                  (binf.leb128/rr-i64))))
+
+    (-> v
+        (binf/seek 0)
+        (binf/wr-b8 0x7F))
+
+    (t/is (= 1
+             (binf/position v)
+             (binf.leb128/n-byte-i64 (binf.int64/i* -1))))
 
     (t/is (= (binf.int64/i* -1)
              (-> v
-                 (binf/seek 0)
-                 (binf/wr-b8 0x7F)
                  (binf/seek 0)
                  (binf.leb128/rr-i64))))))
