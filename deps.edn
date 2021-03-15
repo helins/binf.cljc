@@ -27,7 +27,9 @@
   :test
   {:extra-deps  {lambdaisland/chui        {:mvn/version "0.0.117"}
                  lambdaisland/kaocha      {:mvn/version "1.0-612"}
-                 lambdaisland/kaocha-cljs {:mvn/version "0.0-71"}}
+                 lambdaisland/kaocha-cljs {:mvn/version "0.0-71"}
+                 metosin/malli            {:mvn/version "0.3.0"}
+                 org.clojure/test.check   {:mvn/version "1.1.0"}}
    :extra-paths ["src/test"]}}
 
  :deps
