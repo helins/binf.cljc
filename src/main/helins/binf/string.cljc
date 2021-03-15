@@ -5,7 +5,8 @@
 
 (ns helins.binf.string
 
-  ""
+  "Decoding a string directly to a buffer and vice-versa."
+  
 
   {:author "Adam Helinski"}
 
@@ -69,7 +70,9 @@
 
   "Interprets the given `buffer` as a string.
 
-   Uses [[decoder-utf-8]] in arity 1."
+   Defaults to UTF-8.
+
+   See [[decoder]]."
 
   ([buffer]
 
@@ -90,11 +93,18 @@
 
   "Returns a buffer containing the given `string` encoded in UTF-8."
 
-  ^bytes
 
-  [string]
+  (^bytes
+   [string]
 
-  #?(:clj  (.getBytes ^String string
-                      ^Charset encoder-utf-8)
-     :cljs (.-buffer (.encode encoder-utf-8
-                              string))))
+   #?(:clj  (.getBytes ^String string
+                       ^Charset encoder-utf-8)
+      :cljs (.-buffer (.encode encoder-utf-8
+                               string))))
+
+  #?(:clj (^bytes
+           [string encoder]
+
+           (.getBytes ^String string
+                      ^Charset encoder))))
+
