@@ -135,7 +135,7 @@
                                        :b
                                        :c
                                        :d]
-            :binf.cabi.struct/member+ {:a (member binf.cabi/i8
+            :binf.cabi.struct/member+ {:a (member binf.cabi/bool
                                                   0
                                                   env32)
                                        :b (member binf.cabi/u16
@@ -149,7 +149,7 @@
                                                   env32)}
             :binf.cabi.struct/type    'foo}
            ((binf.cabi/struct 'foo
-                              [[:a binf.cabi/i8]
+                              [[:a binf.cabi/bool]
                                [:b binf.cabi/u16]
                                [:c binf.cabi/i64]
                                [:d binf.cabi/u8]])
@@ -236,7 +236,7 @@
             :binf.cabi/type           'struct
             :binf.cabi.struct/layout  [:a
                                        :b]
-            :binf.cabi.struct/member+ {:a (member binf.cabi/u8
+            :binf.cabi.struct/member+ {:a (member binf.cabi/bool
                                                   0
                                                   env64)
                                        :b (member (fn [env]
@@ -248,7 +248,7 @@
                                                   env64)}
             :binf.cabi.struct/type    'foo}
            ((binf.cabi/struct 'foo
-                              [[:a binf.cabi/u8]
+                              [[:a binf.cabi/bool]
                                [:b (-> binf.cabi/u16
                                        (binf.cabi/array 10)
                                        (binf.cabi/array 5))]])

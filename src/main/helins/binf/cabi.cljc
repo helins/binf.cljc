@@ -143,6 +143,18 @@
 ;;;;;
 
 
+(defn bool
+
+  ""
+
+  [_env]
+
+  {:binf.cabi/align  1
+   :binf.cabi/n-byte 1
+   :binf.cabi/type   'bool})
+
+
+
 (defn i8
 
   ""
