@@ -16,12 +16,12 @@
 
 
 (def w32
-     binf.cabi/sz-word32)
+     4)
 
 
 
 (def w64
-     binf.cabi/sz-word64)
+     8)
 
 
 

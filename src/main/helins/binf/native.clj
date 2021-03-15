@@ -299,7 +299,7 @@
 ;;;;;;;;;; Reading and writing pointers
 
 
-(def sz-ptr
+(def n-byte-ptr
 
   ""
 

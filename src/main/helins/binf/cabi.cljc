@@ -19,40 +19,14 @@
 ;;;;;;;;;;
 
 
-(def sz-word16
-
-  ""
-
-  2)
-
-
-
-(def sz-word32
-
-  ""
-
-  4)
-
-
-
-(def sz-word64
-
-  ""
-
-  8)
-
-
-;;;;;;;;;;
-
-
 (defn env
 
   ""
 
-  [sz-word]
+  [n-byte-word]
 
-  {:binf.cabi/align          sz-word
-   :binf.cabi.pointer/n-byte sz-word})
+  {:binf.cabi/align          n-byte-word
+   :binf.cabi.pointer/n-byte n-byte-word})
 
 
 ;;;;;;;;;;

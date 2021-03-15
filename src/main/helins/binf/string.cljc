@@ -90,6 +90,8 @@
 
   "Returns a buffer containing the given `string` encoded in UTF-8."
 
+  ^bytes
+
   [string]
 
   #?(:clj  (.getBytes ^String string
