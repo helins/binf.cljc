@@ -5,7 +5,7 @@
 
 (ns helins.binf.float
 
-  ""
+  "Handling floating values, miscellaneous coercions."
 
   {:author "Adam Helinski"})
 
@@ -15,9 +15,9 @@
 
 (defn b32
 
-  "Converts a 32-bit float to an integer preserving the bit pattern.
+  "Converts a 32-bit float to a 32-bit integer preserving the bit pattern.
   
-   Opposite of [[f32]]."
+   Opposite of [[from-b32]]."
 
   [f32]
 
@@ -32,9 +32,9 @@
 
 (defn b64
 
-  "Converts a 64-bit float to an integer preserving the bit pattern.
+  "Converts a 64-bit float to a 64-bit integer preserving the bit pattern.
   
-   Opposite of [[f32]]."
+   Opposite of [[from-b64]]."
 
   [f64]
 
@@ -50,9 +50,9 @@
 
 (defn from-b32
 
-  "Interprets bits from an integer (at least 32 bits) as a 32-bit float.
+  "Interprets bits from a 32-bit integer as a 32-bit float.
   
-   Opposite of [[bits-f32]]."
+   Opposite of [[b32]]."
 
   [b32]
 
@@ -70,7 +70,7 @@
 
   "Interprets bits from a 64-bits integer as a 64-bit float.
   
-   Opposite of [[bits-64]]."
+   Opposite of [[b64]]."
 
   [b64]
 
@@ -88,7 +88,7 @@
 
 (defn f32
 
-  ""
+  "Coerce `x` to a 32-bit float (no-op in JS since there no 32-bit floats)."
 
   [x]
 
@@ -98,7 +98,7 @@
 
 (defn f64
 
-  ""
+  "Coerce `x` to a 64-bit float."
 
   [x]
 

@@ -5,7 +5,17 @@
 
 (ns helins.binf.native
 
-  ""
+  "Contains [[view]] for creating a view over native memory (as opposed to the JVM heap)
+   as well as utilities for handling raw pointers.
+  
+   The main utility is [[view]]. Allocating native memory can lead to performance increase
+   and simplifies things when using tools such as JNI.
+  
+   Other utilities are DANGEROUS.
+
+   Manipulating raw pointers and managing memory is just as error prone as in native programming.
+   Those utilities are for users knowing both want they want and what it simplies. Otherwise,
+   segfaults are to be expected."
 
   {:author "Adam Helinski"}
 
@@ -32,7 +42,10 @@
 
 (defn view
 
-  ""
+  "Allocates `n-byte` bytes in native memory, outside of the JVM heap, and returns a view over it.
+  
+   Very useful for performance increase in some situations or for interacting with native functions.
+   The returned view is actually a `DirectByteBuffer` commonly understood by JNI."
 
   ^DirectByteBuffer
 
@@ -46,7 +59,7 @@
 
 (defn alloc
 
-  ""
+  "Returns a raw pointer after allocating `n-byte` bytes in native memory."
 
   [n-byte]
 
@@ -57,7 +70,7 @@
 
 (defn copy
 
-  ""
+  "Copies `n-byte` bytes from a raw pointer to another raw pointer."
 
   [ptr-dest ptr-src n-byte]
 
@@ -70,7 +83,7 @@
 
 (defn free
 
-  ""
+  "De-allocates a raw pointer."
 
   [ptr]
 
@@ -82,7 +95,7 @@
 
 (defn realloc
 
-  ""
+  "Re-allocates a raw pointer."
 
   [ptr n-byte]
 
@@ -96,7 +109,7 @@
 
 (defn r-i8
 
-  ""
+  "Dereferences a raw pointer to a signed 8-bit integer."
 
   [ptr]
 
@@ -107,7 +120,7 @@
 
 (defn r-u8
 
-  ""
+  "Dereferences a raw pointer to an unsigned 8-bit integer."
 
   [ptr]
 
@@ -117,7 +130,7 @@
 
 (defn w-b8
 
-  ""
+  "Write an 8-bit integer at the given raw pointer."
 
   [ptr b8]
 
@@ -131,7 +144,7 @@
 
 (defn r-i16
 
-  ""
+  "Dereferences a raw pointer to a signed 16-bit integer."
 
   [ptr]
 
@@ -142,7 +155,7 @@
 
 (defn r-u16
 
-  ""
+  "Dereferences a raw pointer to an unsigned 16-bit integer."
 
   [ptr]
 
@@ -152,7 +165,7 @@
 
 (defn w-b16
 
-  ""
+  "Writes a 16-bit integer at the given raw pointer."
 
   [ptr b16]
 
@@ -166,7 +179,7 @@
 
 (defn r-i32
 
-  ""
+  "Dereferences a raw pointer to a signed 32-bit integer."
 
   [ptr]
 
@@ -177,7 +190,7 @@
 
 (defn r-u32
 
-  ""
+  "Dereferences a raw pointer to an unsigned 32-bit integer."
 
   [ptr]
 
@@ -187,7 +200,7 @@
 
 (defn w-b32
 
-  ""
+  "Writes a 32-bit integer at the given raw pointer."
 
   [ptr b32]
 
@@ -201,7 +214,9 @@
 
 (defn r-b64
 
-  ""
+  "Dereferences a raw pointer to a 64-bit integer.
+  
+   Meant to be used with the `helins.binf.int64` namespace."
 
   [ptr]
 
@@ -212,7 +227,7 @@
 
 (defn w-b64
 
-  ""
+  "Writes a 64-bit integer at the given raw pointer."
 
   [ptr b64]
 
@@ -226,7 +241,7 @@
 
 (defn r-f32
 
-  ""
+  "Dereferences a raw pointer to a 32-bit float"
 
   [ptr]
 
@@ -237,7 +252,7 @@
 
 (defn w-f32
 
-  ""
+  "Writes a 32-bit float at the given raw pointer."
 
   [ptr f32]
 
@@ -251,7 +266,7 @@
 
 (defn r-f64
 
-  ""
+  "Dereferences a raw pointer to a 64-bit float"
 
   [ptr]
 
@@ -262,7 +277,7 @@
 
 (defn w-f64
 
-  ""
+  "Writes a 64-bit float at the given raw pointer."
 
   [ptr f64]
 
@@ -276,7 +291,9 @@
 
 (def n-byte-ptr
 
-  ""
+  "Number of bytes in a pointer on this machine.
+  
+   Should be 4 on a 32-bit machine, 8 on a 64-bit machine."
 
   (.addressSize -unsafe))
 
@@ -284,7 +301,7 @@
 
 (defn r-ptr
 
-  ""
+  "Dereference a raw pointer to a pointer."
 
   [ptr]
 
@@ -295,7 +312,7 @@
 
 (defn w-ptr
 
-  ""
+  "Writes a pointer at the given raw pointer."
 
   [ptr ptr-value]
 

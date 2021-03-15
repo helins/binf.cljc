@@ -5,7 +5,7 @@
 
  (ns helins.binf.protocol.impl
 
-   ""
+   ;; JVM implementation of BinF protocols.
 
    {:author "Adam Helinski"
     :no-doc true}

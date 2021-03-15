@@ -5,7 +5,15 @@
 
 (ns helins.binf.protocol
 
-  ""
+  "Protocols related to views.
+  
+   This namespace should be relevant only if a new type needs to implement those. The common user
+   should not have to bother.
+  
+   Those functions are described in the core `helins.binf` namespace as well as the README file.
+  
+   Depending on the type, not all protocols must be implemented. For instance, a stream-like type
+   might not be seekable and might implement only `IRelative*` protocols and not `IAbsolute` ones."
 
   {:author "Adam Helinski"})
 
@@ -89,7 +97,7 @@
 
 (defprotocol IGrow
 
-  ""
+  "Growing a view means returning a new view with a higher capacity, copying the initial one."
 
   (grow [this n-additional-byte]))
 

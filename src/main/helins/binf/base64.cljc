@@ -5,13 +5,15 @@
 
 (ns helins.binf.base64
 
-  "Base64 encoding and decoding."
+  "Base64 encoding and decoding.
+  
+   Translating a buffer into a Base64 string is useful for those places which
+   do not understand buffers natively (eg. JSON)."
 
   {:author "Adam Helinski"}
 
   (:require #?(:cljs [goog.crypt.base64])
-            [helins.binf          :as binf]
-            [helins.binf.buffer   :as binf.buffer]
+            #?(:cljs [helins.binf.buffer   :as binf.buffer])
             [helins.binf.protocol :as binf.protocol])
   #?(:clj (:import java.nio.ByteBuffer
                    java.util.Base64)))
@@ -64,7 +66,10 @@
 
 (defn decode
 
-  ;"Decodes a string into a [[buffer]] according to the Base64 basic scheme (RFC 4648 section 4)"
+  "Decodes a string into a [[view]] according to the Base64 basic scheme (RFC 4648 section 4).
+  
+   In JS, the view might be slightly larger than the buffer it wraps since the algorithm sometimes allocates
+   a tiny bit more memory than ultimately needed. "
 
   #?@(:clj  [[^String string]
              (binf.protocol/view (.decode (Base64/getDecoder)
@@ -81,7 +86,7 @@
 
 (defn encode
 
-  ;"Encodes a [[buffer]] into a string according to the Base64 basic scheme (RFC 4648 section 4)"
+  "Encodes a `buffer` into a string according to the Base64 basic scheme (RFC 4648 section 4)"
 
   ([buffer]
 

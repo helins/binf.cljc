@@ -5,7 +5,20 @@
 
 (ns helins.binf.int64
 
-  ""
+  "Handling 64-bit integers, miscellaneous coercions and unsigned math operations.
+  
+   64-bit integers deserves special attention. On the JVM, there is no explicit unsigned 64-bit
+   type and in JS, there are no 64-bit integers at all. This is why creating and handling them in
+   a cross-platform manner, signed or unsigned, is done via this namespace.
+  
+   On the JVM, unsigned 64-bit integers are actually regular 64-bit signed values but treated diffently.
+   What matters is the bit pattern. For human-readability, see [[str-u]].
+  
+   In JS, they are `BigInt`, a type which does not even interoperate with regular numbers.
+  
+   As a rule, all values of any operation must be 64-bit integers. This namespace provides functions for
+   logical and mathematical operations for which sign matters (such as [u<=]] or [[udiv]]) as well as
+   bitwise operations which need an alternative implementation (such as [[bit-clear]]."
 
   {:author "Adam Helinski"}
 
@@ -27,7 +40,7 @@
 
 #?(:cljs (defn ^:private -ix
 
-  ;;
+  ;; Signed js/BigInt to number conversion.
 
   [n-bit big-int]
 
@@ -39,7 +52,7 @@
 
 #?(:cljs (defn ^:private -ux
 
-  ;;
+  ;; Unsigned js/BigInt to number conversion.
 
   [n-bit big-int]
 
@@ -53,6 +66,8 @@
 
 (defn i8
 
+  "Converts a 64-bit integer to a signed 8-bit integer."
+
   [b64]
 
   #?(:clj  (binf.int/i8 b64)
@@ -62,6 +77,8 @@
 
 
 (defn u8
+
+  "Converts a 64-bit integer to an unsigned 8-bit integer."
 
   [b64]
 
@@ -73,6 +90,8 @@
 
 (defn i16
 
+  "Converts a 64-bit integer to a signed 16-bit integer."
+
   [b64]
 
   #?(:clj  (binf.int/i16 b64)
@@ -83,6 +102,7 @@
 
 (defn u16
 
+  "Converts a 64-bit integer to an unsigned 16-bit integer."
   [b64]
 
   #?(:clj  (binf.int/u16 b64)
@@ -93,6 +113,7 @@
 
 (defn i32
 
+  "Converts a 64-bit integer to a signed 32-bit integer."
   [b64]
 
   #?(:clj  (binf.int/i32 b64)
@@ -103,6 +124,7 @@
 
 (defn u32
 
+  "Converts a 64-bit integer to an unsigned -bit integer."
   [b64]
 
   #?(:clj  (binf.int/u32 b64)
@@ -134,7 +156,7 @@
 
 #?(:clj (defmacro i*
 
-  ""
+  "Macro for declaring a signed 64-bit integer."
 
   [n]
 
@@ -146,7 +168,7 @@
 
 #?(:clj (defmacro u*
 
-  ""
+  "Macro for declaring an unsigned 64-bit integer."
 
   [n]
 
@@ -160,7 +182,7 @@
 
 (defn u>>
 
-  ""
+  "Unsigned bit-shift right."
 
   [x n]
 
@@ -171,7 +193,7 @@
 
 (defn bit-clear
 
-  ""
+  "64-bit equivalent of the standard function."
 
   [x n]
 
@@ -185,7 +207,7 @@
 
 (defn bit-flip
 
-  ""
+  "64-bit equivalent of the standard function."
 
   [x n]
 
@@ -198,7 +220,7 @@
 
 (defn bit-set
 
-  ""
+  "64-bit equivalent of the standard function."
 
   [x n]
 
@@ -212,7 +234,7 @@
 
 (defn bit-test
 
-  ""
+  "64-bit equivalent of the standard function."
 
   [x n]
 
@@ -227,22 +249,9 @@
 ;;;;;;;;;; Unsigned logic tests
 
 
-(defn u=
-
-  ""
-
-  [u64-1 u64-2]
-
-  #?(:clj  (zero? (Long/compareUnsigned u64-1
-                                        u64-2))
-     :cljs (= u64-1
-              u64-2)))
-
-
-
 (defn u<
 
-  ""
+  "Unsigned 64-bit equivalent of standard `<`."
 
   [u64-1 u64-2]
 
@@ -255,7 +264,7 @@
 
 (defn u<=
 
-  ""
+  "Unsigned 64-bit equivalent of standard `<=`."
 
   [u64-1 u64-2]
 
@@ -269,7 +278,7 @@
 
 (defn u>
 
-  ""
+  "Unsigned 64-bit equivalent of standard `>`."
 
   [u64-1 u64-2]
 
@@ -282,7 +291,7 @@
 
 (defn u>=
 
-  ""
+  "Unsigned 64-bit equivalent of standard `>=`."
 
   [u64-1 u64-2]
 
@@ -298,7 +307,7 @@
 
 (defn udiv
 
-  ""
+  "Unsigned division."
 
   [u64-1 u64-2]
 
@@ -311,7 +320,7 @@
 
 (defn urem
 
-  ""
+  "Unsigned remainder."
 
   [u64-1 u64-2]
 
@@ -326,7 +335,9 @@
 
 (defn str-i
 
-  ""
+  "Converts the given signed 64-bit integer into a string.
+  
+   A radix can be provided (eg. 16 for hexadecimal or 2 for binary)."
 
 
   ([i64]
@@ -345,7 +356,9 @@
 
 (defn str-u
 
-  ""
+  "Converts the given unsigned 64-bit integer into a string.
+  
+   A radix can be provided (eg. 16 for hexadecimal or 2 for binary)."
 
 
   ([i64]

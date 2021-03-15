@@ -12,14 +12,9 @@
   {:author "Adam Helins"}
 
   (:require [helins.binf.buffer         :as binf.buffer]
-            [helins.binf.int            :as binf.int]
-            [helins.binf.int64          :as binf.int64]
             [helins.binf.protocol       :as binf.protocol]
             [helins.binf.protocol.impl]
-            [helins.binf.string         :as binf.string])
-  (:refer-clojure :rename {bit-shift-left           <<
-                           bit-shift-right          >>
-                           unsigned-bit-shift-right >>>}))
+            [helins.binf.string         :as binf.string]))
 
 
 (declare remaining)
@@ -34,7 +29,7 @@
 (defn ra-buffer
 
   "Reads `n-byte` bytes from an absolute `position` and returns them in a new buffer or in the
-   given `buffer` at the specified `offset` (or 0)."
+   given `buffer` at the specified `offset` (defaults to 0)."
 
 
   ([this position n-byte]
@@ -154,7 +149,7 @@
 
 (defn ra-f32
 
-  "Reads a 32-bit float at from absolute `position`."
+  "Reads a 32-bit float from absolute `position`."
 
   [view position]
 
@@ -165,7 +160,7 @@
 
 (defn ra-f64
 
-  "Reads a 64-bit float at from absolute `position`."
+  "Reads a 64-bit float from absolute `position`."
 
   [view position]
 
@@ -178,9 +173,9 @@
 
   "Reads a string consisting of `n-byte` bytes from an absolute `position`.
   
-   A decoder may be provided (default is UTF-8).
+   A string decoder may be provided (default is UTF-8).
   
-   Cf. [[text-decoder]]"
+   Cf. [[helins.binf.string/decoder]]"
 
 
   ([view position n-byte]
@@ -320,9 +315,7 @@
   
    With that information, the user can continue writing if needed. On the JVM, the tuple contains a 4th
    item which is a `CharBuffer` containing the rest of the unwritten string which can be passed in place
-   of the `string` argument.
-  
-   Growing views will automatically grow and only one call will be sufficient."
+   of the `string` argument."
 
   [view position string]
 
@@ -336,7 +329,11 @@
 
 (defn backing-buffer
 
-  ""
+  "Returns the buffer of those views which do wrap one, nil otherwise.
+
+   It is possible to implement some protocols of this library over something that does not have a backing buffer.
+   Actually, on the JVM, a `DirectByteBuffer` is an example of a supported view which operates over native memory
+   instead of a Java byte array (ie. a buffer in the context of this library)."
 
   [view]
 
@@ -346,7 +343,9 @@
 
 (defn buffer-offset
 
-  ""
+  "Returns the offset relative to the backing buffer, nil if there is not any.
+
+   See [[backing-buffer]] for background."
 
   [view]
 
@@ -381,7 +380,9 @@
 
 (defn grow
 
-  ""
+  "Returns a new view with `n-additional-byte` added, copying entirely the given `view`.
+  
+   It is particularly useful when writing data of yet unknown length."
 
   [view n-additional-byte]
 
@@ -394,7 +395,8 @@
 
 (defn rr-buffer
 
-  "Reads n-byte and returns them in a new buffer or in the given one at the specified `offset` (or 0)."
+  "Reads `n-byte` and returns them in a new buffer or in the given one at the specified `offset`
+   (defaults to 0)."
 
 
   ([view n-byte]
@@ -528,7 +530,7 @@
 
    A non-nil decoder may be provided (default is UTF-8).
   
-   See [[text-decoder]]"
+   See [[helins.binf.string/decoder]]"
 
 
   ([view n-byte]
@@ -663,7 +665,7 @@
 
 (defn limit
 
-  ""
+  "Returns the number of bytes a view contains."
 
   [view]
 
@@ -707,13 +709,13 @@
 
 (defn view
   
-  "A view can be created from a buffer (see [[buffer]]) or from another view.
+  "A view can be created from a buffer (see [[helins.binf.buffer/alloc]]) or from another view.
   
    An `offset` as well as a size (`n-byte`) may be provided.
   
    ```clojure
    (def my-buffer
-        (binf/buffer 100))
+        (binf.buffer/alloc 100))
 
    ;; View with an offset of 50 bytes, 40 bytes long
    (def my-view
@@ -751,7 +753,7 @@
 
 (defn garanteed?
 
-  ""
+  "Helper returning if the `view` can consume at least `n-byte` from the current position."
 
   [view n-byte]
 
@@ -762,7 +764,7 @@
 
 (defn remaining
 
-  "Returns the number of bytes remaining until the end of the view."
+  "Returns the number of bytes remaining until the end of the view given the current position."
 
   [view]
 
@@ -775,7 +777,7 @@
 
 (defn ra-bool
 
-  ""
+  "Reads a boolean value an absolute `position`."
 
   [view position]
 
@@ -787,7 +789,7 @@
 
 (defn rr-bool
 
-  ""
+  "Reads a boolean value from the current position."
 
   [view]
 
@@ -798,7 +800,7 @@
 
 (defn wa-bool
 
-  ""
+  "Writes a boolean value to an absolute `position`."
 
   [view position true?]
 
@@ -812,7 +814,7 @@
 
 (defn wr-bool
 
-  ""
+  "Writes a boolean value from the current position."
 
   [view true?]
 

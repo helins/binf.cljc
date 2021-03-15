@@ -5,7 +5,33 @@
 
 (ns helins.binf.cabi
 
-  "Base64 encoding and decoding."
+  "Interaction with environments which conform to a C-like ABI.
+
+   This namespace is mainly about defining C structures in order to pass them or to understand
+   them when interacting with native functions. It could be when using JNI on the JVM or when
+   calling WebAssembly functions, for instance.
+
+   This opens the road to interacting with languages like C++ and Rust since they allow for
+   defining such C structures and commonly do so in the context of libraries.
+
+   BinF already provides utilities for handling arbitrary data in native memory or in WebAssembly memory.
+   This namespace is necessary for computing how to read or write data since C composite types follow rules
+   (eg. alignment of data fields for performance).
+
+   3 definitions are needed for understanding those utilities:
+
+     - An `env` is a map containing information needed for computing those rules. See [[env]] for creating one.
+     - A description map describes either a primitive type (eg. [[u32]]) or a composite data structure (eg. [[struct]]).
+     - A description function takes an `env` and produces a description map.
+
+   A description map is plain data containing eveything that is needed for handling this type. For instance,
+   a description of a structure contains computed memory offsets of all its data fields.
+
+   This namespace contains ready description functions for primitive types (such as [[f32]]) as well as functions
+   for creating description functions for composite ones (such as [[array]] or [[struct]]).
+  
+   See [[struct]] for a small example and tests in the `helins.binf.test.cabi` namespace. Source code also clearly
+   shows what is being outputed."
 
   {:author "Adam Helinski"}
 
@@ -21,7 +47,11 @@
 
 (defn env
 
-  ""
+  "Creates a minimal `env` map which describes the used alignment and the size of a pointer. Those
+   informations are necessary to compute about any C type.
+  
+   This function leverages the fact that in modern architectures, alignment matches the size of pointers
+   (eg. on 64-bit machine, alignment is 8 bytes and a pointer is 8 bytes as well)."
 
   [n-byte-word]
 
@@ -34,7 +64,19 @@
 
 (defn force-align
 
-  ""
+  "Sometimes, different alignments are used at the same time. For instance, an inner structure might have
+   a different alignment than its outer structure. This function alters a description function in order to
+   force a particular alignment.
+
+   ```clojure
+   ;; Forcing 4 byte alignment on the inner struct
+
+   (struct 'OuterStruct
+           [:a f32]
+           [:b (force-align (struct 'InnerStruct
+                                    [:inner-a i64])
+                            4)])
+   ```"
 
   [f align]
 
@@ -47,7 +89,7 @@
 
 (defn force-env
 
-  ""
+  "Akin to [[force-align]] but forces the given `env` over the one being used rather than merely the alignment."
 
   [f env]
 
@@ -61,18 +103,22 @@
 
 (defn name-get
 
-  ""
+  "Given a description map, returns its name.
 
-  [member]
+   As such, only members of a [[struct]] or a [[union]] have a name."
 
-  (get member
+  [description-map]
+
+  (get description-map
        :binf.cabi/name))
 
 
 
 (defn name-set
 
-  ""
+  "Assoc'es a new name to a description map.
+
+   See [[name-get]]."
   
   [member name]
 
@@ -86,7 +132,17 @@
 
 (defn aligned
 
-  ""
+  "Re-align `offset` given `align` (an alignment in bytes).
+
+   Used by utilities in this namespace.
+
+  
+   ```clojure
+   (aligned 8
+            13)
+
+   ;; 13 is re-aligned to 16, a multiple of 8
+   ```"
 
   [align offset]
 
@@ -102,9 +158,9 @@
 ;;;;;;;;;;
 
 
-(defn primitive
+(defn- -primitive
 
-  ;;
+  ;; Helper for defining a primitive type.
 
   [type n-byte {:binf.cabi/keys [align]}]
 
@@ -119,7 +175,7 @@
 
 (defn bool
 
-  ""
+  "Given an `env`, returns a map describing a boolean."
 
   [_env]
 
@@ -131,7 +187,7 @@
 
 (defn i8
 
-  ""
+  "Given an `env`, returns a map describing a signed 8-bit integer."
 
   [_env]
 
@@ -143,43 +199,43 @@
 
 (defn i16
 
-  ""
+  "Given an `env`, returns a map describing a signed 16-bit integer."
 
   [env]
 
-  (primitive 'i16
-             2
-             env))
+  (-primitive 'i16
+              2
+              env))
 
 
 
 (defn i32
 
-  ""
+  "Given an `env`, returns a map describing a signed 32-bit integer."
 
   [env]
 
-  (primitive 'i32
-             4
-             env))
+  (-primitive 'i32
+              4
+              env))
 
 
 
 (defn i64
 
-  ""
+  "Given an `env`, returns a map describing a signed 64-bit integer."
 
   [env]
 
-  (primitive 'i64
-             8
-             env))
+  (-primitive 'i64
+              8
+              env))
 
 
 
 (defn u8
 
-  ""
+  "Given an `env`, returns a map describing an unsigned 8-bit integer."
 
   [_env]
 
@@ -191,74 +247,75 @@
 
 (defn u16
 
-  ""
+  "Given an `env`, returns a map describing an unsigned 16-bit integer."
 
   [env]
 
-  (primitive 'u16
-             2
-             env))
+  (-primitive 'u16
+              2
+              env))
 
 
 
 (defn u32
 
-  ""
+  "Given an `env`, returns a map describing an unsigned 32-bit integer."
 
   [env]
 
-  (primitive 'u32
-             4
-             env))
+  (-primitive 'u32
+              4
+              env))
 
 
 
 (defn u64
 
-  ""
+  "Given an `env`, returns a map describing an unsigned 64-bit integer."
 
   [env]
 
-  (primitive 'u64
-             8
-             env))
+  (-primitive 'u64
+              8
+              env))
 
 
 
 (defn f32
 
-  ""
+  "Given an `env`, returns a map describing a 32-bit floating value."
 
   [env]
 
-  (primitive 'f32
-             4
-             env))
+  (-primitive 'f32
+              4
+              env))
 
 
 
 (defn f64
 
-  ""
+  "Given an `env`, returns a map describing a 64-bit floating value."
 
   [env]
 
-  (primitive 'f64
-             8
-             env))
+  (-primitive 'f64
+              8
+              env))
 
 
 
 (defn ptr
 
-  ""
+  "Given a description function for a type, returns a function taking an `env` and returning
+   a map describing a pointer for that type."
 
   [type]
 
   (fn def-ptr [env]
-    (assoc (primitive 'ptr
-                      (env :binf.cabi.pointer/n-byte)
-                      env)
+    (assoc (-primitive 'ptr
+                       (env :binf.cabi.pointer/n-byte)
+                       env)
            :binf.cabi.pointer/target
            (type env))))
 
@@ -268,14 +325,15 @@
 
 (defn array
 
-  ""
+  "Given a description function for a type and a number of elements, returns a description function
+   for an array."
 
-  [element n-element]
+  [description-fn n-element]
 
   (fn def-array [env]
     (let [{:as             element-2
            :binf.cabi/keys [align
-                            n-byte]} (element env)]
+                            n-byte]} (description-fn env)]
       {:binf.cabi/align           align
        :binf.cabi/n-byte          (* n-element
                                      n-byte)
@@ -289,7 +347,14 @@
 
 (defn enum
 
-  ""
+  "Given a type name and a sequence of constants, returns a description function
+   for an enum named as such and composed of those constants.
+
+   A constant is either an identifier (string or keyword) or a vector `[identifier value]`.
+   It looks exactly like defining an enum in C in that regard.
+
+   Attention, enums are brittle from an ABI point of view and should be discouraged. For
+   instance, the Google Fuchsia projects even explicitely bans them."
 
   [type constant+]
 
@@ -329,7 +394,26 @@
 
 (defn struct
 
-  ""
+  "Given a type name and a sequence of members, returns a description function for a structure
+   named as such and composed of those members.
+  
+   A member is a vector `[member-name description-function]`.
+
+   The following example creates a structure containing a byte and an array of doubles. The resulting
+   description function is then being passed an environment map were words are 8 bytes (ie. 64-bit machine).
+
+   That description is plain data and contains computed offsets of all members.
+
+   ```clojure
+   (def my-struct-fn
+        (struct :MyStruct
+                [:a u8]
+                [:b (array f64
+                           10)]))
+
+   (def my-struct-map
+        (my-struct-fn (env 8)))
+   ```"
 
   [type member+]
 
@@ -370,7 +454,12 @@
 
 (defn union
 
-  ""
+  "Given a type name and a sequence of members, returns a description function for
+   a union named as such and composed of those members.
+  
+   A member is a vector `[member-name description-function]`.
+  
+   Behaves similarly to [[struct]]."
 
   [type member+]
 

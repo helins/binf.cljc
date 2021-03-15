@@ -5,7 +5,10 @@
 
 (ns helins.binf.leb128
 
-  ""
+  "Read and write integers in LEB128 format (as used in WebAssembly or DWARF).
+  
+   All functions mentioning 64-bit integers takes values complying with the
+   `helins.binf.int64` namespace."
 
   {:author "Adam Helins"}
 
@@ -22,7 +25,8 @@
 
 (defn n-byte-max
 
-  ""
+  "Computes the maximum number of bytes needed for expressing a value containing
+   `n-bit` bits."
 
   [n-bit]
 
@@ -33,7 +37,7 @@
 
 (defn n-byte-i32
 
-  ""
+  "Combines the number of bytes needed for encoding the given signed value (at most 32-bits)."
 
   [i32]
 
@@ -58,7 +62,7 @@
 
 (defn n-byte-u32
 
-  ""
+  "Combines the number of bytes needed for encoding the given unsigned value (at most 32-bits)."
 
   [u32]
 
@@ -75,7 +79,7 @@
 
 (defn n-byte-i64
 
-  ""
+  "Combines the number of bytes needed for encoding the given signed value (at most 64-bits)."
 
   [i64]
 
@@ -103,7 +107,7 @@
 
 (defn n-byte-u64
 
-  ""
+  "Combines the number of bytes needed for encoding the given unsigned value (at most 64-bits)."
 
   [u64]
 
@@ -123,7 +127,9 @@
 
 (defn rr-i32
 
-  ""
+  "Reads a signed integer containing at most 32-bits from a view.
+  
+   `n-bit` is non-nilable and defaults to 32."
 
 
   ([view]
@@ -160,8 +166,8 @@
 
 (defn wr-i32
 
-  ""
-
+  "Write a signed integer containing at most 32-bits from a view."
+  
   [view i32]
 
   (loop [i32-2 i32]
@@ -192,7 +198,7 @@
 
 (defn rr-u32
 
-  ""
+  "Reads an unsigned integer containing at most 32-bits from a view."
 
   [view]
 
@@ -215,7 +221,7 @@
 
 (defn wr-u32
 
-  ""
+  "Write an unsigned integer containing at most 32-bits from a view."
 
   [view u32]
 
@@ -236,62 +242,14 @@
           (recur u32-3))))))
 
 
-;;;;;;;;;; u64
-
-
-(defn rr-u64
-
-  ""
-
-  [view]
-
-  (loop [u64   (binf.int64/u* 0)
-         shift (binf.int64/u* 0)]
-    (let [b8    (binf.protocol/rr-u8 view)
-          u64-2 (bit-or u64
-                        (<< (binf.int64/u* (bit-and b8
-                                                    0x7f))
-                            shift))]
-      (if (zero? (bit-and b8
-                          0x80))
-        u64-2
-        (recur u64-2
-               (+ shift
-                  (binf.int64/u* 7)))))))
-
-
-
-(defn wr-u64
-
-  ""
-
-  [view u64]
-
-  (loop [u64-2 u64]
-    (let [b8    (bit-and u64-2
-                         (binf.int64/u* 0x7f))
-          u64-3 (binf.int64/u>> u64-2
-                                (binf.int64/u* 7))]
-      (if (= (binf.int64/u* 0)
-             u64-3)
-        (do
-          (binf.protocol/wr-b8 view
-                               (binf.int64/u8 b8))
-          view)
-        (do
-          (binf.protocol/wr-b8 view
-                               (binf.int64/u8 (bit-or b8
-                                                      (binf.int64/u* 0x80))))
-          (recur u64-3))))))
-
-
 ;;;;;;;;;; i64
 
 
 (defn rr-i64
 
-  ""
+  "Reads a signed integer containing at most 64-bits from a view.
 
+   `n-bit` is non-nilable and defaults to 32."
 
   ([view]
 
@@ -327,7 +285,7 @@
 
 (defn wr-i64
 
-  ""
+  "Write a signed integer containing at most 64-bits from a view."
 
   [view i64]
 
@@ -355,3 +313,52 @@
                                (bit-or (binf.int64/u8 b8)
                                        0x80))
           (recur i64-3))))))
+
+
+;;;;;;;;;; u64
+
+
+(defn rr-u64
+
+  "Reads an unsigned integer containing at most 64-bits from a view."
+
+  [view]
+
+  (loop [u64   (binf.int64/u* 0)
+         shift (binf.int64/u* 0)]
+    (let [b8    (binf.protocol/rr-u8 view)
+          u64-2 (bit-or u64
+                        (<< (binf.int64/u* (bit-and b8
+                                                    0x7f))
+                            shift))]
+      (if (zero? (bit-and b8
+                          0x80))
+        u64-2
+        (recur u64-2
+               (+ shift
+                  (binf.int64/u* 7)))))))
+
+
+
+(defn wr-u64
+
+  "Write an unsigned integer containing at most 32-bits from a view."
+
+  [view u64]
+
+  (loop [u64-2 u64]
+    (let [b8    (bit-and u64-2
+                         (binf.int64/u* 0x7f))
+          u64-3 (binf.int64/u>> u64-2
+                                (binf.int64/u* 7))]
+      (if (= (binf.int64/u* 0)
+             u64-3)
+        (do
+          (binf.protocol/wr-b8 view
+                               (binf.int64/u8 b8))
+          view)
+        (do
+          (binf.protocol/wr-b8 view
+                               (binf.int64/u8 (bit-or b8
+                                                      (binf.int64/u* 0x80))))
+          (recur u64-3))))))

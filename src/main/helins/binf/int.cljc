@@ -5,6 +5,10 @@
 
 (ns helins.binf.int
 
+  "Handling integers (maximum 32-bits), miscellaneous coercions.
+  
+   64-bit integers are handled in `helins.binf.int64`."
+
   {:author "Adam Helinski"}
 
   (:refer-clojure :exclude [str]
@@ -16,8 +20,7 @@
 
 (defn u8
 
-  ""
-
+  "Converts an integer (maximum 32-bits) to an unsigned 8-bit integer."
 
   [max-b32]
 
@@ -28,7 +31,7 @@
 
 (defn i8
 
-  ""
+  "Converts an integer (maximum 32-bits) to a signed 8-bit integer."
 
   [max-b32]
 
@@ -43,8 +46,7 @@
 
 (defn u16
 
-  ""
-
+  "Converts an integer (maximum 32-bits) to an unsigned 16-bit integer."
 
   ([max-b32]
 
@@ -62,7 +64,7 @@
 
 (defn i16
 
-  ""
+  "Converts an integer (maximum 32-bits) to a signed 8-bit integer."
 
 
   ([max-b32]
@@ -85,7 +87,7 @@
 
 (defn u32
 
-  ""
+  "Converts an integer (maximum 32-bits) to an unsigned 32-bit integer."
 
 
   ([max-b32]
@@ -120,7 +122,7 @@
 
 (defn i32
 
-  ""
+  "Converts an integer (maximum 32-bits) to a signed 32-bit integer."
 
 
   ([max-b32]
@@ -150,7 +152,7 @@
 
 (defn- -b64
 
-  ;;
+  ;; Helper for [[i64]] and [[i-u64]].
 
   [b32-1 b32-2]
 
@@ -164,7 +166,7 @@
 
 (defn i64
 
-  ""
+  "Combines different integers (maximum 32-bits) into a signed 64-bit integer."
 
 
   ([b32-1 b32-2]
@@ -199,7 +201,7 @@
 
 (defn u64
 
-  ""
+  "Combines different integers (maximum 32-bits) into an unsigned 64-bit integer."
 
 
   ([b32-1 b32-2]
@@ -236,7 +238,7 @@
 
 (defn from-float
 
-  "Truncates a float value to an integer (eg. `42.0` to `42`)."
+  "Truncates a float value to an integer (eg. `42.7` to `42`)."
 
   [floating]
 
@@ -248,7 +250,9 @@
 
 (defn str
 
-  ""
+  "Converts the given integer into a string.
+  
+   A radix can be provided (eg. 16 for hexadecimal or 2 for binary)."
 
 
   ([max-b32]

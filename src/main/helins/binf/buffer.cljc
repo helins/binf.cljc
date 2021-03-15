@@ -5,7 +5,9 @@
 
 (ns helins.binf.buffer
 
-  ""
+  "Buffers are the native representation of a byte array which can be wrapped in a view
+   and manipulated by using the core `helins.binf` namespaces. They represent a raw, fixed-size
+   chunk of memory."
 
   {:author "Adam Helinski"}
 
@@ -35,7 +37,9 @@
 #?(:cljs (def ^{:arglists '([n-byte])}
               alloc-shared
 
-  "Akin to [[alloc]], allocates a JS `SharedArrayBuffer`."
+  "Akin to [[alloc]], allocates a JS `SharedArrayBuffer`.
+  
+   Throws if they are not supported by the JS environment."
 
   (if (exists? js/SharedArrayBuffer)
     (fn [n-byte]
@@ -46,7 +50,7 @@
 
 #?(:cljs (def alloc-shared?
 
-  ""
+  "True if the JS environment supports using [[alloc-shared]]."
 
   (exists? js/SharedArrayBuffer)))
 

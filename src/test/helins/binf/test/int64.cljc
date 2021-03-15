@@ -89,16 +89,6 @@
 
 
 
-(t/deftest u=
-
-  (t/is (binf.int64/u= u64-max
-                       u64-max))
-
-  (t/is (false? (binf.int64/u= u64-min
-                               u64-max))))
-
-
-
 (t/deftest u<
 
   (t/is (binf.int64/u< u64-min
