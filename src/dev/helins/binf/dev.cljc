@@ -13,6 +13,7 @@
 			[helins.binf.cabi			:as binf.cabi]
             [helins.binf.endian         :as binf.endian]
             [helins.binf.float          :as binf.float]
+            [helins.binf.gen            :as binf.gen]
             [helins.binf.int            :as binf.int]
             [helins.binf.int64          :as binf.int64]
             [helins.binf.leb128         :as binf.leb128]
@@ -64,5 +65,10 @@
       binf/view
       binf/position)
 
+
+  (require '[clojure.spec.gen.alpha :as gen])
+
+
+  (gen/generate binf.gen/u64)
 
   )

@@ -9,8 +9,11 @@
 
   {:author "Adam Helinski"}
 
-  (:require [clojure.test       :as t]
-            [helins.binf.string :as binf.string]))
+  (:require [clojure.test                    :as t]
+            [clojure.test.check.clojure-test :as tc.ct]
+            [clojure.test.check.generators   :as tc.gen]
+            [clojure.test.check.properties   :as tc.prop]
+            [helins.binf.string              :as binf.string]))
 
 
 ;;;;;;;;;;
@@ -21,9 +24,19 @@
 
 
 
-(t/deftest text
+(t/deftest main
 
   (t/is (= string
            (-> string
                binf.string/encode
                binf.string/decode))))
+
+
+
+(tc.ct/defspec gen
+
+  (tc.prop/for-all [string tc.gen/string]
+    (= string
+       (-> string
+           binf.string/encode
+           binf.string/decode))))

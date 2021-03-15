@@ -7,10 +7,14 @@
 
   {:author "Adam Helins"}
 
-  (:require [clojure.test       :as t]
-            [helins.binf        :as binf]
-            [helins.binf.base64 :as binf.base64]
-            [helins.binf.buffer :as binf.buffer]))
+  (:require [clojure.test                    :as t]
+            [clojure.test.check.clojure-test :as tc.ct]
+            [clojure.test.check.generators   :as tc.gen]
+            [clojure.test.check.properties   :as tc.prop]
+            [helins.binf                     :as binf]
+            [helins.binf.base64              :as binf.base64]
+            [helins.binf.buffer              :as binf.buffer]
+            [helins.binf.gen                 :as binf.gen]))
 
 
 ;;;;;;;;;;
@@ -62,3 +66,15 @@
                                (binf.base64/decode binf.buffer/alloc-shared)
                                binf/backing-buffer))))
           "With offset and length")))
+
+
+
+(tc.ct/defspec gen
+
+  (tc.prop/for-all [buffer binf.gen/buffer]
+    (= (seq buffer)
+       (let [view (-> buffer
+                      binf.base64/encode
+                      binf.base64/decode)]
+         (seq (binf/rr-buffer view
+                              (binf/limit view)))))))

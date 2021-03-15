@@ -7,26 +7,53 @@
 
   {:author "Adam Helins"}
 
-  (:require [clojure.test      :as t]
-            [helins.binf.float :as binf.float]))
+  (:require [clojure.test                    :as t]
+            [clojure.test.check.clojure-test :as tc.ct]
+            [clojure.test.check.generators   :as tc.gen]
+            [clojure.test.check.properties   :as tc.prop]
+            [helins.binf.float               :as binf.float]))
 
 
 ;;;;;;;;;;
 
 
-#?(:clj (t/deftest f32
+(defn nan?
 
-  ; JS does not have real floats, imprecision arise when they get converted automatically to f64.
-  ; Other than that, the implementation is technically correct.
+  ""
 
-  (t/is (= (float 42.42)
-           (binf.float/from-b32 (binf.float/b32 42.42)))
-        "f32")))
+  [x]
+
+  #?(:clj  (Double/isNaN x)
+     :cljs (js/isNaN x)))
 
 
 
-(t/deftest f64
+(defn f=
 
-  (t/is (= 42.42
-           (binf.float/from-b64 (binf.float/b64 42.42)))
-        "f64"))
+  ""
+
+  [x-1 x-2]
+
+  (if (nan? x-1)
+    (nan? x-2)
+    (= x-1
+       x-2)))
+
+
+;;;;;;;;;;
+
+
+#?(:clj (tc.ct/defspec f32
+
+  (tc.prop/for-all [x (tc.gen/fmap unchecked-float
+                                   tc.gen/double)]
+    (f= x
+        (binf.float/from-b32 (binf.float/b32 x))))))
+
+
+
+(tc.ct/defspec f64
+
+  (tc.prop/for-all [x tc.gen/double]
+    (f= x
+        (binf.float/from-b64 (binf.float/b64 x)))))

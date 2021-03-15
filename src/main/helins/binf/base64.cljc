@@ -64,7 +64,7 @@
 
 (defn decode
 
-  "Decodes a string into a [[buffer]] according to the Base64 basic scheme (RFC 4648 section 4)"
+  ;"Decodes a string into a [[buffer]] according to the Base64 basic scheme (RFC 4648 section 4)"
 
   #?@(:clj  [[^String string]
              (binf.protocol/view (.decode (Base64/getDecoder)
@@ -81,7 +81,7 @@
 
 (defn encode
 
-  "Encodes a [[buffer]] into a string according to the Base64 basic scheme (RFC 4648 section 4)"
+  ;"Encodes a [[buffer]] into a string according to the Base64 basic scheme (RFC 4648 section 4)"
 
   ([buffer]
 

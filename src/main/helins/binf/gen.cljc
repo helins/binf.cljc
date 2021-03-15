@@ -14,10 +14,7 @@
             [helins.binf.buffer            :as binf.buffer]))
 
 
-(declare u32)
-
-
-;;;;;;;;;; Integers
+;;;;;;;;;; Integers <= 32-bits
 
 
 (def i8
@@ -35,16 +32,6 @@
                     2147483647))
 
 
-
-(def i64
-     #?(:clj  tc.gen/large-integer
-        :cljs (tc.gen/fmap (fn [[a b]]
-                             (js/BigInt.asIntN 64
-                                               (str a
-                                                    b)))
-                           (tc.gen/tuple u32
-                                         u32))))
-
 (def u8
      (tc.gen/choose 0
                     255))
@@ -60,6 +47,18 @@
                     4294967295))
 
 
+;;;;;;;;;; Integers 64-bits
+
+
+(def i64
+     #?(:clj  tc.gen/large-integer
+        :cljs (tc.gen/fmap (fn [[a b]]
+                             (js/BigInt.asIntN 64
+                                               (str a
+                                                    b)))
+                           (tc.gen/tuple u32
+                                         u32))))
+
 (def u64
      #?(:clj  tc.gen/large-integer
         :cljs (tc.gen/fmap (fn [[a b]]
@@ -71,7 +70,7 @@
 
 
 
-;;;;;;;;;;
+;;;;;;;;;; Buffers
 
 
 (def view

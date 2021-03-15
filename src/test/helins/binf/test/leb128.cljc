@@ -7,11 +7,14 @@
 
   {:author "Adam Helins"}
 
-  (:require [clojure.test       :as t]
-            [helins.binf        :as binf]
-            [helins.binf.buffer :as binf.buffer]
-            [helins.binf.int64  :as binf.int64]
-            [helins.binf.leb128 :as binf.leb128]))
+  (:require [clojure.test                    :as t]
+            [clojure.test.check.clojure-test :as tc.ct]
+            [clojure.test.check.properties   :as tc.prop]
+            [helins.binf                     :as binf]
+            [helins.binf.buffer              :as binf.buffer]
+            [helins.binf.gen                 :as binf.gen]
+            [helins.binf.int64               :as binf.int64]
+            [helins.binf.leb128              :as binf.leb128]))
 
 
 ;;;;;;;;;; int32
@@ -223,3 +226,59 @@
              (-> v
                  (binf/seek 0)
                  (binf.leb128/rr-i64))))))
+
+
+;;;;;;;;;; Generative testing
+
+
+(def view-gen
+     (-> (binf.leb128/n-byte-max 64)
+         binf.buffer/alloc
+         binf/view))
+
+
+(tc.ct/defspec gen-i32
+
+  (tc.prop/for-all [i32 binf.gen/i32]
+    (= i32
+       (-> view-gen
+           (binf/seek 0)
+           (binf.leb128/wr-i32 i32)
+           (binf/seek 0)
+           binf.leb128/rr-i32))))
+
+
+
+(tc.ct/defspec gen-u32
+
+  (tc.prop/for-all [u32 binf.gen/u32]
+    (= u32
+       (-> view-gen
+           (binf/seek 0)
+           (binf.leb128/wr-u32 u32)
+           (binf/seek 0)
+           binf.leb128/rr-u32))))
+
+
+
+(tc.ct/defspec gen-i64
+
+  (tc.prop/for-all [i64 binf.gen/i64]
+    (= i64
+       (-> view-gen
+           (binf/seek 0)
+           (binf.leb128/wr-i64 i64)
+           (binf/seek 0)
+           binf.leb128/rr-i64))))
+
+
+
+(tc.ct/defspec gen-u64
+
+  (tc.prop/for-all [u64 binf.gen/u64]
+    (= u64
+       (-> view-gen
+           (binf/seek 0)
+           (binf.leb128/wr-u64 u64)
+           (binf/seek 0)
+           binf.leb128/rr-u64))))
