@@ -9,35 +9,10 @@
 
   {:author "Adam Helinski"}
 
-  (:require [helins.binf.int      :as binf.int]
-            [helins.binf.protocol :as binf.protocol])
+  (:require [helins.binf.int :as binf.int])
   (:import (java.nio ByteBuffer
                      DirectByteBuffer)
            sun.misc.Unsafe))
-
-
-;;;;;;;;;; Implementing necessary protocols
-
-
-(extend-type DirectByteBuffer
-
-
-  binf.protocol/-IByteBuffer
-
-    (-array-index [_this position]
-      position)
-
-
-  binf.protocol/IGrow
-
-    (grow [this n-additional-byte]
-      (.position this
-                 0)
-      (let [bb-new (ByteBuffer/allocateDirect (+ (binf.protocol/limit this)
-                                                 n-additional-byte))]
-        (.put bb-new
-              this)
-        bb-new)))
 
 
 ;;;;;;;;;; Access to the Unsafe API

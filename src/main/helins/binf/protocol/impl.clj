@@ -15,12 +15,35 @@
              [helins.binf.string   :as binf.string])
    (:import (java.nio ByteBuffer
                       ByteOrder
-                      CharBuffer)
+                      CharBuffer
+                      DirectByteBuffer)
             (java.nio.charset Charset
                               CoderResult)))
 
 
 ;;;;;;;;;; Implenting protocols
+
+
+(extend-type DirectByteBuffer
+
+
+  binf.protocol/-IByteBuffer
+
+    (-array-index [_this position]
+      position)
+
+
+  binf.protocol/IGrow
+
+    (grow [this n-additional-byte]
+      (.position this
+                 0)
+      (let [bb-new (ByteBuffer/allocateDirect (+ (binf.protocol/limit this)
+                                                 n-additional-byte))]
+        (.put bb-new
+              this)
+        bb-new)))
+
 
 
 (extend-type ByteBuffer

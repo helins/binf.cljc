@@ -5,7 +5,7 @@
 
 (ns helins.binf
 
-  "Uninhibited library for handling any kind of binary format or protocol.
+  "Core namespace for handling views.
   
    See README for an overview."
 
