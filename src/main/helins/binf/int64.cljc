@@ -319,3 +319,43 @@
                                    u64-2)
      :cljs (js-mod u64-1
                    u64-2)))
+
+
+;;;;;;;;;; Converting to strings
+
+
+(defn str-i
+
+  ""
+
+
+  ([i64]
+
+   (str i64))
+
+
+  ([radix i64]
+
+   #?(:clj  (Long/toString ^long i64
+                           radix)
+      :cljs (.toString i64
+                       radix))))
+
+
+
+(defn str-u
+
+  ""
+
+
+  ([i64]
+
+   (str i64))
+
+
+  ([radix i64]
+
+   #?(:clj  (Long/toUnsignedString ^long i64
+                                   radix)
+      :cljs (.toString i64
+                       radix))))

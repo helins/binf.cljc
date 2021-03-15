@@ -7,7 +7,8 @@
 
   {:author "Adam Helinski"}
 
-  (:refer-clojure :rename {bit-shift-left <<}))
+  (:refer-clojure :exclude [str]
+                  :rename  {bit-shift-left <<}))
 
 
 ;;;;;;;;;; Casting between  integers <= 32 bit
@@ -230,7 +231,7 @@
              b8-8))))
 
 
-;;;;;;;;;;
+;;;;;;;;;; Relation to floating numbers
 
 
 (defn from-float
@@ -240,3 +241,24 @@
   [floating]
 
   (long floating))
+
+
+;;;;;;;;;; Converting to strings
+
+
+(defn str
+
+  ""
+
+
+  ([max-b32]
+
+   (clojure.core/str max-b32))
+
+
+  ([radix max-b32]
+
+   #?(:clj  (Long/toString max-b32
+                           radix)
+      :cljs (.toString max-b32
+                       radix))))
