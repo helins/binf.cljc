@@ -589,7 +589,7 @@
 
 
 
-(when js/SharedArrayBuffer
+(when (exists? js/SharedArrayBuffer)
 
   (extend-protocol binf.protocol/IViewable
 

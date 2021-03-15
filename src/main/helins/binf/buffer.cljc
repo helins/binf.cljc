@@ -37,18 +37,18 @@
 
   "Akin to [[alloc]], allocates a JS `SharedArrayBuffer`."
 
-  (if js/SharedArrayBuffer
+  (if (exists? js/SharedArrayBuffer)
     (fn [n-byte]
       (js/SharedArrayBuffer. n-byte))
     (fn [_n-byte]
-      (throw (js/Error. "SharedArrayBuffer are not supported by this browser"))))))
+      (throw (js/Error. "SharedArrayBuffer are not supported by this JS environmen"))))))
 
 
 #?(:cljs (def alloc-shared?
 
   ""
 
-  (boolean js/SharedArrayBuffer)))
+  (exists? js/SharedArrayBuffer)))
 
 
 ;;;;;;;;;; Copying between buffers
@@ -139,7 +139,7 @@
 
 
 
-#?(:cljs (when js/SharedArrayBuffer (extend-type js/SharedArrayBuffer
+#?(:cljs (when (exists? js/SharedArrayBuffer) (extend-type js/SharedArrayBuffer
 
   ICounted
 
