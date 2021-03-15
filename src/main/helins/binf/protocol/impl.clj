@@ -200,10 +200,12 @@
   binf.protocol/IBackingBuffer
 
     (backing-buffer [this]
-      (.array this))
+      (when (.hasArray this)
+        (.array this)))
 
     (buffer-offset [this]
-      (.arrayOffset this))
+      (when (.hasArray this)
+        (.arrayOffset this)))
 
 
   binf.protocol/IEndianess
