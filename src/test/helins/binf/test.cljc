@@ -614,3 +614,25 @@
                (binf/grow 24)
                binf/endian-get))
         "Endianess is duplicated"))
+
+
+;;;;;;;;;; Additional types / Boolean
+
+
+(t/deftest bool
+
+  (let [view (binf/view (binf.buffer/alloc 2))]
+
+    (t/is (= true
+             (-> view
+                 (binf/wr-bool true)
+                 (binf/seek 0)
+                 binf/rr-bool))
+          "Relative")
+
+    (t/is (= true
+             (-> view
+                 (binf/wa-bool 1
+                               true)
+                 (binf/ra-bool 1)))
+          "Absolute")))

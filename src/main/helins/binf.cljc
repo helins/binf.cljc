@@ -818,3 +818,55 @@
 
   (- (binf.protocol/limit view)
      (binf.protocol/position view)))
+
+
+;;;;;;;;;; Additional types / Boolean
+
+
+(defn ra-bool
+
+  ""
+
+  [view position]
+
+  (= (ra-u8 view
+            position)
+     1))
+
+
+
+(defn rr-bool
+
+  ""
+
+  [view]
+
+  (= (rr-u8 view)
+     1))
+
+
+
+(defn wa-bool
+
+  ""
+
+  [view position true?]
+
+  (wa-b8 view
+         position
+         (if true?
+           1
+           0)))
+
+
+
+(defn wr-bool
+
+  ""
+
+  [view true?]
+
+  (wr-b8 view
+         (if true?
+           1
+           0)))
