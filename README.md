@@ -5,8 +5,8 @@ Project](https://img.shields.io/clojars/v/io.helins/binf.svg)](https://clojars.o
 
 [![cljdoc badge](https://cljdoc.org/badge/io.helins/binf)](https://cljdoc.org/d/io.helins/binf)
 
-Clojure(script) library for handling any kind of binary format, protocol, and
-helping interacting with native libraries and WebAssembly modules.
+Clojure(script) library for handling any kind of binary format, protocol ; both
+in-memory and during IO ; and helping interacting with native libraries and WebAssembly modules.
 
 An authentic Swiss army knife providing:
 

@@ -23,6 +23,25 @@
 
 ;;;;;;;;;; Implenting protocols
 
+(defn- -grow-bb
+
+  ;; Helper for growing different ByteBuffers.
+
+  [bb-alloc ^ByteBuffer bb n-additional-byte]
+
+  (let [position (.position bb)]
+    (.position bb
+               0)
+    (let [bigger-view (doto (bb-alloc (+ (binf.protocol/limit bb)
+                                         n-additional-byte))
+                        (.put bb)
+                        (.position position)
+                        (.order (.order bb)))]
+      (.position bb
+                 position)
+      bigger-view)))
+
+  
 
 (extend-type DirectByteBuffer
 
@@ -36,13 +55,9 @@
   binf.protocol/IGrow
 
     (grow [this n-additional-byte]
-      (.position this
-                 0)
-      (let [bb-new (ByteBuffer/allocateDirect (+ (binf.protocol/limit this)
-                                                 n-additional-byte))]
-        (.put bb-new
-              this)
-        bb-new)))
+      (-grow-bb #(ByteBuffer/allocateDirect %)
+                this
+                n-additional-byte)))
 
 
 
@@ -228,14 +243,9 @@
   binf.protocol/IGrow
 
     (grow [this n-additional-byte]
-      (let [position (.position this)]
-        (.position this
-                   0)
-        (doto (ByteBuffer/allocate (+ (binf.protocol/limit this)
-                                      n-additional-byte))
-          (.put this)
-          (.position position)
-          (.order (.order this)))))
+      (-grow-bb #(ByteBuffer/allocate %)
+                this
+                n-additional-byte))
 
 
   binf.protocol/IRelativeReader

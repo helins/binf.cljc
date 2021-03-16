@@ -600,12 +600,14 @@
                                                              (binf/wr-b8 42))
                                                          2))))))
 
-  (t/is (= 42
-           (-> (binf/view (binf.buffer/alloc 100))
-               (binf/seek 42)
-               (binf/grow 200)
-               binf/position))
-        "Position is the same than in the original view")
+  (let [view (-> (binf/view (binf.buffer/alloc 100))
+                 (binf/seek 42))]
+    (t/is (= 42
+             (binf/position view)
+             (-> view
+                 (binf/grow 200)
+                 binf/position))
+          "Position is the same than in the original view"))
 
   (t/is (= :little-endian
            (-> (binf.buffer/alloc 42)
