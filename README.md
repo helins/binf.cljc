@@ -5,131 +5,421 @@ Project](https://img.shields.io/clojars/v/io.helins/binf.svg)](https://clojars.o
 
 [![cljdoc badge](https://cljdoc.org/badge/io.helins/binf)](https://cljdoc.org/d/io.helins/binf)
 
-Cross-platform library for handling any kind of binary format or protocol without any shenaningans.
+Clojure(script) library for handling any kind of binary format, protocol, and
+helping interacting with native libraries and WebAssembly modules.
 
-Provides:
+An authentic Swiss army knife providing:
 
-- Reading and writing primitive values to byte arrays: signed/unsigned integers,
-    floats, and strings
-- Easy copying
-- Facilitate working with dynamically sized data
-- Relative positioning (akin to Java ByteBuffers)
-- Just functions, straightforward and flexible
-- Primitive coercions
+- Reading, writing, and copying binary data
+- Via protocols which enhance host classes (`js/DataView` in JS, `ByteBuffer` on the
+    JVM, etc)
+- Coercions between primitive types
+- Cross-platform handling of 64-bit integers
+- Excellent support for IO and even memory-mapped files on the JVM
 - Extra utilities such as Base64 encoding/decoding
-- Compatible with the JVM, NodeJS, and the browser
+- Defining C-like composite types (struct, unions, ...) as EDN
 
 ## Rationale
 
-As Clojure keeps on expanding, there are more and more places where having proper tooling for manipulating byte
-arrays becomes increasingly interesting. Those are but a few examples:
-
-- Custom and fine-tuned serialization
-- Sharing data between web workers without copying
-- Handling binary protocols, custom or well-known ones (eg. MIDI)
-- Lower-level programming (eg. accessing native APIs)
-- Talking to hardware
-
-Being cross-platform is important. The story between Clojure and
-Clojurescript is a beautiful one and when it comes to serialization, not every use case suits EDN or JSON. Furthermore, the browser - hence Clojurescript - has became quite a capable beast and now allows for somewhat lower-level forms of programming (eg. handling files, talking to MIDI devices, USB or bluetooth ones).
-
-Prior work in this field is often constrained to the JVM and/or too opiniated,
-resulting in poor flexibility.
+Clojure libraries for handling binary data are typically limited and not very
+well maintained. BinF is the only library providing a seamless experience
+between Clojure and Clojurescript for pretty much any use case with an extensive
+set of tools built with low-level performance in mind. While in beta, it has
+already been used in production and for involving projects such as a WebAssembly decompiler/compiler.
 
 ## Usage
 
-After reading the following overview, go explore the [full API](https://cljdoc.org/d/io.helins/binf) which really sheds light on what is possible.
+After reading the following overview, go explore the [full API](https://cljdoc.org/d/io.helins/binf)
+which really sheds light on the different namespaces.
 
-### Buffers and Views
-
-A `buffer` is a fixed-size collection of bytes. On the JVM, it is a simple byte array. In
-Clojurescript, it is an
-[ArrayBuffer](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer).
+Let us require the main namespace used in this document:
 
 ```clojure
-(require '[helins.binf :as binf])
-
-(def my-buffer
-     (binf/buffer 1024))
+(require '[helins.binf        :as binf]
+         '[helins.binf.buffer :as binf.buffer])
 ```
 
-However, most operations are performed via a `view`.
+### Buffers and views
+
+BinF is highly versatile because it leverages what the host offers, following the
+Clojure mindset. The following main concepts must be understood.
+
+A view is an object encompassing a raw chunk of memory and offering utilities for
+manipulating it: reading and/or writing binary data. Such a chunk of memory
+could be a byte array or a file. It does not really matter since views abstract
+those chunks.
+
+More precisely, a view is anything that implement at least some of the protocols
+defined in the `helins.binf.protocol` namespace. Only rarely will the user
+implement anything since BinF already enhances common classes.
+
+On the JVM, those protocols are implemented for the ubiquitous
+[ByteBuffer](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/nio/ByteBuffer.html)
+which is used pretty much everywhere. In JS, they enhance the just-as-ubiquitous
+[DataView](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/DataView).
+
+By enhancing these host classes, code can be reused for many contexts: handling
+memory, handling a file, a socket, ...
+
+Finally, by definition, a buffer is an opaque byte array which can be manipulated only
+via a view. It represents the lowest-level of directly accessible memory a host
+can provide. On the JVM, a buffer is a plain old byte array. In JS, it is a an [ArrayBuffer](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer)
+or optionally a
+[SharedArrayBuffer](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer).
+
+Many host utilities expect buffers hence it is important to define a coherent
+story between buffers and views.
+
+### Binary data and operations
+
+Types and related operations follow a predictable naming convention.
+
+The following table summarizes primitive binary types and their names:
+
+
+| Type | Description |
+|---|---|
+| buffer | Byte array |
+| f32 | 32-bit float |
+| f64 | 64-bit float |
+| i8 | Signed 8-bit integer |
+| i16 | Signed 16-bit integer |
+| i32 | Signed 32-bit integer |
+| i64 | Signed 64-bit integer |
+| string | String (UTF-8 by default) |
+| u8 | Unsigned 8-bit integer |
+| u16 | Unsigned 16-bit integer |
+| u32 | Unsigned 32-bit integer |
+| u64 | Unsigned 64-bit integer |
+
+Reading and writing revolve around these types and happen at a specific position
+in a view. In *absolute operations*, that position is provided by the user
+explicitly. In *relative operations*, views use an internal position they maintain
+themselves. It is much more common to use relative operations since it is more
+common to read or write things in a sequence. For instance, writing a 32-bit
+integer will then advance that internal position by 4 bytes.
+
+When writing integers, sign do not matter. For instance, instead of specifying
+`i32` or `u32`, `b32` is used since only the bit pattern matters.
+
+These operations are gathered in the core [helins.binf]
+(https://cljdoc.org/d/io.helins/binf/0.0.0-beta0/api/helins.binf) namespace. Some
+examples are:
+
+| Operation | Description |
+|---|---|
+| wa-b32 | Write a 32-bit integer at an absolute position |
+| rr-i64 | Read a signed 64-bit integer from the current relative position |
+| wr-buffer | Copy the given buffer to the current relative position |
+| ra-string | Read a string from an absolute position |
+
+The first letter denotes `r`eading or `w`riting, the second letter denotes
+`a`bsolute or `r`elative.
+
+It is best to follow that naming convention when writing business logic.
+
+For instance, writing and reading a `YYYY/mm/dd` date "relatively":
 
 ```clojure
+(defn wr-date
+  [view year month day]
+  (-> view
+      (binf/wr-b16 year)
+      (binf/wr-b8 month)
+      (binf/wr-b8 day)))
+
+
+(defn rr-date
+  [view]
+  [(binf/rr-u16 view)
+   (binf/rr-u8 view)
+   (binf/rr-u8 view)])
+```
+
+### Creating a view from a buffer
+
+This example demonstrates how to create a view over a buffer (ie. a byte array).
+
+```clojure
+;; Allocating a buffer of 1024 bytes
+;;
+(def my-buffer
+     (binf.buffer/alloc 1024))
+
+;; Wrapping the buffer in view
+;;
 (def my-view
      (binf/view my-buffer))
+
+;; The buffer can always be extracted from its view
+;;
+(binf/backing-buffer my-view)
 ```
 
-A `view` maintains a current position to which all "relative" operations refer.
-For instance, reading a 32-bit integer will advance this position by 4 bytes.
-A same set of operations is provided for acting upon an "absolute" position
-provided by the user and leaving the relative position unchanged.
-
-As a mnemonic, those operations are functions referring to a primivite value prefixed by 2 letters. The first one is `r`
-(read) or `w` (write). The second is `r` (relative) or `a` (absolute). Primitives
-naming is akin to the convention used by the Rust programming language. For
-instance:
+Using our date functions defined in the previous section:
 
 ```clojure
-;; Relative to the current position, write a byte and a 32-bit integer
-;; (sign is irrelevant, only the bit pattern is important when writing)
+;; From the current position (0 for a new view)
 ;;
-(-> my-view
-    (binf/wr-b8 42)
-    (binf/wr-b32 1000))
+(let [position-date (binf/position my-view)]
+  (-> my-view
+      (wr-date 2021
+               3
+               16)
+      (binf/seek position-date)
+      rr-date))
 
+;; => [2021 3 16]
 
-;; Relative position in bytes is updated
-;;
-(= (binf/position my-view)
-   5)
-
-;; At absolute positions, read our data as unsigned integers
-;;
-[(binf/ra-u8 my-view
-             0)
- (binf/ra-u32 my-view
-              1)]
-
-;; = [42 1000]
-
-
-;; We could have rewind our data and used relative positioning
-;;
-(binf/seek my-view
-           0)
-
-[(binf/rr-u8 my-view)
- (binf/rr-u32 my-view)]
 ```
 
-### Growing views
+### Creating a view over a memory-mapped file (JVM)
 
-Sometimes, when writing data, the end size is unknown and working with a
-fixed-size buffer becomes tedious. A `growing view` intially wraps a given buffer
-just like a regular view but when the end is reached, it transparently allocates
-a bigger one under the hood.
+On the JVM, BinF protocols already extends the popular `ByteBuffer` used
+extensively by many utilities, amongst them IO ones (about anything in
+`java.nio`).
+
+One notable mention is the child class
+[MappedByteBuffer](https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/nio/MappedByteBuffer.html),
+a special type of `ByteBuffer` which memory-maps a file. This technique usually
+results in fast and efficient IO for larger file while being easy to follow.
+
+Our date functions used in the previous function can right away be reused for
+writing to a memory-mapped file which looks like a simple buffer.
+
+There are a few ways for obtaining a `MappedByteBuffer`, here is one example:
+
 
 ```clojure
-(def my-growing-view
-     (binf/growing-view (binf/buffer 100)))
+(import 'java.io.RandomAccessFile
+        'java.nio.channels.FileChannel$MapMode)
 
-
-;; Yeah, a 100 bytes will not be enough
-;;
-(dotimes [i 4000]
-  (binf/wr-b16 my-growing-view
-               i))
-
-;; No worries
-;;
-(= (count my-growing-view)
-   8675)
+(with-open [file (RandomAccessFile. "/tmp/binf-example.dat"
+                                    "rw")]
+  (let [view (-> file
+                 .getChannel
+                 (.map FileChannel$MapMode/READ_WRITE
+                       ;; From byte 0 in the file
+                       0
+                       ;; A size in bytes, we know a date is 4 bytes
+                       4))]
+    (-> view
+        ;; Writing date
+        (wr-date 2021
+                 3
+                 16)
+        ;; Ensuring changes are persisted on disk
+        .force
+        ;; Reading it back from the start of the file
+        (binf/seek 0)
+        rr-date)))
 ```
 
-This reallocation strategy is a simple one, yet it is quite effective on the
-longer term. Behavior is configurable (by default, the new buffer is 1.5 the size of the previous one).
+### Creating views from views
 
+It is often useful to create "sub-views" of a view. Akin to wrapping a buffer, a
+view can wrap a view:
+
+```clojure
+;; An offset of a 100 bytes with a window of 200 bytes
+;;
+(def sub-view
+     (binf/view my-view
+                100
+                200))
+
+;; The position of that sub-view starts transparently at 0
+;;
+(= 0
+   (binf/position sub-view))
+
+;; Contains 200 bytes indeed
+;;
+(= 200
+   (binf/limit sub-view))
+```
+
+### Working with dynamically size data
+
+While reading data in a sequence is easy, writing can sometimes be a bit tricky
+since one has to decide how much memory to allocate.
+
+Sometimes, the lenght of the data is known in advance and writing is straightforward.
+
+Sometimes, size can be estimated and one can pessimistically allocate more than needed
+to cover all cases.
+
+Sometimes, size is unknown but easy to compute. A first pass throught the data
+computes the total number of bytes, a second pass actually writes it without
+fearing of overflowing and having to check defensively if there is enough space.
+
+And sometimes, size is not trivial to compute or impossible. In one pass, the user
+must check defensively if there is enough memory for the next bit of data (eg. a date)
+and then write that bit.
+
+Anyway, when space is lacking, the user can grow a view, meaning copying in one
+go the content of a view to a new bigger one. A rule of thumb could be to grow
+size times 1.5:
+
+```clojure
+(def my-view-2
+     (binf/grow my-view
+                (Math/ceil (* 1.5
+                              (binf/limit my-view)))))
+```
+
+### Interacting with native libraries and WebAssembly
+
+Clojure is expanding, reaching new fronts through GraalVM, WebAssembly, new ways
+of calling native code.
+
+Although the C language does not have a defined
+[ABI](https://en.wikipedia.org/wiki/Application_binary_interface), many tools
+and languages understand a C-like ABI. For instance, the Rust programming
+language allows for defining structures which follow the same rules as C
+structures. This is because such rules are often well-defined, straightforward,
+and there is a need for different languages and tools to understand each other
+(eg. a shared native library).
+
+The `helins.binf.cabi` namespace provides utilities for following those rules,
+for instance when defining structures (eg. order of data members, specific aligment
+of members depending on size, ...)
+
+Those definitions can be reused for different architectures and ultimately
+end up being plain old EDN, meaning they can be used in many different ways,
+especially in combination with the view utilities seen before.
+
+For instance, on the JVM, `DirectByteBuffer` which already extends view
+protocols is often used in JNI for calling native code. In JS, [WebAssembly
+memories](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WebAssembly/Memory)
+are buffers which can be wrapped in views. This provides exciting
+possibilities.
+
+Here is an example of defining a C structure for our date. Let us supposed it is
+meant to be used with WebAssembly which is (as of today) 32-bit:
+
+```clojure
+(require '[helins.binf.cabi :as binf.cabi])
+
+
+;; This information map defines a 32-bit modern architecture where words
+;; are 4 bytes
+;;
+(def env32
+     (binf.cabi/env 4))
+
+(=  {:binf.cabi/align          4
+     :binf.cabi.pointer/n-byte 4}
+    env)
+
+
+;; Defining a function computing our C date structure
+;;
+(def fn-struct-dates
+     (binf.cabi/struct :MyDate
+                       [[:year  binf.cabi/u16]
+                        [:month binf.cabi/u8]
+                        [:date  binf.cabi/u8]]))
+
+
+;; Computing our C date structure as EDN for a WebAssembly environment
+;;
+(= (fn-struct-dates env32)
+
+   {:binf.cabi/align          2
+    :binf.cabi/n-byte         4
+    :binf.cabi/type           :struct
+    :binf.cabi.struct/layout  [:year
+                               :month
+                               :date]
+    :binf.cabi.struct/member+ {:date  {:binf.cabi/align  1
+                                       :binf.cabi/n-byte 1
+                                       :binf.cabi/offset 3
+                                       :binf.cabi/type   :u8}
+                               :month {:binf.cabi/align  1
+                                       :binf.cabi/n-byte 1
+                                       :binf.cabi/offset 2
+                                       :binf.cabi/type  :u8}
+                               :year {:binf.cabi/align  2
+                                      :binf.cabi/n-byte 2
+                                      :binf.cabi/offset 0 
+                                      :binf.cabi/type   :u16}}
+    :binf.cabi.struct/type    :MyDate})
+```
+
+This date structure, in a 32-bit WebAssembly, is 4 bytes, aligns on a multiple
+of 2 bytes. It is a `:struct` called `:MyDate` and all data members are clearly
+layed out with their memory offset computed.
+
+A more challenging example would not be easy to compute by hand:
+
+```clojure
+(binf.cabi/struct :ComplexExample
+                  [[:pointer_array (binf.cabi/array (binf.cabi/ptr binf.cabi/f64)
+                                                    10)]
+                   [:inner_struct  (binf.cabi/struct :InnerStruct
+                                                     [[:a_byte  binf.cabi/u8]
+                                                      [:a_union (binf.cabi/union :SomeUnion
+                                                                                 [[:an_int   binf.cabi/i32]
+                                                                                  [:a_double binf.cabi/f64]])]])]])
+```
+
+### Working with 64-bit integers
+
+Working with 64-bit integers is tricky since the JVM does not have unsigned ones
+and JS engines do not even really have 64-bit integers at all. The
+`helins.binf.int64` namespace provide utilities for working with them in a
+cross-platform fashion. It is not the most beautiful experience the user will
+encounter in the course of a lifetime but it works and does the job as efficiently as possible.
+
+### Extra utilities
+
+Other namespaces provides utilities such as Base64 encoding/decoding, LEB128
+encoding/decoding, ...
+
+It is best to [navigate through the
+API](https://en.wikipedia.org/wiki/Application_binary_interface).
+
+## Running tests
+
+On the JVM, using [Kaocha](https://github.com/lambdaisland/kaocha):
+
+```bash
+$ ./bin/test/jvm/run
+$ ./bin/test/jvm/watch
+```
+On NodeJS, using [Kaocha-CLJS](https://github.com/lambdaisland/kaocha-cljs):
+
+```bash
+$ ./bin/test/node/run
+$ ./bin/test/node/watch
+```
+
+In the browser, using [Chui](https://github.com/lambdaisland/chui):
+```
+$ ./bin/test/browser/compile
+# Then open ./resources/chui/index.html
+
+# For testing an advanced build
+$ ./bin/test/browser/advanced
+```
+
+## Development
+
+Starting in Clojure JVM mode, mentioning an additional deps alias (here, a local
+setup of NREPL):
+```bash
+$ ./bin/dev/clojure :nrepl
+```
+
+Starting in CLJS mode using Shadow-CLJS:
+```bash
+$ ./bin/dev/cljs
+# Then open ./resources/public/index.html
+```
+
+The `helins.binf.dev` namespaces requires all namespaces of this library and can
+be used for REPLing around.
 
 ## License
 
