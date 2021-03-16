@@ -32,43 +32,5 @@
 (comment
 
 
- ; (.grow js/mem
- ;        1)
-
- ; (.-byteLength (.-buffer js/mem))
-
- ; (set! js/mem
- ;       (js/WebAssembly.Memory. #js {"initial" 1}))
-
-
-  (set! js/v
-        (binf/view (.-buffer js/mem)))
-
-
-
-  (def v
-       (binf/view (binf.buffer/alloc 128)))
-
-
-  (binf.leb128/rr-i32 (-> (binf/view (binf.buffer/alloc 10))
-                          (binf/wa-b8 0
-                                      0x7F
-                                      #_(binf.int/u8 0x7F)))
-                      #_33)
-
-
-  (def v
-       (binf/view (binf.buffer/alloc 42)))
-
-  (-> v
-      (binf/wr-b32 42)
-      binf/view
-      binf/position)
-
-
-  (require '[clojure.spec.gen.alpha :as gen])
-
-
-  (gen/generate binf.gen/u64)
 
   )

@@ -5,8 +5,6 @@
 
 (ns helins.binf.test.buffer
 
-  ""
-
   {:author "Adam Helinski"}
 
   (:require [clojure.test       :as t]

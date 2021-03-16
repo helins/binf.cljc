@@ -7,8 +7,7 @@
 
   {:author "Adam Helins"}
 
-  (:require [clojure.test                    :as t]
-            [clojure.test.check.clojure-test :as tc.ct]
+  (:require [clojure.test.check.clojure-test :as tc.ct]
             [clojure.test.check.generators   :as tc.gen]
             [clojure.test.check.properties   :as tc.prop]
             [helins.binf.float               :as binf.float]))

@@ -29,8 +29,4 @@
   (kaocha.repl/run :jvm)
 
 
-  (unsigned-bit-shift-right (unchecked-long -4)
-                            1)
-
-
   )
