@@ -80,9 +80,9 @@
    ```clojure
    ;; Forcing 4 byte alignment on the inner struct
 
-   (struct 'OuterStruct
+   (struct :OuterStruct
            [:a f32]
-           [:b (force-align (struct 'InnerStruct
+           [:b (force-align (struct :InnerStruct
                                     [:inner-a i64])
                             4)])
    ```"
@@ -190,7 +190,7 @@
 
   {:binf.cabi/align  1
    :binf.cabi/n-byte 1
-   :binf.cabi/type   'bool})
+   :binf.cabi/type   :bool})
 
 
 
@@ -202,7 +202,7 @@
 
   {:binf.cabi/align  1
    :binf.cabi/n-byte 1
-   :binf.cabi/type   'i8})
+   :binf.cabi/type   :i8})
 
 
 
@@ -212,7 +212,7 @@
 
   [env]
 
-  (-primitive 'i16
+  (-primitive :i16
               2
               env))
 
@@ -224,7 +224,7 @@
 
   [env]
 
-  (-primitive 'i32
+  (-primitive :i32
               4
               env))
 
@@ -236,7 +236,7 @@
 
   [env]
 
-  (-primitive 'i64
+  (-primitive :i64
               8
               env))
 
@@ -250,7 +250,7 @@
 
   {:binf.cabi/align  1
    :binf.cabi/n-byte 1
-   :binf.cabi/type   'u8})
+   :binf.cabi/type   :u8})
 
 
 
@@ -260,7 +260,7 @@
 
   [env]
 
-  (-primitive 'u16
+  (-primitive :u16
               2
               env))
 
@@ -272,7 +272,7 @@
 
   [env]
 
-  (-primitive 'u32
+  (-primitive :u32
               4
               env))
 
@@ -284,7 +284,7 @@
 
   [env]
 
-  (-primitive 'u64
+  (-primitive :u64
               8
               env))
 
@@ -296,7 +296,7 @@
 
   [env]
 
-  (-primitive 'f32
+  (-primitive :f32
               4
               env))
 
@@ -308,7 +308,7 @@
 
   [env]
 
-  (-primitive 'f64
+  (-primitive :f64
               8
               env))
 
@@ -322,7 +322,7 @@
   [type]
 
   (fn def-ptr [env]
-    (assoc (-primitive 'ptr
+    (assoc (-primitive :ptr
                        (env :binf.cabi.pointer/n-byte)
                        env)
            :binf.cabi.pointer/target
@@ -346,7 +346,7 @@
       {:binf.cabi/align           align
        :binf.cabi/n-byte          (* n-element
                                      n-byte)
-       :binf.cabi/type            'array
+       :binf.cabi/type            :array
        :binf.cabi.array/element   element-2
        :binf.cabi.array/n-element n-element})))
 
@@ -404,7 +404,7 @@
         {:binf.cabi/align          (min 4
                                         (env :binf.cabi/align))
          :binf.cabi/n-byte         4
-         :binf.cabi/type           'enum
+         :binf.cabi/type           :enum
          :binf.cabi.enum/constant+ tag->value
          :binf.cabi.enum/type      type}))))
 
@@ -463,7 +463,7 @@
         {:binf.cabi/align          align
          :binf.cabi/n-byte         (aligned align
                                             offset)
-         :binf.cabi/type           'struct
+         :binf.cabi/type           :struct
          :binf.cabi.struct/layout  layout
          :binf.cabi.struct/member+ name->member
          :binf.cabi.struct/type    type}))))
@@ -500,6 +500,6 @@
                         member)))
         {:binf.cabi/align         align
          :binf.cabi/n-byte        n-byte
-         :binf.cabi/type          'union
+         :binf.cabi/type          :union
          :binf.cabi.union/member+ name->member
          :binf.cabi.union/type    type}))))
