@@ -12,14 +12,32 @@ An authentic Swiss army knife providing:
 
 - Reading, writing, and copying binary data
 - Via protocols which enhance host classes (`js/DataView` in JS, `ByteBuffer` on the
-    JVM, etc)
+    JVM, ...)
 - Coercions between primitive types
 - Cross-platform handling of 64-bit integers
 - Excellent support for IO and even memory-mapped files on the JVM
-- Extra utilities such as Base64 encoding/decoding
-- Defining C-like composite types (struct, unions, ...) as EDN
+- Extra utilities such as Base64 encoding/decoding, LEB128, ...
+- Defining C-like composite types (structs, unions, ...) as EDN
 
-## Rationale
+
+Table of content:
+
+- [Rationale](#rationale)
+- [Usage](#usage)
+    - [Buffers and views](#buffers_and_views)
+    - [Binary data and operations](#binary_data)
+    - [Creating a view from a buffer](#view_from_buffer)
+    - [Creating a view over a memory-mapped-file (JVM)](#mmap)
+    - [Creating a view from a view](#view_from_view)
+    - [Working with dynamically-sized data](#dynamic_data)
+    - [Interacting with native libraries and WebAssembly](#native)
+    - [Working with 64-bit integers](#int64)
+    - [Extra utilities](#extra)
+- [Running tests](#tests)
+- [Development](#develop)
+
+
+## Rationale <a name="rationale">
 
 Clojure libraries for handling binary data are typically limited and not very
 well maintained. BinF is the only library providing a seamless experience
@@ -27,7 +45,7 @@ between Clojure and Clojurescript for pretty much any use case with an extensive
 set of tools built with low-level performance in mind. While in beta, it has
 already been used in production and for involving projects such as a WebAssembly decompiler/compiler.
 
-## Usage
+## Usage <a name="usage">
 
 After reading the following overview, go explore the [full API](https://cljdoc.org/d/io.helins/binf)
 which really sheds light on the different namespaces.
@@ -39,7 +57,7 @@ Let us require the main namespace used in this document:
          '[helins.binf.buffer :as binf.buffer])
 ```
 
-### Buffers and views
+### Buffers and views <a name="buffers_and_views">
 
 BinF is highly versatile because it leverages what the host offers, following the
 Clojure mindset. The following main concepts must be understood.
@@ -70,7 +88,7 @@ or optionally a
 Many host utilities expect buffers hence it is important to define a coherent
 story between buffers and views.
 
-### Binary data and operations
+### Binary data and operations <a name="binary_data">
 
 Types and related operations follow a predictable naming convention.
 
@@ -136,7 +154,7 @@ For instance, writing and reading a `YYYY/mm/dd` date "relatively":
    (binf/rr-u8 view)])
 ```
 
-### Creating a view from a buffer
+### Creating a view from a buffer <a name="view_from_buffer">
 
 This example demonstrates how to create a view over a buffer (ie. a byte array).
 
@@ -173,7 +191,7 @@ Using our date functions defined in the previous section:
 
 ```
 
-### Creating a view over a memory-mapped file (JVM)
+### Creating a view over a memory-mapped file (JVM) <a name="mmap">
 
 On the JVM, BinF protocols already extends the popular `ByteBuffer` used
 extensively by many utilities, amongst them IO ones (about anything in
@@ -215,7 +233,7 @@ There are a few ways for obtaining a `MappedByteBuffer`, here is one example:
         rr-date)))
 ```
 
-### Creating views from views
+### Creating a view from a view <a name="view_from_view">
 
 It is often useful to create "sub-views" of a view. Akin to wrapping a buffer, a
 view can wrap a view:
@@ -239,7 +257,7 @@ view can wrap a view:
    (binf/limit sub-view))
 ```
 
-### Working with dynamically size data
+### Working with dynamically-sized data <a name="dynamic_data">
 
 While reading data in a sequence is easy, writing can sometimes be a bit tricky
 since one has to decide how much memory to allocate.
@@ -268,7 +286,7 @@ size times 1.5:
                               (binf/limit my-view)))))
 ```
 
-### Interacting with native libraries and WebAssembly
+### Interacting with native libraries and WebAssembly <a name="native">
 
 Clojure is expanding, reaching new fronts through GraalVM, WebAssembly, new ways
 of calling native code.
@@ -364,7 +382,7 @@ A more challenging example would not be easy to compute by hand:
                                                                                   [:a_double binf.cabi/f64]])]])]])
 ```
 
-### Working with 64-bit integers
+### Working with 64-bit integers <a name="int64">
 
 Working with 64-bit integers is tricky since the JVM does not have unsigned ones
 and JS engines do not even really have 64-bit integers at all. The
@@ -372,7 +390,7 @@ and JS engines do not even really have 64-bit integers at all. The
 cross-platform fashion. It is not the most beautiful experience the user will
 encounter in the course of a lifetime but it works and does the job as efficiently as possible.
 
-### Extra utilities
+### Extra utilities <a name="extra">
 
 Other namespaces provides utilities such as Base64 encoding/decoding, LEB128
 encoding/decoding, ...
@@ -380,7 +398,7 @@ encoding/decoding, ...
 It is best to [navigate through the
 API](https://en.wikipedia.org/wiki/Application_binary_interface).
 
-## Running tests
+## Running tests <a name="tests">
 
 On the JVM, using [Kaocha](https://github.com/lambdaisland/kaocha):
 
@@ -404,7 +422,7 @@ $ ./bin/test/browser/compile
 $ ./bin/test/browser/advanced
 ```
 
-## Development
+## Development <a name="develop">
 
 Starting in Clojure JVM mode, mentioning an additional deps alias (here, a local
 setup of NREPL):
