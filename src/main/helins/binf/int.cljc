@@ -166,7 +166,9 @@
 
 (defn i64
 
-  "Combines different integers (maximum 32-bits) into a signed 64-bit integer."
+  "Combines different integers (maximum 32-bits) into a signed 64-bit integer.
+  
+   See the `helins.binf.int64` namespace for how to use 64-bit integers."
 
 
   ([b32-1 b32-2]
@@ -201,7 +203,9 @@
 
 (defn u64
 
-  "Combines different integers (maximum 32-bits) into an unsigned 64-bit integer."
+  "Combines different integers (maximum 32-bits) into an unsigned 64-bit integer.
+  
+   See the `helins.binf.int64` namespace for how to use 64-bit integers."
 
 
   ([b32-1 b32-2]

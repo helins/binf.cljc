@@ -11,14 +11,14 @@
    type and in JS, there are no 64-bit integers at all. This is why creating and handling them in
    a cross-platform manner, signed or unsigned, is done via this namespace.
   
-   On the JVM, unsigned 64-bit integers are actually regular 64-bit signed values but treated diffently.
+   On the JVM, unsigned 64-bit integers are actually regular 64-bit signed values but treated differently.
    What matters is the bit pattern. For human-readability, see [[str-u]].
   
    In JS, they are `BigInt`, a type which does not even interoperate with regular numbers.
   
-   As a rule, all values of any operation must be 64-bit integers. This namespace provides functions for
-   logical and mathematical operations for which sign matters (such as [u<=]] or [[udiv]]) as well as
-   bitwise operations which need an alternative implementation (such as [[bit-clear]]."
+   As a rule, all values in any operation must be 64-bit integers since THEY DO NOT MIX with <= 32-bit integers.
+   This namespace provides functions for logical and mathematical operations for which sign matters (such as [u<=]]
+   or [[udiv]]) as well as bitwise operations which need an alternative implementation (such as [[bit-clear]])."
 
   {:author "Adam Helinski"}
 
@@ -156,7 +156,13 @@
 
 #?(:clj (defmacro i*
 
-  "Macro for declaring a signed 64-bit integer."
+  "Macro for declaring a signed 64-bit integer.
+
+   ```clojure
+   (def n
+        (i* -9223372036854775808))
+   ```"
+
 
   [n]
 
@@ -168,7 +174,12 @@
 
 #?(:clj (defmacro u*
 
-  "Macro for declaring an unsigned 64-bit integer."
+  "Macro for declaring an unsigned 64-bit integer.
+  
+   ```clojure
+   (def n
+        (u* 18446744073709551615))
+   ```"
 
   [n]
 
@@ -193,7 +204,7 @@
 
 (defn bit-clear
 
-  "64-bit equivalent of the standard function."
+  "64-bit equivalent of the related standard function."
 
   [x n]
 
@@ -207,7 +218,7 @@
 
 (defn bit-flip
 
-  "64-bit equivalent of the standard function."
+  "64-bit equivalent of the related standard function."
 
   [x n]
 
@@ -220,7 +231,7 @@
 
 (defn bit-set
 
-  "64-bit equivalent of the standard function."
+  "64-bit equivalent of the related standard function."
 
   [x n]
 
@@ -234,7 +245,7 @@
 
 (defn bit-test
 
-  "64-bit equivalent of the standard function."
+  "64-bit equivalent of the related standard function."
 
   [x n]
 
@@ -361,14 +372,14 @@
    A radix can be provided (eg. 16 for hexadecimal or 2 for binary)."
 
 
-  ([i64]
+  ([u64]
 
-   (str i64))
+   (str u64))
 
 
-  ([radix i64]
+  ([radix u64]
 
-   #?(:clj  (Long/toUnsignedString ^long i64
+   #?(:clj  (Long/toUnsignedString ^long u64
                                    radix)
-      :cljs (.toString i64
+      :cljs (.toString u64
                        radix))))

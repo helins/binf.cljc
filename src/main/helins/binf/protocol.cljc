@@ -10,7 +10,7 @@
    This namespace should be relevant only if a new type needs to implement those. The common user
    should not have to bother.
   
-   Those functions are described in the core `helins.binf` namespace as well as the README file.
+   Those functions are described in the core `helins.binf` namespace as well as in the README file.
   
    Depending on the type, not all protocols must be implemented. For instance, a stream-like type
    might not be seekable and might implement only `IRelative*` protocols and not `IAbsolute` ones."
@@ -55,7 +55,8 @@
 
   "Writing primitive values at an absolute position, without disturbing the current one.
   
-   When writing integers, sign is irrelevant and truncation is automatic."
+   When writing integers, sign is irrelevant and truncation is automatic between all integers that
+   are <= 32-bits."
   
   (wa-buffer [view position buffer offset n-byte])
 
@@ -77,7 +78,7 @@
 
 (defprotocol IBackingBuffer
 
-  ""
+  "Some views operates over a buffer which can be directly accessed using this protocol."
 
   (backing-buffer [this])
 
@@ -139,7 +140,8 @@
   "Writing primitive values to the current position, advancing it as needed. For instance,
    reading a 64-bit float will advance the current position by 8 bytes.
 
-   When writing integers, sign is irrelevant and truncation is automatic."
+   When writing integers, sign is irrelevant and truncation is automatic between all integers that
+   are <= 32-bits."
 
   (wr-buffer [view buffer offset n-byte])
   
@@ -161,7 +163,7 @@
 
 (defprotocol IPosition
 
-  "Handling the position of a view and its relation to its buffer."
+  "Handling the position of a view if it is seekable."
 
   (limit [view])
 

@@ -28,7 +28,9 @@
      \"utf-16le\"
 
    Other encodings are platform dependent. On the JVM, it can be anything accepted
-   by the `Charset` class while in JS it can be anything accepted by a `TextDecoder`."
+   by the `Charset` class while in JS it can be anything accepted by a `TextDecoder`.
+  
+   Throws if the encoding is not supported."
 
   [encoding]
 
@@ -39,7 +41,7 @@
 
 #?(:clj (defn encoder
 
-  "An encoder knows how to translate a string encoded in a given encoding into a buffer.
+  "An encoder knows how to translate into a buffer a string encoded in a given encoding.
   
    In JS, strings can only be encoded as UTF-8 which is why string encoding utilities
    from this library use exclusively UTF-8.
@@ -107,7 +109,9 @@
 
 (defn encode
 
-  "Returns a buffer containing the given `string` encoded in UTF-8."
+  "Returns a buffer containing the given `string` encoded in UTF-8.
+  
+   On the JVM, an alternative encoder can be provided (see [[encoder]])."
 
 
   (^bytes

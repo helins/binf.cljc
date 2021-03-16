@@ -17,7 +17,9 @@
 
   "Converts a 32-bit float to a 32-bit integer preserving the bit pattern.
   
-   Opposite of [[from-b32]]."
+   Opposite of [[from-b32]].
+  
+   See [[b64]] for an example."
 
   [f32]
 
@@ -34,7 +36,19 @@
 
   "Converts a 64-bit float to a 64-bit integer preserving the bit pattern.
   
-   Opposite of [[from-b64]]."
+   Opposite of [[from-b64]].
+  
+   ```clojure
+   (def bits
+        (b64 42.24))
+
+   ;; equals to 4631166901565532406
+
+   (= 42.24
+      (from-b64 bits))
+   ```
+  
+   Useful for places which can handle integers but not floats."
 
   [f64]
 

@@ -8,13 +8,13 @@
   "Contains [[view]] for creating a view over native memory (as opposed to the JVM heap)
    as well as utilities for handling raw pointers.
   
-   The main utility is [[view]]. Allocating native memory can lead to performance increase
-   and simplifies things when using tools such as JNI.
+   The main utility is [[view]] which returns a `DirectByteBuffer`. Allocating native memory
+   can lead to performance increase and simplifies things when using tools such as JNI.
   
-   Other utilities are DANGEROUS.
+   Other utilities are related to raw pointers and are DANGEROUS.
 
    Manipulating raw pointers and managing memory is just as error prone as in native programming.
-   Those utilities are for users knowing both want they want and what it simplies. Otherwise,
+   Those utilities are for users knowing both want they want and what it implies. Otherwise,
    segfaults are to be expected."
 
   {:author "Adam Helinski"}
@@ -45,7 +45,7 @@
   "Allocates `n-byte` bytes in native memory, outside of the JVM heap, and returns a view over it.
   
    Very useful for performance increase in some situations or for interacting with native functions.
-   The returned view is actually a `DirectByteBuffer` commonly understood by JNI."
+   The returned view is actually a `DirectByteBuffer` commonly understood by many tools (such as JNI)."
 
   ^DirectByteBuffer
 
@@ -130,7 +130,7 @@
 
 (defn w-b8
 
-  "Write an 8-bit integer at the given raw pointer."
+  "Writes an 8-bit integer at the given raw pointer."
 
   [ptr b8]
 

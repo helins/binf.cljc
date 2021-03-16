@@ -37,7 +37,7 @@
 
 (defn n-byte-i32
 
-  "Combines the number of bytes needed for encoding the given signed value (at most 32-bits)."
+  "Computes the number of bytes needed for encoding the given signed value (at most 32-bits)."
 
   [i32]
 
@@ -62,7 +62,7 @@
 
 (defn n-byte-u32
 
-  "Combines the number of bytes needed for encoding the given unsigned value (at most 32-bits)."
+  "Computes the number of bytes needed for encoding the given unsigned value (at most 32-bits)."
 
   [u32]
 
@@ -79,7 +79,7 @@
 
 (defn n-byte-i64
 
-  "Combines the number of bytes needed for encoding the given signed value (at most 64-bits)."
+  "Computes the number of bytes needed for encoding the given signed value (at most 64-bits)."
 
   [i64]
 
@@ -107,7 +107,7 @@
 
 (defn n-byte-u64
 
-  "Combines the number of bytes needed for encoding the given unsigned value (at most 64-bits)."
+  "Computes the number of bytes needed for encoding the given unsigned value (at most 64-bits)."
 
   [u64]
 
@@ -166,7 +166,7 @@
 
 (defn wr-i32
 
-  "Write a signed integer containing at most 32-bits from a view."
+  "Writes a signed integer containing at most 32-bits from a view."
   
   [view i32]
 
@@ -221,7 +221,7 @@
 
 (defn wr-u32
 
-  "Write an unsigned integer containing at most 32-bits from a view."
+  "Writes an unsigned integer containing at most 32-bits from a view."
 
   [view u32]
 

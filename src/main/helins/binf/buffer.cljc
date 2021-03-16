@@ -5,9 +5,13 @@
 
 (ns helins.binf.buffer
 
-  "Buffers are the native representation of a byte array which can be wrapped in a view
+  "Buffers are the platform representation of a byte array which can be wrapped in a view
    and manipulated by using the core `helins.binf` namespaces. They represent a raw, fixed-size
-   chunk of memory."
+   chunk of memory.
+
+   On the JVM, a buffer is indeed a `byte-array`.
+
+   In JS, it is either a `js/ArrayBuffer` or its sibling `js/SharedArrayBuffer`."
 
   {:author "Adam Helinski"}
 

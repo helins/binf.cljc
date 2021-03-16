@@ -5,7 +5,7 @@
 
 (ns helins.binf.cabi
 
-  "Interaction with environments which conform to a C-like ABI.
+  "Interaction with environments that conform to a C-like ABI.
 
    This namespace is mainly about defining C structures in order to pass them or to understand
    them when interacting with native functions. It could be when using JNI on the JVM or when
@@ -15,13 +15,22 @@
    defining such C structures and commonly do so in the context of libraries.
 
    BinF already provides utilities for handling arbitrary data in native memory or in WebAssembly memory.
-   This namespace is necessary for computing how to read or write data since C composite types follow rules
-   (eg. alignment of data fields for performance).
+   For example, on the JVM, `DirectByteBuffer` implements view protocols and is commonly used with JNI.
+   Some WebAssembly runtimes such as `Wasmer` use them to represent the memory of a WebAssembly module. In
+   JS, WebAssembly memories are buffers from which a view can be built.
 
-   3 definitions are needed for understanding those utilities:
+   What is missing is knowing how to use a C-like ABI which relies on following some rules. For instance,
+   the members of a structure are aligned on specific memory addresses for performance reasons. This namespace
+   provides utilities for defining such composite data structures as EDN and computing everything there is to compute
+   for following those ABI rules.
 
-     - An `env` is a map containing information needed for computing those rules. See [[env]] for creating one.
+   3 definitions are needed for understanding these utilities:
+
+     - An `env` is a map containing information needed for computing those rules such as the alignment being used.
+       See [[env]] for creating one.
+
      - A description map describes either a primitive type (eg. [[u32]]) or a composite data structure (eg. [[struct]]).
+
      - A description function takes an `env` and produces a description map.
 
    A description map is plain data containing eveything that is needed for handling this type. For instance,
@@ -31,7 +40,7 @@
    for creating description functions for composite ones (such as [[array]] or [[struct]]).
   
    See [[struct]] for a small example and tests in the `helins.binf.test.cabi` namespace. Source code also clearly
-   shows what is being outputed."
+   shows what is being outputed. While daunting at first, this namespace is actually quite simple."
 
   {:author "Adam Helinski"}
 
@@ -48,7 +57,7 @@
 (defn env
 
   "Creates a minimal `env` map which describes the used alignment and the size of a pointer. Those
-   informations are necessary to compute about any C type.
+   informations are necessary for computing about any C type.
   
    This function leverages the fact that in modern architectures, alignment matches the size of pointers
    (eg. on 64-bit machine, alignment is 8 bytes and a pointer is 8 bytes as well)."
@@ -354,7 +363,16 @@
    It looks exactly like defining an enum in C in that regard.
 
    Attention, enums are brittle from an ABI point of view and should be discouraged. For
-   instance, the Google Fuchsia projects even explicitely bans them."
+   instance, the Google Fuchsia projects even explicitely bans them.
+  
+   ```clojure
+   (def make-enum
+        (enum :MyEnum
+              [:a
+               :b
+               [:c 42]
+               :d]))
+   ```"
 
   [type constant+]
 
@@ -405,14 +423,14 @@
    That description is plain data and contains computed offsets of all members.
 
    ```clojure
-   (def my-struct-fn
+   (def make-struct
         (struct :MyStruct
-                [:a u8]
-                [:b (array f64
-                           10)]))
+                [[:a u8]
+                 [:b (array f64
+                            10)]]))
 
    (def my-struct-map
-        (my-struct-fn (env 8)))
+        (make-struct (env 8)))
    ```"
 
   [type member+]

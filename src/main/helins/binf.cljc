@@ -149,7 +149,7 @@
 
 (defn ra-f32
 
-  "Reads a 32-bit float from absolute `position`."
+  "Reads a 32-bit float from an absolute `position`."
 
   [view position]
 
@@ -160,7 +160,7 @@
 
 (defn ra-f64
 
-  "Reads a 64-bit float from absolute `position`."
+  "Reads a 64-bit float from an absolute `position`."
 
   [view position]
 
@@ -175,7 +175,7 @@
   
    A string decoder may be provided (default is UTF-8).
   
-   Cf. [[helins.binf.string/decoder]]"
+   See [[helins.binf.string/decoder]]."
 
 
   ([view position n-byte]
@@ -333,7 +333,7 @@
 
    It is possible to implement some protocols of this library over something that does not have a backing buffer.
    Actually, on the JVM, a `DirectByteBuffer` is an example of a supported view which operates over native memory
-   instead of a Java byte array (ie. a buffer in the context of this library)."
+   instead of a Java byte array (ie. instead of a buffer in the context of this library)."
 
   [view]
 
@@ -382,7 +382,8 @@
 
   "Returns a new view with `n-additional-byte` added, copying entirely the given `view`.
   
-   It is particularly useful when writing data of yet unknown length."
+   It is particularly useful when writing data of yet unknown length, giving the ability of
+   growing as needed."
 
   [view n-additional-byte]
 
@@ -526,11 +527,11 @@
 
 (defn rr-string
   
-  "Reads a string consisting of `n-byte` from the current position.
+  "Reads a string consisting of `n-byte` bytes from the current position.
 
    A non-nil decoder may be provided (default is UTF-8).
   
-   See [[helins.binf.string/decoder]]"
+   See [[helins.binf.string/decoder]]."
 
 
   ([view n-byte]
@@ -753,7 +754,7 @@
 
 (defn garanteed?
 
-  "Helper returning if the `view` can consume at least `n-byte` from the current position."
+  "Returns true if the `view` can consume at least `n-byte` from the current position."
 
   [view n-byte]
 
@@ -777,7 +778,7 @@
 
 (defn ra-bool
 
-  "Reads a boolean value an absolute `position`."
+  "Reads a boolean value from an absolute `position`."
 
   [view position]
 
