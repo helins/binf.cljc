@@ -30,9 +30,9 @@ Table of content:
     - [Creating a view over a memory-mapped-file (JVM)](#mmap)
     - [Creating a view from a view](#view_from_view)
     - [Working with dynamically-sized data](#dynamic_data)
-    - [Interacting with native libraries and WebAssembly](#native)
     - [Working with 64-bit integers](#int64)
     - [Extra utilities](#extra)
+    - [Interacting with native libraries and WebAssembly](#native)
 - [Running tests](#tests)
 - [Development](#develop)
 
@@ -81,7 +81,7 @@ memory, handling a file, a socket, ...
 
 Finally, by definition, a buffer is an opaque byte array which can be manipulated only
 via a view. It represents the lowest-level of directly accessible memory a host
-can provide. On the JVM, a buffer is a plain old byte array. In JS, it is a an [ArrayBuffer](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer)
+can provide. On the JVM, a buffer is a plain old byte array. In JS, it is an [ArrayBuffer](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer)
 or optionally a
 [SharedArrayBuffer](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/SharedArrayBuffer).
 
@@ -111,18 +111,19 @@ The following table summarizes primitive binary types and their names:
 | u64 | Unsigned 64-bit integer |
 
 Reading and writing revolve around these types and happen at a specific position
-in a view. In *absolute operations*, that position is provided by the user
-explicitly. In *relative operations*, views use an internal position they maintain
-themselves. It is much more common to use relative operations since it is more
+in a view. In **absolute operations**, that position is provided by the user
+explicitly. In **relative operations**, views use an internal position they maintain
+themselves.
+
+It is much more common to use relative operations since it is more
 common to read or write things in a sequence. For instance, writing a 32-bit
 integer will then advance that internal position by 4 bytes.
 
 When writing integers, sign do not matter. For instance, instead of specifying
 `i32` or `u32`, `b32` is used since only the bit pattern matters.
 
-These operations are gathered in the core [helins.binf]
-(https://cljdoc.org/d/io.helins/binf/0.0.0-beta0/api/helins.binf) namespace. Some
-examples are:
+These operations are gathered in the core [helins.binf](https://cljdoc.org/d/io.helins/binf/0.0.0-beta0/api/helins.binf)
+namespace. Some examples showing the naming convention are:
 
 | Operation | Description |
 |---|---|
@@ -276,15 +277,34 @@ must check defensively if there is enough memory for the next bit of data (eg. a
 and then write that bit.
 
 Anyway, when space is lacking, the user can grow a view, meaning copying in one
-go the content of a view to a new bigger one. A rule of thumb could be to grow
-size times 1.5:
+go the content of a view to a new bigger one:
 
 ```clojure
+;; Asking for a view which contains 1024 additional bytes
+;;
 (def my-view-2
      (binf/grow my-view
-                (Math/ceil (* 1.5
-                              (binf/limit my-view)))))
+                1024))
 ```
+
+### Working with 64-bit integers <a name="int64">
+
+Working with 64-bit integers is tricky since the JVM does not have unsigned ones
+and JS engines do not even really have 64-bit integers at all. The
+`helins.binf.int64` namespace provide utilities for working with them in a
+cross-platform fashion.
+
+It is not the most beautiful experience one will encounter in the course of a lifetime
+but it works and does the job pretty efficiently.
+
+### Extra utilities <a name="extra">
+
+Other namespaces provides utilities such as Base64 encoding/decoding, LEB128
+encoding/decoding, ...
+
+It is best to [navigate through the
+API](https://cljdoc.org/d/io.helins/binf).
+
 
 ### Interacting with native libraries and WebAssembly <a name="native">
 
@@ -333,7 +353,7 @@ meant to be used with WebAssembly which is (as of today) 32-bit:
 
 ;; Defining a function computing our C date structure
 ;;
-(def fn-struct-dates
+(def fn-struct-date
      (binf.cabi/struct :MyDate
                        [[:year  binf.cabi/u16]
                         [:month binf.cabi/u8]
@@ -342,7 +362,7 @@ meant to be used with WebAssembly which is (as of today) 32-bit:
 
 ;; Computing our C date structure as EDN for a WebAssembly environment
 ;;
-(= (fn-struct-dates env32)
+(= (fn-struct-date env32)
 
    {:binf.cabi/align          2
     :binf.cabi/n-byte         4
@@ -367,7 +387,7 @@ meant to be used with WebAssembly which is (as of today) 32-bit:
 
 This date structure, in a 32-bit WebAssembly, is 4 bytes, aligns on a multiple
 of 2 bytes. It is a `:struct` called `:MyDate` and all data members are clearly
-layed out with their memory offset computed.
+layed out with their memory offsets computed.
 
 A more challenging example would not be easy to compute by hand:
 
@@ -382,21 +402,6 @@ A more challenging example would not be easy to compute by hand:
                                                                                   [:a_double binf.cabi/f64]])]])]])
 ```
 
-### Working with 64-bit integers <a name="int64">
-
-Working with 64-bit integers is tricky since the JVM does not have unsigned ones
-and JS engines do not even really have 64-bit integers at all. The
-`helins.binf.int64` namespace provide utilities for working with them in a
-cross-platform fashion. It is not the most beautiful experience the user will
-encounter in the course of a lifetime but it works and does the job as efficiently as possible.
-
-### Extra utilities <a name="extra">
-
-Other namespaces provides utilities such as Base64 encoding/decoding, LEB128
-encoding/decoding, ...
-
-It is best to [navigate through the
-API](https://en.wikipedia.org/wiki/Application_binary_interface).
 
 ## Running tests <a name="tests">
 
