@@ -3,10 +3,10 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.helins</groupId>
   <artifactId>binf</artifactId>
-  <version>0.0.0-beta0</version>
+  <version>1.0.0-beta0</version>
   <name>BinF</name>
   <description>Handling any binary format</description>
-  <url>https://github.com/helins-io/binf.cljc</url>
+  <url>https://github.com/helins/binf.cljc</url>
   <licenses>
     <license>
       <name>Mozilla Public License Version 2.0</name>
@@ -16,19 +16,21 @@
   <developers>
     <developer>
       <name>Adam Helinski</name>
+      <email>adam@helins.io</email>
+      <url>http://www.helins.io</url>
     </developer>
   </developers>
   <scm>
-    <url>https://github.com/helins-io/binf.cljc</url>
-    <connection>scm:git:git://github.com/helins-io/binf.cljc.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com/helins-io/binf.cljc.git</developerConnection>
+    <url>https://github.com/helins/binf.cljc</url>
+    <connection>scm:git:git://github.com/helins/binf.cljc.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/helins/binf.cljc.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
   <dependencies>
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>clojure</artifactId>
-      <version>1.10.2</version>
+      <version>1.10.1</version>
     </dependency>
   </dependencies>
   <build>

@@ -1,5 +1,4 @@
-{
- :aliases
+{:aliases
  {:bench
   {:extra-deps  {com.taoensso/tufte {:mvn/version "2.2.0"}}
    :extra-paths ["src/bench"]}
@@ -9,8 +8,10 @@
    :main-opts  ["-m" "shadow.cljs.devtools.cli"]}
 
   :deploy
-  {:extra-deps {deps-deploy/deps-deploy {:mvn/version "0.0.9"}}
-   :main-opts  ["-m" "deps-deploy.deps-deploy" "deploy" "release.jar"]}
+  {:exec-args  {:artifact  "release.jar"
+                :installer :remote}
+   :exec-fn    deps-deploy.deps-deploy/deploy
+   :extra-deps {slipset/deps-deploy {:mvn/version "RELEASE"}}}
 
   :dev
   {:extra-deps  {org.clojure/test.check {:mvn/version "0.10.0"}}
@@ -18,12 +19,16 @@
                  "src/example"]}
 
   :jar
-  {:extra-deps {seancorfield/depstar {:mvn/version "0.5.2"}}
-   :main-opts  ["-m" "hf.depstar.jar" "release.jar"]}
+  {:exec-args    {:jar      "release.jar"
+                  :sync-pom true}
+   :exec-fn      hf.depstar/jar
+   :replace-deps {seancorfield/depstar {:mvn/version "2.0.171"}}}
 
   :install
-  {:extra-deps {deps_deploy/deps-deploy {:mvn/version "0.0.9"}}
-   :main-opts  ["-m" "deps-deploy.deps-deploy" "install" "release.jar"]}
+  {:exec-args  {:artifact  "release.jar"
+                :installer :local}
+   :exec-fn    deps-deploy.deps-deploy/deploy
+   :extra-deps {slipset/deps-deploy {:mvn/version "RELEASE"}}}
 
   :test
   {:extra-deps  {lambdaisland/chui        {:mvn/version "0.0.117"}
@@ -33,8 +38,10 @@
                  org.clojure/test.check   {:mvn/version "1.1.0"}}
    :extra-paths ["src/test"]}}
 
+
  :deps
  {}
+
 
  :paths
  ["src/main"]}
