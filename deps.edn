@@ -14,7 +14,8 @@
 
   :dev
   {:extra-deps  {org.clojure/test.check {:mvn/version "0.10.0"}}
-   :extra-paths ["src/dev"]}
+   :extra-paths ["src/dev"
+                 "src/example"]}
 
   :jar
   {:extra-deps {seancorfield/depstar {:mvn/version "0.5.2"}}

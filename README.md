@@ -357,7 +357,7 @@ meant to be used with WebAssembly which is (as of today) 32-bit:
      (binf.cabi/struct :MyDate
                        [[:year  binf.cabi/u16]
                         [:month binf.cabi/u8]
-                        [:date  binf.cabi/u8]]))
+                        [:day   binf.cabi/u8]]))
 
 
 ;; Computing our C date structure as EDN for a WebAssembly environment
@@ -369,8 +369,8 @@ meant to be used with WebAssembly which is (as of today) 32-bit:
     :binf.cabi/type           :struct
     :binf.cabi.struct/layout  [:year
                                :month
-                               :date]
-    :binf.cabi.struct/member+ {:date  {:binf.cabi/align  1
+                               :day]
+    :binf.cabi.struct/member+ {:day   {:binf.cabi/align  1
                                        :binf.cabi/n-byte 1
                                        :binf.cabi/offset 3
                                        :binf.cabi/type   :u8}
