@@ -66,7 +66,7 @@
                binf/view)))
 
 
-;;;;;;;;;; Creating functions for writing and reading a date using information from our struct
+;;;;;;;;;; Creating functions for writing and reading a date using information from our struct.
 ;;;;;;;;;;
 ;;;;;;;;;; Depending on the use-case, helpers should be written.
 ;;;;;;;;;; Here, we show the whole work.

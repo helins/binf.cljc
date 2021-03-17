@@ -23,6 +23,7 @@ An authentic Swiss army knife providing:
 Table of content:
 
 - [Rationale](#rationale)
+- [Examples](#examples)
 - [Usage](#usage)
     - [Buffers and views](#buffers_and_views)
     - [Binary data and operations](#binary_data)
@@ -45,12 +46,28 @@ between Clojure and Clojurescript for pretty much any use case with an extensive
 set of tools built with low-level performance in mind. While in beta, it has
 already been used in production and for involving projects such as a WebAssembly decompiler/compiler.
 
+## Examples <a name="examples">
+
+All examples from the "[Usage](#usage)" section as well as more complete ones
+are in the [./src/example/helins/binf](../develop/src/example/helins/binf) directory.
+They are well-described and meant to be tried out at the REPL.
+
+Also, the [helins.binf.dev](../develop/src/dev/helins/binf/dev.cljc) namespace
+requires all namespaces of this library (quite a few) and can be used for
+REPLing around.
+
+Cloning this repo is a fast way of trying things out. See the
+"[Development](#develop)" section.
+
 ## Usage <a name="usage">
 
-After reading the following overview, go explore the [full API](https://cljdoc.org/d/io.helins/binf)
-which really sheds light on the different namespaces.
+This is an overview.
 
-Let us require the main namespace used in this document:
+After getting a sense of the library, it is best to try out full examples and
+explore the [full API](https://cljdoc.org/d/io.helins/binf) which describes more
+namespaces.
+
+Let us require the main namespaces used in this document:
 
 ```clojure
 (require '[helins.binf        :as binf]
@@ -157,7 +174,9 @@ For instance, writing and reading a `YYYY/mm/dd` date "relatively":
 
 ### Creating a view from a buffer <a name="view_from_buffer">
 
-This example demonstrates how to create a view over a buffer (ie. a byte array).
+Complete example in the [helins.binf.example](../develop/src/example/helins/binf/example.cljc)
+namespace.
+
 
 ```clojure
 ;; Allocating a buffer of 1024 bytes
@@ -194,6 +213,9 @@ Using our date functions defined in the previous section:
 
 ### Creating a view over a memory-mapped file (JVM) <a name="mmap">
 
+Complete example in the [helins.binf.example.mmap-file](../develop/src/example/helins/binf/example/mmap_file.clj)
+namespace.
+
 On the JVM, BinF protocols already extends the popular `ByteBuffer` used
 extensively by many utilities, amongst them IO ones (about anything in
 `java.nio`).
@@ -203,8 +225,8 @@ One notable mention is the child class
 a special type of `ByteBuffer` which memory-maps a file. This technique usually
 results in fast and efficient IO for larger file while being easy to follow.
 
-Our date functions used in the previous function can right away be reused for
-writing to a memory-mapped file which looks like a simple buffer.
+Our date functions used in the previous section be applied to
+such a memory-mapped file without any change.
 
 There are a few ways for obtaining a `MappedByteBuffer`, here is one example:
 
@@ -280,11 +302,12 @@ Anyway, when space is lacking, the user can grow a view, meaning copying in one
 go the content of a view to a new bigger one:
 
 ```clojure
-;; Asking for a view which contains 1024 additional bytes
+;; Asking for a view which contains 256 additional bytes.
+;; Current position is preserved.
 ;;
 (def my-view-2
      (binf/grow my-view
-                1024))
+                256)
 ```
 
 ### Working with 64-bit integers <a name="int64">
@@ -307,6 +330,9 @@ API](https://cljdoc.org/d/io.helins/binf).
 
 
 ### Interacting with native libraries and WebAssembly <a name="native">
+
+Complete example in the [helins.binf.example.cabi](../develop/src/example/helins/binf/example/cabi.cljc)
+namespace.
 
 Clojure is expanding, reaching new fronts through GraalVM, WebAssembly, new ways
 of calling native code.
@@ -346,9 +372,10 @@ meant to be used with WebAssembly which is (as of today) 32-bit:
 (def env32
      (binf.cabi/env 4))
 
-(=  {:binf.cabi/align          4
-     :binf.cabi.pointer/n-byte 4}
-    env)
+(=  env32
+
+    {:binf.cabi/align          4
+     :binf.cabi.pointer/n-byte 4})
 
 
 ;; Defining a function computing our C date structure
@@ -389,19 +416,7 @@ This date structure, in a 32-bit WebAssembly, is 4 bytes, aligns on a multiple
 of 2 bytes. It is a `:struct` called `:MyDate` and all data members are clearly
 layed out with their memory offsets computed.
 
-A more challenging example would not be easy to compute by hand:
-
-```clojure
-(binf.cabi/struct :ComplexExample
-                  [[:pointer_array (binf.cabi/array (binf.cabi/ptr binf.cabi/f64)
-                                                    10)]
-                   [:inner_struct  (binf.cabi/struct :InnerStruct
-                                                     [[:a_byte  binf.cabi/u8]
-                                                      [:a_union (binf.cabi/union :SomeUnion
-                                                                                 [[:an_int   binf.cabi/i32]
-                                                                                  [:a_double binf.cabi/f64]])]])]])
-```
-
+A more challenging example would not be so easy to compute by hand.
 
 ## Running tests <a name="tests">
 
@@ -441,8 +456,6 @@ $ ./bin/dev/cljs
 # Then open ./resources/public/index.html
 ```
 
-The `helins.binf.dev` namespaces requires all namespaces of this library and can
-be used for REPLing around.
 
 ## License
 
