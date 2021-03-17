@@ -49,10 +49,10 @@ already been used in production and for involving projects such as a WebAssembly
 ## Examples <a name="examples">
 
 All examples from the "[Usage](#usage)" section as well as more complete ones
-are in the [./src/example/helins/binf](../develop/src/example/helins/binf) directory.
+are in the [./src/example/helins/binf](../main/src/example/helins/binf) directory.
 They are well-described and meant to be tried out at the REPL.
 
-Also, the [helins.binf.dev](../develop/src/dev/helins/binf/dev.cljc) namespace
+Also, the [helins.binf.dev](../main/src/dev/helins/binf/dev.cljc) namespace
 requires all namespaces of this library (quite a few) and can be used for
 REPLing around.
 
@@ -174,7 +174,7 @@ For instance, writing and reading a `YYYY/mm/dd` date "relatively":
 
 ### Creating a view from a buffer <a name="view_from_buffer">
 
-Complete example in the [helins.binf.example](../develop/src/example/helins/binf/example.cljc)
+Complete example in the [helins.binf.example](../main/src/example/helins/binf/example.cljc)
 namespace.
 
 
@@ -213,7 +213,7 @@ Using our date functions defined in the previous section:
 
 ### Creating a view over a memory-mapped file (JVM) <a name="mmap">
 
-Complete example in the [helins.binf.example.mmap-file](../develop/src/example/helins/binf/example/mmap_file.clj)
+Complete example in the [helins.binf.example.mmap-file](../main/src/example/helins/binf/example/mmap_file.clj)
 namespace.
 
 On the JVM, BinF protocols already extends the popular `ByteBuffer` used
@@ -331,7 +331,7 @@ API](https://cljdoc.org/d/io.helins/binf).
 
 ### Interacting with native libraries and WebAssembly <a name="native">
 
-Complete example in the [helins.binf.example.cabi](../develop/src/example/helins/binf/example/cabi.cljc)
+Complete example in the [helins.binf.example.cabi](../main/src/example/helins/binf/example/cabi.cljc)
 namespace.
 
 Clojure is expanding, reaching new fronts through GraalVM, WebAssembly, new ways
