@@ -141,7 +141,7 @@ integer will then advance that internal position by 4 bytes.
 When writing integers, sign do not matter. For instance, instead of specifying
 `i32` or `u32`, `b32` is used since only the bit pattern matters.
 
-These operations are gathered in the core [helins.binf](https://cljdoc.org/d/io.helins/binf/0.0.0-beta0/api/helins.binf)
+These operations are gathered in the core `helins.binf`
 namespace. Some examples showing the naming convention are:
 
 | Operation | Description |

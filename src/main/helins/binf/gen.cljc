@@ -5,7 +5,9 @@
 
 (ns helins.binf.gen
 
-  "`test.check` generators for primitive integers, buffers, and views."
+  "`test.check` generators for primitive integers, buffers, and views.
+  
+    Attention, `test.check` is not included and must be imported by the user."
 
   {:author "Adam Helinski"}
 

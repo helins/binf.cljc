@@ -5,11 +5,11 @@
 
 (ns helins.binf.cabi
 
-  "Interaction with environments that conform to a C-like ABI.
+  "Interaction with environments that conforms to a C-like ABI.
 
    This namespace is mainly about defining C structures in order to pass them or to understand
    them when interacting with native functions. It could be when using JNI on the JVM or when
-   calling WebAssembly functions, for instance.
+   calling WebAssembly functions in Clojurescript, for instance.
 
    This opens the road to interacting with languages like C++ and Rust since they allow for
    defining such C structures and commonly do so in the context of libraries.
@@ -39,8 +39,8 @@
    This namespace contains ready description functions for primitive types (such as [[f32]]) as well as functions
    for creating description functions for composite ones (such as [[array]] or [[struct]]).
   
-   See [[struct]] for a small example and tests in the `helins.binf.test.cabi` namespace. Source code also clearly
-   shows what is being outputed. While daunting at first, this namespace is actually quite simple."
+   See [[struct]] for a small example and a full one in the `helins.binf.example.cabi` namespace from the repository.
+   Source code also clearly shows what is being outputed. While daunting at first, this namespace is actually quite simple."
 
   {:author "Adam Helinski"}
 

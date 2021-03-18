@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.helins</groupId>
   <artifactId>binf</artifactId>
-  <version>1.0.0-beta0</version>
+  <version>1.0.0-beta1</version>
   <name>BinF</name>
   <description>Handling any binary format</description>
   <url>https://github.com/helins/binf.cljc</url>

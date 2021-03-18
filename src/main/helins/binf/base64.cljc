@@ -69,7 +69,9 @@
   "Decodes a string into a [[view]] according to the Base64 basic scheme (RFC 4648 section 4).
   
    In JS, the view might be slightly larger than the buffer it wraps since the algorithm sometimes allocates
-   a tiny bit more memory than ultimately needed. "
+   a tiny bit more memory than ultimately needed.
+  
+   The buffer can be retrieved from the view by using [[helins.binf/backing-buffer]]."
 
   #?@(:clj  [[^String string]
              (binf.protocol/view (.decode (Base64/getDecoder)

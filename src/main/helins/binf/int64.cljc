@@ -17,7 +17,7 @@
    In JS, they are `BigInt`, a type which does not even interoperate with regular numbers.
   
    As a rule, all values in any operation must be 64-bit integers since THEY DO NOT MIX with <= 32-bit integers.
-   This namespace provides functions for logical and mathematical operations for which sign matters (such as [u<=]]
+   This namespace provides functions for logical and mathematical operations for which sign matters (such as [[u<=]]
    or [[udiv]]) as well as bitwise operations which need an alternative implementation (such as [[bit-clear]])."
 
   {:author "Adam Helinski"}
@@ -124,7 +124,7 @@
 
 (defn u32
 
-  "Converts a 64-bit integer to an unsigned -bit integer."
+  "Converts a 64-bit integer to an unsigned 32-bit integer."
   [b64]
 
   #?(:clj  (binf.int/u32 b64)

@@ -25,9 +25,9 @@
 
   "Allocates a new buffer having `n-byte` bytes.
   
-   In Clojurescript, corresponds to a JS `ArrayBuffer`.
+   On the JVM, corresponds to a plain byte array.
 
-   In Clojure on the JVM, corresponds to a plain byte array.
+   In JS, corresponds to a JS `ArrayBuffer`.
   
    In order to do anything interesting with this library, it needs to be wrapped in a [[helins.binf/view]]."
 

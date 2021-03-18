@@ -329,11 +329,11 @@
 
 (defn backing-buffer
 
-  "Returns the buffer of those views which do wrap one, nil otherwise.
+  "Returns the buffer of `view` if it does wrap one, nil otherwise.
 
    It is possible to implement some protocols of this library over something that does not have a backing buffer.
    Actually, on the JVM, a `DirectByteBuffer` is an example of a supported view which operates over native memory
-   instead of a Java byte array (ie. instead of a buffer in the context of this library)."
+   instead of a Java byte array (ie. a \"buffer\")."
 
   [view]
 
@@ -382,7 +382,7 @@
 
   "Returns a new view with `n-additional-byte` added, copying entirely the given `view`.
   
-   It is particularly useful when writing data of yet unknown length, giving the ability of
+   It is particularly useful when writing data of yet unknown length, providing the ability of
    growing as needed."
 
   [view n-additional-byte]
@@ -754,7 +754,7 @@
 
 (defn garanteed?
 
-  "Returns true if the `view` can consume at least `n-byte` from the current position."
+  "Returns true if the `view` can consume at least `n-byte` bytes from the current position."
 
   [view n-byte]
 

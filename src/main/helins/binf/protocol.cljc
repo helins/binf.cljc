@@ -13,7 +13,7 @@
    Those functions are described in the core `helins.binf` namespace as well as in the README file.
   
    Depending on the type, not all protocols must be implemented. For instance, a stream-like type
-   might not be seekable and might implement only `IRelative*` protocols and not `IAbsolute` ones."
+   might not be seekable and might implement only `IRelative*` protocols and not `IAbsolute*` ones."
 
   {:author "Adam Helinski"})
 

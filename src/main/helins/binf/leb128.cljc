@@ -249,7 +249,7 @@
 
   "Reads a signed integer containing at most 64-bits from a view.
 
-   `n-bit` is non-nilable and defaults to 32."
+   `n-bit` is non-nilable and defaults to 64."
 
   ([view]
 
