@@ -5,6 +5,8 @@ Project](https://img.shields.io/clojars/v/io.helins/binf.svg)](https://clojars.o
 
 [![cljdoc badge](https://cljdoc.org/badge/io.helins/binf)](https://cljdoc.org/d/io.helins/binf)
 
+![CircleCI](https://circleci.com/gh/helins/binf.cljc.svg?style=shield)
+
 Clojure(script) library for handling any kind of binary format, protocol ; both
 in-memory and during IO ; and helping interacting with native libraries and WebAssembly modules.
 
