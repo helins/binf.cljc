@@ -49,7 +49,7 @@
     (fn [n-byte]
       (js/SharedArrayBuffer. n-byte))
     (fn [_n-byte]
-      (throw (js/Error. "SharedArrayBuffer are not supported by this JS environmen"))))))
+      (throw (js/Error. "SharedArrayBuffer are not supported by this JS environment"))))))
 
 
 #?(:cljs (def alloc-shared?

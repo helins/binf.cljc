@@ -26,13 +26,6 @@
     <developerConnection>scm:git:ssh://git@github.com/helins/binf.cljc.git</developerConnection>
     <tag>HEAD</tag>
   </scm>
-  <dependencies>
-    <dependency>
-      <groupId>org.clojure</groupId>
-      <artifactId>clojure</artifactId>
-      <version>1.10.1</version>
-    </dependency>
-  </dependencies>
   <build>
     <sourceDirectory>src/main</sourceDirectory>
   </build>
@@ -49,4 +42,11 @@
       <url>https://clojars.org/repo</url>
     </repository>
   </distributionManagement>
+  <dependencies>
+    <dependency>
+      <groupId>org.clojure</groupId>
+      <artifactId>clojure</artifactId>
+      <version>1.10.2</version>
+    </dependency>
+  </dependencies>
 </project>
