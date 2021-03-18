@@ -19,8 +19,7 @@
                  "src/example"]}
 
   :jar
-  {:exec-args    {:jar      "release.jar"
-                  :sync-pom true}
+  {:exec-args    {:jar "release.jar"}
    :exec-fn      hf.depstar/jar
    :replace-deps {seancorfield/depstar {:mvn/version "2.0.171"}}}
 
