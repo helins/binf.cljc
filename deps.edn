@@ -4,14 +4,14 @@
    :extra-paths ["src/bench"]}
   
   :cljs
-  {:extra-deps {thheller/shadow-cljs {:mvn/version "RELEASE"}}
+  {:extra-deps {thheller/shadow-cljs {:mvn/version "2.11.23"}}
    :main-opts  ["-m" "shadow.cljs.devtools.cli"]}
 
   :deploy
   {:exec-args  {:artifact  "release.jar"
                 :installer :remote}
    :exec-fn    deps-deploy.deps-deploy/deploy
-   :extra-deps {slipset/deps-deploy {:mvn/version "RELEASE"}}}
+   :extra-deps {slipset/deps-deploy {:mvn/version "0.1.5"}}}
 
   :dev
   {:extra-deps  {org.clojure/test.check {:mvn/version "1.1.0"}}
@@ -27,11 +27,11 @@
   {:exec-args  {:artifact  "release.jar"
                 :installer :local}
    :exec-fn    deps-deploy.deps-deploy/deploy
-   :extra-deps {slipset/deps-deploy {:mvn/version "RELEASE"}}}
+   :extra-deps {slipset/deps-deploy {:mvn/version "0.1.5"}}}
 
   :test
   {:extra-deps  {lambdaisland/chui        {:mvn/version "0.0.117"}
-                 lambdaisland/kaocha      {:mvn/version "1.0-612"}
+                 lambdaisland/kaocha      {:mvn/version "1.0.829"}
                  lambdaisland/kaocha-cljs {:mvn/version "0.0-71"}
                  metosin/malli            {:mvn/version "0.3.0"}
                  org.clojure/test.check   {:mvn/version "1.1.0"}}

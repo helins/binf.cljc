@@ -14,7 +14,7 @@
    Other utilities are related to raw pointers and are DANGEROUS.
 
    Manipulating raw pointers and managing memory is just as error prone as in native programming.
-   Those utilities are for users knowing both want they want and what it implies. Otherwise,
+   Those utilities are for users knowing both what they want and what it implies. Otherwise,
    segfaults are to be expected."
 
   {:author "Adam Helinski"}

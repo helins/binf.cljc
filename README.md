@@ -1,9 +1,8 @@
 # BinF stands for "Binary Formats"
 
-[![Clojars
-Project](https://img.shields.io/clojars/v/io.helins/binf.svg)](https://clojars.org/io.helins/binf)
+[![Clojars](https://img.shields.io/clojars/v/io.helins/binf.svg)](https://clojars.org/io.helins/binf)
 
-[![cljdoc badge](https://cljdoc.org/badge/io.helins/binf)](https://cljdoc.org/d/io.helins/binf)
+[![Cljdoc](https://cljdoc.org/badge/io.helins/binf)](https://cljdoc.org/d/io.helins/binf)
 
 ![CircleCI](https://circleci.com/gh/helins/binf.cljc.svg?style=shield)
 
@@ -420,6 +419,7 @@ layed out with their memory offsets computed.
 
 A more challenging example would not be so easy to compute by hand.
 
+
 ## Running tests <a name="tests">
 
 On the JVM, using [Kaocha](https://github.com/lambdaisland/kaocha):
@@ -443,6 +443,7 @@ $ ./bin/test/browser/compile
 # For testing an advanced build
 $ ./bin/test/browser/advanced
 ```
+
 
 ## Development <a name="develop">
 
