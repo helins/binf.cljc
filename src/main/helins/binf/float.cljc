@@ -102,11 +102,20 @@
 
 (defn f32
 
-  "Coerce `x` to a 32-bit float (no-op in JS since there no 32-bit floats)."
+  "Coerce `x` to a 32-bit float.
+  
+   In JS, there are no 32-bit floats. Hence, the returned value is a 32-bit representation embedded
+   in a 64-bit number."
 
   [x]
 
-  (float x))
+  #?(:clj  (float x)
+     :cljs (let [arr (js/Float32Array. 1)]
+             (aset arr
+                   0
+                   x)
+             (aget arr
+                   0))))
 
 
 

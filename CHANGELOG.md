@@ -10,7 +10,10 @@ All notable changes to this project will be documented in this file.
 
 ### Changed
 
+- In JS, coercion to f32 became a real operation instead of a no-op
+
 ### Fixed
+
 
 
 ## [1.0.0-beta1] - 2021-03-18
