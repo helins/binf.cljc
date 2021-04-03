@@ -21,25 +21,7 @@ An authentic Swiss army knife providing:
 - Defining C-like composite types (structs, unions, ...) as EDN
 
 
-Table of content:
-
-- [Rationale](#rationale)
-- [Examples](#examples)
-- [Usage](#usage)
-    - [Buffers and views](#buffers_and_views)
-    - [Binary data and operations](#binary_data)
-    - [Creating a view from a buffer](#view_from_buffer)
-    - [Creating a view over a memory-mapped-file (JVM)](#mmap)
-    - [Creating a view from a view](#view_from_view)
-    - [Working with dynamically-sized data](#dynamic_data)
-    - [Working with 64-bit integers](#int64)
-    - [Extra utilities](#extra)
-    - [Interacting with native libraries and WebAssembly](#native)
-- [Running tests](#tests)
-- [Development](#develop)
-
-
-## Rationale <a name="rationale">
+## Rationale
 
 Clojure libraries for handling binary data are typically limited and not very
 well maintained. BinF is the only library providing a seamless experience
@@ -47,7 +29,8 @@ between Clojure and Clojurescript for pretty much any use case with an extensive
 set of tools built with low-level performance in mind. While in beta, it has
 already been used in production and for involving projects such as a WebAssembly decompiler/compiler.
 
-## Examples <a name="examples">
+
+## Examples
 
 All examples from the "[Usage](#usage)" section as well as more complete ones
 are in the [./src/example/helins/binf](../main/src/example/helins/binf) directory.
@@ -60,7 +43,8 @@ REPLing around.
 Cloning this repo is a fast way of trying things out. See the
 "[Development](#develop)" section.
 
-## Usage <a name="usage">
+
+## Usage
 
 This is an overview.
 
@@ -75,7 +59,7 @@ Let us require the main namespaces used in this document:
          '[helins.binf.buffer :as binf.buffer])
 ```
 
-### Buffers and views <a name="buffers_and_views">
+### Buffers and views
 
 BinF is highly versatile because it leverages what the host offers, following the
 Clojure mindset. The following main concepts must be understood.
@@ -106,7 +90,8 @@ or optionally a
 Many host utilities expect buffers hence it is important to define a coherent
 story between buffers and views.
 
-### Binary data and operations <a name="binary_data">
+
+### Binary data and operations
 
 Types and related operations follow a predictable naming convention.
 
@@ -173,7 +158,8 @@ For instance, writing and reading a `YYYY/mm/dd` date "relatively":
    (binf/rr-u8 view)])
 ```
 
-### Creating a view from a buffer <a name="view_from_buffer">
+
+### Creating a view from a buffer
 
 Complete example in the [helins.binf.example](../main/src/example/helins/binf/example.cljc)
 namespace.
@@ -212,7 +198,8 @@ Using our date functions defined in the previous section:
 
 ```
 
-### Creating a view over a memory-mapped file (JVM) <a name="mmap">
+
+### Creating a view over a memory-mapped file (JVM)
 
 Complete example in the [helins.binf.example.mmap-file](../main/src/example/helins/binf/example/mmap_file.clj)
 namespace.
@@ -257,7 +244,8 @@ There are a few ways for obtaining a `MappedByteBuffer`, here is one example:
         rr-date)))
 ```
 
-### Creating a view from a view <a name="view_from_view">
+
+### Creating a view from a view
 
 It is often useful to create "sub-views" of a view. Akin to wrapping a buffer, a
 view can wrap a view:
@@ -281,7 +269,8 @@ view can wrap a view:
    (binf/limit sub-view))
 ```
 
-### Working with dynamically-sized data <a name="dynamic_data">
+
+### Working with dynamically-sized data
 
 While reading data in a sequence is easy, writing can sometimes be a bit tricky
 since one has to decide how much memory to allocate.
@@ -311,7 +300,8 @@ go the content of a view to a new bigger one:
                 256)
 ```
 
-### Working with 64-bit integers <a name="int64">
+
+### Working with 64-bit integers
 
 Working with 64-bit integers is tricky since the JVM does not have unsigned ones
 and JS engines do not even really have 64-bit integers at all. The
@@ -321,7 +311,8 @@ cross-platform fashion.
 It is not the most beautiful experience one will encounter in the course of a lifetime
 but it works and does the job pretty efficiently.
 
-### Extra utilities <a name="extra">
+
+### Extra utilities
 
 Other namespaces provides utilities such as Base64 encoding/decoding, LEB128
 encoding/decoding, ...
@@ -330,7 +321,8 @@ It is best to [navigate through the
 API](https://cljdoc.org/d/io.helins/binf).
 
 
-### Interacting with native libraries and WebAssembly <a name="native">
+
+### Interacting with native libraries and WebAssembly
 
 Complete example in the [helins.binf.example.cabi](../main/src/example/helins/binf/example/cabi.cljc)
 namespace.
@@ -420,7 +412,7 @@ layed out with their memory offsets computed.
 A more challenging example would not be so easy to compute by hand.
 
 
-## Running tests <a name="tests">
+## Running tests
 
 On the JVM, using [Kaocha](https://github.com/lambdaisland/kaocha):
 
@@ -438,7 +430,7 @@ $ ./bin/test/node/advanced
 ```
 
 
-## Development <a name="develop">
+## Development
 
 Starting in Clojure JVM mode, mentioning an additional deps alias (here, a local
 setup of NREPL):
