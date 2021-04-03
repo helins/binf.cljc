@@ -428,20 +428,13 @@ On the JVM, using [Kaocha](https://github.com/lambdaisland/kaocha):
 $ ./bin/test/jvm/run
 $ ./bin/test/jvm/watch
 ```
-On NodeJS, using [Kaocha-CLJS](https://github.com/lambdaisland/kaocha-cljs):
+On NodeJS, using [Shadow-CLJS](https://github.com/thheller/shadow-cljs):
 
 ```bash
 $ ./bin/test/node/run
-$ ./bin/test/node/watch
-```
 
-In the browser, using [Chui](https://github.com/lambdaisland/chui):
-```
-$ ./bin/test/browser/compile
-# Then open ./resources/chui/index.html
-
-# For testing an advanced build
-$ ./bin/test/browser/advanced
+# Or testing an advanced build:
+$ ./bin/test/node/advanced
 ```
 
 
@@ -453,10 +446,10 @@ setup of NREPL):
 $ ./bin/dev/clojure :nrepl
 ```
 
-Starting in CLJS mode using Shadow-CLJS:
+Starting in CLJS mode using [Shadow-CLJS](https://github.com/thheller/shadow-cljs):
 ```bash
 $ ./bin/dev/cljs
-# Then open ./resources/public/index.html
+# Then open ./cljs/index.html
 ```
 
 

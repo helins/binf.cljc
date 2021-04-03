@@ -1,29 +1,20 @@
 {:builds
- {:bench
-  {:asset-path "/js"
-   :modules    {:main {:entries [helins.binf.bench]
-                       :init-fn helins.binf.bench/main}}
-   :output-dir "resources/public/js"
-   :target     :browser}
-  
-  :dev
+ {:dev
   {:asset-path "/js"
    :modules    {:main {:entries [helins.binf.dev]}}
-   :output-dir "resources/public/js"
+   :output-dir "cljs/js"
    :target     :browser}
 
-
- :test
+ :test-node
  {:ns-regexp ".+"
-  :runner-ns lambdaisland.chui.shadow.browser-runner
-  :target    :browser-test
-  :test-dir  "resources/chui"}}
+  :output-to "compiled/node/test.js"
+  :target    :node-test}}
 
  :deps
  {:alias [:cljs]}
 
  :dev-http
- {8000 "resources/public"}
+ {8000 "cljs"}
  
  :nrepl
  {:port 14563}}
