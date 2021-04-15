@@ -6,7 +6,7 @@
 
 ![CircleCI](https://circleci.com/gh/helins/binf.cljc.svg?style=shield)
 
-Clojure(script) library for handling any kind of binary format, protocol ; both
+Clojure/script library for handling any kind of binary format, protocol ; both
 in-memory and during IO ; and helping interacting with native libraries and WebAssembly modules.
 
 An authentic Swiss army knife providing:
@@ -19,6 +19,13 @@ An authentic Swiss army knife providing:
 - Excellent support for IO and even memory-mapped files on the JVM
 - Extra utilities such as Base64 encoding/decoding, LEB128, ...
 - Defining C-like composite types (structs, unions, ...) as EDN
+
+Supported platforms:
+
+- [Babashka](https://github.com/babashka/babashka) (besides `helins.binf.native` namespace)
+- Browser
+- JVM
+- NodeJS
 
 
 ## Rationale
