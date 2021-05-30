@@ -823,3 +823,139 @@
          (if true?
            1
            0)))
+
+;; View copying
+
+(defn wa-ra-view
+
+  "Copies `n-byte` bytes from an absolute `src-offset` in the `src-view`
+   into given `dest-view` at the specified `dest-offset`."
+
+  ([dest-view src-view]
+
+   (binf.protocol/copy-view dest-view
+                            0
+                            true
+                            src-view
+                            0
+                            true
+                            (min (limit dest-view) (limit src-view))))
+
+  ([dest-view dest-offset src-view src-offset n-byte]
+
+   (binf.protocol/copy-view dest-view
+                            dest-offset
+                            true
+                            src-view
+                            src-offset
+                            true
+                            n-byte)))
+
+(defn wa-rr-view
+
+  "Copies `n-byte` bytes from the `src-view`
+   into given `dest-view` at the specified `dest-offset`."
+
+  ([dest-view dest-offset src-view]
+
+   (binf.protocol/copy-view dest-view
+                            0
+                            true
+                            src-view
+                            0
+                            false
+                            (min (limit dest-view)
+                                 (- (limit src-view) (position src-view)))))
+
+  ([dest-view dest-offset src-view n-byte]
+
+   (binf.protocol/copy-view dest-view
+                            dest-offset
+                            true
+                            src-view
+                            0
+                            false
+                            n-byte)))
+
+(defn wr-ra-view
+
+  "Copies `n-byte` bytes from an absolute `src-offset` in the `src-view`
+   into given `dest-view`."
+
+  ([dest-view src-view src-offset]
+
+   (binf.protocol/copy-view dest-view
+                            0
+                            false
+                            src-view
+                            src-offset
+                            true
+                            (min (limit dest-view)
+                                 (- (limit src-view) (position src-view)))))
+
+  ([dest-view src-view src-offset n-byte]
+
+   (binf.protocol/copy-view dest-view
+                            0
+                            false
+                            src-view
+                            src-offset
+                            true
+                            n-byte)))
+
+(defn wr-rr-view
+
+  "Copies `n-byte` bytes from the `src-view`
+   into given `dest-view`."
+
+  ([dest-view src-view]
+
+   (binf.protocol/copy-view dest-view
+                            0
+                            false
+                            src-view
+                            0
+                            false
+                            (min (- (limit dest-view) (position dest-view))
+                                 (- (limit src-view) (position src-view)))))
+
+  ([dest-view src-view n-byte]
+
+   (binf.protocol/copy-view dest-view
+                            0
+                            false
+                            src-view
+                            0
+                            false
+                            n-byte)))
+
+;; Default implementations of binf.protocol/copy-view:
+
+;; The backup implementation.
+;; This requires the allocation of an intermediate buffer.
+;; To reduce memory cost for a large copy this could be changed to copying in smaller chunks.
+(defmethod binf.protocol/copy-view :default
+  [dest-view dest-offset dest-absolute? src-view src-offset src-absolute? n-byte]
+  (let [bytes (if src-absolute?
+                (ra-buffer src-view src-offset n-byte)
+                (rr-buffer src-view n-byte))]
+    (if dest-absolute?
+      (wa-buffer dest-view dest-offset bytes)
+      (wr-buffer dest-view bytes))))
+
+;; If both src and dest have backing buffers then perform a copy between these buffers.
+(defmethod binf.protocol/copy-view [::binf.protocol/has-backing-buffer ::binf.protocol/has-backing-buffer]
+  [dest-view dest-offset dest-absolute? src-view src-offset src-absolute? n-byte]
+  (let [dest-bb (backing-buffer dest-view)
+        src-bb (backing-buffer src-view)
+        src-offset (if src-absolute? src-offset (position src-view))
+        dest-offset (if dest-absolute? dest-offset (position dest-view))]
+    (binf.buffer/copy dest-bb
+                      dest-offset
+                      src-bb
+                      src-offset
+                      n-byte)
+    (when-not dest-absolute?
+      (skip dest-view n-byte))
+    (when-not src-absolute?
+      (skip src-view n-byte))))

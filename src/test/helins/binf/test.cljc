@@ -53,6 +53,23 @@
                   (binf/endian-set :little-endian))))
 
 
+(defn alloc-view
+  [size]
+  (-> (binf.buffer/alloc size)
+      binf/view
+      (binf/endian-set :little-endian)))
+
+
+(defn alloc-view-native-or-shared
+  [size]
+  #?(:clj (binf/endian-set (binf.native/view size)
+                           :little-endian)
+     :cljs (-> (binf.buffer/alloc size)
+               binf/view
+               (binf/endian-set :little-endian))))
+
+
+
 
 (t/deftest buffer->view
 
@@ -638,3 +655,265 @@
                                true)
                  (binf/ra-bool 1)))
           "Absolute")))
+
+
+;;;;;;;;;; View -> View copying
+
+
+(t/deftest copy-view->view
+
+  ;; Read absolute -> Write absolute
+
+  ;; Full copy
+
+  (let [src-v (alloc-view 16)
+        dest-v (alloc-view 16)]
+
+    (doseq [i (range 16)]
+      (binf/wa-b8 src-v i i))
+
+    (binf/wa-ra-view dest-v 0 src-v 0 16)
+
+    (doseq [i (range 16)]
+      (t/is (= i (binf/ra-i8 dest-v i))))
+
+    (t/is (= 0 (binf/position src-v)))
+    (t/is (= 0 (binf/position dest-v))))
+
+  ;; Partial copy
+
+  (let [src-v (alloc-view 16)
+        dest-v (alloc-view 16)]
+
+    (doseq [i (range 16)]
+      (binf/wa-b8 src-v i i))
+
+    (binf/wa-ra-view dest-v 4 src-v 8 4)
+
+    (doseq [i (range 4)]
+      (t/is (= 0 (binf/ra-i8 dest-v i))))
+    (doseq [i (range 4 8)]
+      (t/is (= (+ i 4) (binf/ra-i8 dest-v i))))
+    (doseq [i (range 8 16)]
+      (t/is (= 0 (binf/ra-i8 dest-v i))))
+
+    (t/is (= 0 (binf/position src-v)))
+    (t/is (= 0 (binf/position dest-v))))
+
+  ;; check that it works wit native/shared variants
+
+  ;; native/shared src
+
+  (let [src-v (alloc-view-native-or-shared 16)
+        dest-v (alloc-view 16)]
+
+    (doseq [i (range 16)]
+      (binf/wa-b8 src-v i i))
+
+    (binf/wa-ra-view dest-v 4 src-v 8 4)
+
+    (doseq [i (range 4)]
+      (t/is (= 0 (binf/ra-i8 dest-v i))))
+    (doseq [i (range 4 8)]
+      (t/is (= (+ i 4) (binf/ra-i8 dest-v i))))
+    (doseq [i (range 8 16)]
+      (t/is (= 0 (binf/ra-i8 dest-v i))))
+
+    (t/is (= 0 (binf/position src-v)))
+    (t/is (= 0 (binf/position dest-v))))
+
+  ;; native/shared dest
+
+  (let [src-v (alloc-view 16)
+        dest-v (alloc-view-native-or-shared 16)]
+
+    (doseq [i (range 16)]
+      (binf/wa-b8 src-v i i))
+
+    (binf/wa-ra-view dest-v 4 src-v 8 4)
+
+    (doseq [i (range 4)]
+      (t/is (= 0 (binf/ra-i8 dest-v i))))
+    (doseq [i (range 4 8)]
+      (t/is (= (+ i 4) (binf/ra-i8 dest-v i))))
+    (doseq [i (range 8 16)]
+      (t/is (= 0 (binf/ra-i8 dest-v i))))
+
+    (t/is (= 0 (binf/position src-v)))
+    (t/is (= 0 (binf/position dest-v))))
+
+  ;; native/shared src and dest
+
+  (let [src-v (alloc-view-native-or-shared 16)
+        dest-v (alloc-view-native-or-shared 16)]
+
+    (doseq [i (range 16)]
+      (binf/wa-b8 src-v i i))
+
+    (binf/wa-ra-view dest-v 4 src-v 8 4)
+
+    (doseq [i (range 4)]
+      (t/is (= 0 (binf/ra-i8 dest-v i))))
+    (doseq [i (range 4 8)]
+      (t/is (= (+ i 4) (binf/ra-i8 dest-v i))))
+    (doseq [i (range 8 16)]
+      (t/is (= 0 (binf/ra-i8 dest-v i))))
+
+    (t/is (= 0 (binf/position src-v)))
+    (t/is (= 0 (binf/position dest-v))))
+
+  ;; Read relative -> Write relative
+
+  ;; Full copy
+
+  (let [src-v (alloc-view 16)
+        dest-v (alloc-view 16)]
+
+    (doseq [i (range 16)]
+      (binf/wa-b8 src-v i i))
+
+    (binf/wr-rr-view dest-v src-v)
+
+    (doseq [i (range 16)]
+      (t/is (= i (binf/ra-i8 dest-v i))))
+
+    (t/is (= 16 (binf/position src-v)))
+    (t/is (= 16 (binf/position dest-v))))
+
+  ;; Partial copy
+
+  (let [src-v (alloc-view 16)
+        dest-v (alloc-view 16)]
+
+    (doseq [i (range 16)]
+      (binf/wa-b8 src-v i i))
+
+    (binf/skip dest-v 4)
+    (binf/skip src-v 8)
+
+    (binf/wr-rr-view dest-v src-v 4)
+
+    (doseq [i (range 4)]
+      (t/is (= 0 (binf/ra-i8 dest-v i))))
+    (doseq [i (range 4 8)]
+      (t/is (= (+ i 4) (binf/ra-i8 dest-v i))))
+    (doseq [i (range 8 16)]
+      (t/is (= 0 (binf/ra-i8 dest-v i))))
+
+    (t/is (= 12 (binf/position src-v)))
+    (t/is (= 8 (binf/position dest-v))))
+
+  ;; Read relative -> Write absolute
+
+  ;; Full copy
+
+  (let [src-v (alloc-view 16)
+        dest-v (alloc-view 16)]
+
+    (doseq [i (range 16)]
+      (binf/wa-b8 src-v i i))
+
+    (binf/wa-rr-view dest-v 0 src-v)
+
+    (doseq [i (range 16)]
+      (t/is (= i (binf/ra-i8 dest-v i))))
+
+    (t/is (= 16 (binf/position src-v)))
+    (t/is (= 0 (binf/position dest-v))))
+
+  ;; Full copy smaller source
+
+  (let [src-v (alloc-view 8)
+        dest-v (alloc-view 16)]
+
+    (doseq [i (range 8)]
+      (binf/wa-b8 src-v i i))
+
+    (binf/wa-rr-view dest-v 0 src-v)
+
+    (doseq [i (range 8)]
+      (t/is (= i (binf/ra-i8 dest-v i))))
+    (doseq [i (range 8 16)]
+      (t/is (= 0 (binf/ra-i8 dest-v i))))
+
+    (t/is (= 8 (binf/position src-v)))
+    (t/is (= 0 (binf/position dest-v))))
+
+  ;; Full copy smaller dest
+
+  (let [src-v (alloc-view 16)
+        dest-v (alloc-view 8)]
+
+    (doseq [i (range 16)]
+      (binf/wa-b8 src-v i i))
+
+    (binf/wa-rr-view dest-v 0 src-v)
+
+    (doseq [i (range 8)]
+      (t/is (= i (binf/ra-i8 dest-v i))))
+
+    (t/is (= 8 (binf/position src-v)))
+    (t/is (= 0 (binf/position dest-v))))
+
+  ;; Partial copy
+
+  (let [src-v (alloc-view 16)
+        dest-v (alloc-view 16)]
+
+    (doseq [i (range 16)]
+      (binf/wa-b8 src-v i i))
+
+    (binf/skip src-v 8)
+
+    (binf/wa-rr-view dest-v 4 src-v 4)
+
+    (doseq [i (range 4)]
+      (t/is (= 0 (binf/ra-i8 dest-v i))))
+    (doseq [i (range 4 8)]
+      (t/is (= (+ i 4) (binf/ra-i8 dest-v i))))
+    (doseq [i (range 8 16)]
+      (t/is (= 0 (binf/ra-i8 dest-v i))))
+
+    (t/is (= 12 (binf/position src-v)))
+    (t/is (= 0 (binf/position dest-v))))
+
+
+  ;; Read absolute -> Write relative
+
+  ;; Full copy
+
+  (let [src-v (alloc-view 16)
+        dest-v (alloc-view 16)]
+
+    (doseq [i (range 16)]
+      (binf/wa-b8 src-v i i))
+
+    (binf/wr-ra-view dest-v src-v 0 16)
+
+    (doseq [i (range 16)]
+      (t/is (= i (binf/ra-i8 dest-v i))))
+
+    (t/is (= 0 (binf/position src-v)))
+    (t/is (= 16 (binf/position dest-v))))
+
+  ;; Partial copy
+
+  (let [src-v (alloc-view 16)
+        dest-v (alloc-view 16)]
+
+    (doseq [i (range 16)]
+      (binf/wa-b8 src-v i i))
+
+    (binf/skip dest-v 4)
+
+    (binf/wr-ra-view dest-v src-v 8 4)
+
+    (doseq [i (range 4)]
+      (t/is (= 0 (binf/ra-i8 dest-v i))))
+    (doseq [i (range 4 8)]
+      (t/is (= (+ i 4) (binf/ra-i8 dest-v i))))
+    (doseq [i (range 8 16)]
+      (t/is (= 0 (binf/ra-i8 dest-v i))))
+
+    (t/is (= 0 (binf/position src-v)))
+    (t/is (= 8 (binf/position dest-v)))))

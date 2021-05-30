@@ -184,6 +184,12 @@
         [viewable offset n-byte]))
 
 
+
+(defmulti copy-view (fn [dest-view dest-offset dest-absolute? src-view src-offset src-absolute? n-byte]
+                      [(type dest-view) (type src-view)]))
+
+
+
 ;;;;;;;;;; Hidden
 
 

@@ -541,6 +541,9 @@
                    this))))
 
 
+(derive js/DataView ::binf.protocol/has-backing-buffer)
+
+
 ;;;;;;;;;;
 
 

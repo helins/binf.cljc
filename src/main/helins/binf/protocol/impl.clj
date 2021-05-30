@@ -450,3 +450,23 @@
                             offset
                             n-byte)
            .slice))))
+
+(defmethod binf.protocol/copy-view [ByteBuffer ByteBuffer]
+  [dest-view dest-offset dest-absolute? src-view src-offset src-absolute? n-byte]
+  (let [dest-position-cache (.position dest-view)
+        src-position-cache (.position src-view)
+        src-limit-cache (.limit src-view)
+        new-limit (if src-absolute?
+                    (+ n-byte src-offset)
+                    (+ n-byte (.position src-view)))]
+    (when dest-absolute?
+      (.position dest-view dest-offset))
+    (when src-absolute?
+      (.position src-view src-offset))
+    (.limit src-view new-limit)
+    (.put dest-view src-view)
+    (when dest-absolute?
+      (.position dest-view dest-position-cache))
+    (when src-absolute?
+      (.position src-view src-position-cache))
+    (.limit src-view src-limit-cache)))
