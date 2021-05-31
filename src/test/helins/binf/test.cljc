@@ -803,6 +803,31 @@
     (t/is (= 12 (binf/position src-v)))
     (t/is (= 8 (binf/position dest-v))))
 
+  ;; With an offset view
+
+  (let [src-v (alloc-view 16)
+        dest-v (-> (binf.buffer/alloc 64)
+                   (binf/view 32 16)
+                   (binf/endian-set :little-endian))]
+
+    (doseq [i (range 16)]
+      (binf/wa-b8 src-v i i))
+
+    (binf/skip dest-v 4)
+    (binf/skip src-v 8)
+
+    (binf/wr-rr-view dest-v src-v 4)
+
+    (doseq [i (range 4)]
+      (t/is (= 0 (binf/ra-i8 dest-v i))))
+    (doseq [i (range 4 8)]
+      (t/is (= (+ i 4) (binf/ra-i8 dest-v i))))
+    (doseq [i (range 8 16)]
+      (t/is (= 0 (binf/ra-i8 dest-v i))))
+
+    (t/is (= 12 (binf/position src-v)))
+    (t/is (= 8 (binf/position dest-v))))
+
   ;; Read relative -> Write absolute
 
   ;; Full copy

@@ -947,13 +947,15 @@
 (defmethod binf.protocol/copy-view [::binf.protocol/has-backing-buffer ::binf.protocol/has-backing-buffer]
   [dest-view dest-offset dest-absolute? src-view src-offset src-absolute? n-byte]
   (let [dest-bb (backing-buffer dest-view)
+        dest-bb-offset (buffer-offset dest-view)
         src-bb (backing-buffer src-view)
+        src-bb-offset (buffer-offset src-view)
         src-offset (if src-absolute? src-offset (position src-view))
         dest-offset (if dest-absolute? dest-offset (position dest-view))]
     (binf.buffer/copy dest-bb
-                      dest-offset
+                      (+ dest-bb-offset dest-offset)
                       src-bb
-                      src-offset
+                      (+ src-bb-offset src-offset)
                       n-byte)
     (when-not dest-absolute?
       (skip dest-view n-byte))
