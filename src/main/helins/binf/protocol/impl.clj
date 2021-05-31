@@ -67,8 +67,7 @@
   binf.protocol/-IByteBuffer
 
     (-array-index [this position]
-      (+ (.arrayOffset this)
-         position))
+      position)
 
 
   binf.protocol/IAbsoluteReader

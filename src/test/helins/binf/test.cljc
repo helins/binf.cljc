@@ -53,6 +53,13 @@
                   (binf/endian-set :little-endian))))
 
 
+(t/deftest offset-view
+  (let [view (-> (binf.buffer/alloc 64)
+                 (binf/view 32 16)
+                 (binf/endian-set :little-endian))]
+    (binf/wa-b8 view 0 42)
+    (t/is (= 42 (binf/ra-u8 view 0)))))
+
 
 (t/deftest buffer->view
 
