@@ -92,18 +92,56 @@
 ;;;;;;;;;; Buffers
 
 
-(def view
-     (TC.gen/fmap (fn [u8+]
-                    (let [view (binf/view (binf.buffer/alloc (count u8+)))]
-                      (doseq [u8 u8+]
-                        (binf/wr-b8 view
-                                    u8))
-                      (binf/seek view
-                                 0)))
-                  (TC.gen/vector u8)))
+(let [fmap (fn [gen]
+             (TC.gen/fmap (fn [u8+]
+                            (let [view (binf/view (binf.buffer/alloc (count u8+)))]
+                              (doseq [u8 u8+]
+                                (binf/wr-b8 view
+                                            u8))
+                              (binf/seek view
+                                         0)))
+                          gen))]
+  (defn view
+
+
+    ([]
+     
+     (fmap (TC.gen/vector u8)))
+
+
+    ([n-byte-min n-byte-max]
+
+     (fmap (TC.gen/vector u8
+                          n-byte-min
+                          n-byte-max)))))
 
 
 
-(def buffer
-     (TC.gen/fmap binf/backing-buffer
-                  view))
+(let [fmap (fn [gen]
+             (TC.gen/fmap binf/backing-buffer
+                          gen))]
+  (defn buffer
+
+
+    ([]
+
+     (fmap (view)))
+
+
+    ([n-byte-min n-byte-max]
+
+     (fmap (view n-byte-min
+                 n-byte-max)))))
+
+
+;;;;;;;;;;
+
+
+(comment
+
+
+  (seq (TC.gen/generate (buffer 16
+                                32)))
+
+
+  )
