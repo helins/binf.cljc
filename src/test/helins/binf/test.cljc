@@ -5,24 +5,41 @@
 
 (ns helins.binf.test
 
+  "Testing core view utilities."
+
   {:author "Adam Helins"}
 
-  (:require [clojure.test                  :as t]
+  (:require [clojure.test                    :as t]
             [clojure.test.check.clojure-test :as TC.ct]
-            [clojure.test.check.generators :as TC.gen]
-            [clojure.test.check.properties :as TC.prop]
-            [helins.binf                   :as binf]
-            [helins.binf.buffer            :as binf.buffer]
-            [helins.binf.gen               :as binf.gen]
-            [helins.binf.int               :as binf.int]
-            [helins.binf.int64             :as binf.int64]
-            #?(:clj [helins.binf.native    :as binf.native])
-            [helins.binf.test.buffer       :as binf.test.buffer]
-            [helins.binf.test.string       :as binf.test.string]))
+            [clojure.test.check.generators   :as TC.gen]
+            [clojure.test.check.properties   :as TC.prop]
+            [helins.binf                     :as binf]
+            [helins.binf.buffer              :as binf.buffer]
+            [helins.binf.gen                 :as binf.gen]
+            [helins.binf.int                 :as binf.int]
+            [helins.binf.int64               :as binf.int64]
+            #?(:clj [helins.binf.native      :as binf.native])
+            [helins.binf.test.buffer         :as binf.test.buffer]
+            [helins.binf.test.string         :as binf.test.string]))
 
 
 #?(:clj (set! *warn-on-reflection*
               true))
+
+
+;;;;;;;;;; Miscellaneous
+
+
+(defn eq-float
+
+  "Computes equality for floats where NaN is equal to itself."
+
+  [x y]
+
+  (if (Double/isNaN x)
+    (Double/isNaN y)
+    (= x
+       y)))
 
 
 ;;;;;;;;;; Creating views
@@ -205,146 +222,27 @@
 ;;;;;;;;; Numerical R/W
 
 
-(defn view-8
-
-  []
-  
-  (binf/view (binf.buffer/alloc 8)))
-
-
-
-#?(:clj (defn view-8-native
-
-  []
-
-  (binf.native/view 8)))
-
-
-
-#?(:cljs (defn view-8-shared
-
-  []
-
-  (binf/view (binf.buffer/alloc-shared 8))))
-
-
-
-(defn- -view-uints
-
-  [f-view]
-
-  (t/are [wa ra wr rr value]
-         (and (t/is (= value
-                       (-> (f-view)
-                           (wa 0
-                               value)
-                           (ra 0)))
-                    "Absolute uint")
-              (t/is (= value
-                       (-> (f-view)
-                           (wr value)
-                           (binf/seek 0)
-                           rr))
-                    "Relative uint"))
-
-
-    binf/wa-b8  binf/ra-u8  binf/wr-b8  binf/rr-u8  (binf.int/from-float (dec (Math/pow 2 8)))
-    binf/wa-b8  binf/ra-i8  binf/wr-b8  binf/rr-i8  -1
-    binf/wa-b16 binf/ra-u16 binf/wr-b16 binf/rr-u16 (binf.int/from-float (dec (Math/pow 2 16)))
-    binf/wa-b16 binf/ra-i16 binf/wr-b16 binf/rr-i16 -1
-    binf/wa-b32 binf/ra-u32 binf/wr-b32 binf/rr-u32 (binf.int/from-float (dec (Math/pow 2 32)))
-    binf/wa-b32 binf/ra-i32 binf/wr-b32 binf/rr-i32 -1))
-
-
-
-(defn- -view-i64
-
-  [f-view]
-
-  (let [x (binf.int64/i* -9223372036854775808)]
-    (and (t/is (= x
-                 (-> (f-view)
-                     (binf/wa-b64 0
-                                  x)
-                     (binf/ra-i64 0)))
-               "Absolute i64")
-         (t/is (= x
-                  (-> (f-view)
-                      (binf/wr-b64 x)
-                      (binf/seek 0)
-                      (binf/rr-i64)))
-               "Relative i64"))))
-
-
-
-#?(:clj (defn- -view-f32
-
-  [f-view]
-
-  (let [x (float 42.42)]
-    (and (t/is (= x
-                  (-> (f-view)
-                      (binf/wa-f32 0
-                                   x)
-                      (binf/ra-f32 0)))
-               "Absolute f32")
-         (t/is (= x
-                  (-> (f-view)
-                      (binf/wr-f32 x)
-                      (binf/seek 0)
-                      binf/rr-f32))
-               "Relative f32")))))
-
-
-
-(defn- -view-f64
-
-  [f-view]
-
-  (let [x 42.42]
-    (and (t/is (= x
-                  (-> (f-view)
-                      (binf/wa-f64 0
-                                   x)
-                      (binf/ra-f64 0)))
-               "Absolute f64")
-         (t/is (= x
-                  (-> (f-view)
-                      (binf/wr-f64 x)
-                      (binf/seek 0)
-                      binf/rr-f64))
-               "Relative f64"))))
-
-
-
-
-
-(def buff-size
+(def view-size
      1024)
-
-
-(def buff
-     (binf.buffer/alloc buff-size))
-         
 
 
 (defn gen-write
 
   ""
 
-  [n-byte]
+  [src n-byte]
 
   (TC.gen/let [start (TC.gen/choose 0
-                                    (- buff-size
+                                    (- view-size
                                        n-byte))
                size  (TC.gen/choose n-byte
-                                    (- buff-size
+                                    (- view-size
                                        start))
                pos   (TC.gen/choose 0
                                     (- size
                                        n-byte))]
     [pos
-     (binf/view buff
+     (binf/view src
                 start
                 size)]))
 
@@ -355,20 +253,22 @@
   ""
 
 
-  ([gen n-byte ra wa]
+  ([src gen n-byte ra wa]
 
-   (prop-absolute gen
+   (prop-absolute src
+                  gen
                   n-byte
                   ra
                   wa
                   =))
 
 
-  ([gen n-byte ra wa eq]
+  ([src gen n-byte ra wa eq]
 
    (TC.prop/for-all [x      gen
                      [pos
-                      view] (gen-write n-byte)]
+                      view] (gen-write src
+                                       n-byte)]
      (eq x
          (-> view
              (wa pos
@@ -382,19 +282,22 @@
   ""
 
 
-  ([gen n-byte ra wa]
+  ([src gen n-byte ra wa]
 
-   (prop-relative gen
+   (prop-relative src
+                  gen
                   n-byte
                   ra
                   wa
                   =))
 
-  ([gen n-byte rr wr eq]
+
+  ([src gen n-byte rr wr eq]
 
    (TC.prop/for-all [x      gen
                      [pos
-                      view] (gen-write n-byte)]
+                      view] (gen-write src
+                                       n-byte)]
      (eq x
          (-> view
              (binf/seek pos)
@@ -404,10 +307,15 @@
              rr)))))
 
 
+(def src
+     (binf.buffer/alloc view-size))
+
+
 
 (TC.ct/defspec rwa-i8
 
-  (prop-absolute binf.gen/i8
+  (prop-absolute src
+                 binf.gen/i8
                  1
                  binf/ra-i8
                  binf/wa-b8))
@@ -415,7 +323,8 @@
 
 (TC.ct/defspec rwa-i16
 
-  (prop-absolute binf.gen/i16
+  (prop-absolute src
+                 binf.gen/i16
                  2
                  binf/ra-i16
                  binf/wa-b16))
@@ -423,7 +332,8 @@
 
 (TC.ct/defspec rwa-i32
 
-  (prop-absolute binf.gen/i32
+  (prop-absolute src
+                 binf.gen/i32
                  4
                  binf/ra-i32
                  binf/wa-b32))
@@ -431,7 +341,8 @@
 
 (TC.ct/defspec rwa-i64
 
-  (prop-absolute binf.gen/i64
+  (prop-absolute src
+                 binf.gen/i64
                  8
                  binf/ra-i64
                  binf/wa-b64))
@@ -439,7 +350,8 @@
 
 (TC.ct/defspec rwa-u8
 
-  (prop-absolute binf.gen/u8
+  (prop-absolute src
+                 binf.gen/u8
                  1
                  binf/ra-u8
                  binf/wa-b8))
@@ -447,7 +359,8 @@
 
 (TC.ct/defspec rwa-u16
 
-  (prop-absolute binf.gen/u16
+  (prop-absolute src
+                 binf.gen/u16
                  2
                  binf/ra-u16
                  binf/wa-b16))
@@ -455,7 +368,8 @@
 
 (TC.ct/defspec rwa-u32
 
-  (prop-absolute binf.gen/u32
+  (prop-absolute src
+                 binf.gen/u32
                  4
                  binf/ra-u32
                  binf/wa-b32))
@@ -463,7 +377,8 @@
 
 (TC.ct/defspec rwa-u64
 
-  (prop-absolute binf.gen/u64
+  (prop-absolute src
+                 binf.gen/u64
                  8
                  binf/ra-u64
                  binf/wa-b64))
@@ -471,7 +386,8 @@
 
 (TC.ct/defspec rwr-i8
 
-  (prop-relative binf.gen/i8
+  (prop-relative src
+                 binf.gen/i8
                  1
                  binf/rr-i8
                  binf/wr-b8))
@@ -479,7 +395,8 @@
 
 (TC.ct/defspec rwr-i16
 
-  (prop-relative binf.gen/i16
+  (prop-relative src
+                 binf.gen/i16
                  2
                  binf/rr-i16
                  binf/wr-b16))
@@ -487,7 +404,8 @@
 
 (TC.ct/defspec rwr-i32
 
-  (prop-relative binf.gen/i32
+  (prop-relative src
+                 binf.gen/i32
                  4
                  binf/rr-i32
                  binf/wr-b32))
@@ -495,24 +413,11 @@
 
 (TC.ct/defspec rwr-i64
 
-  (prop-relative binf.gen/i64
+  (prop-relative src
+                 binf.gen/i64
                  8
                  binf/rr-i64
                  binf/wr-b64))
-
-
-
-(defn eq-float
-
-  ""
-
-  [x y]
-
-  (if (Double/isNaN x)
-    (Double/isNaN y)
-    (= x
-       y)))
-
 
 
 (TC.ct/defspec rwa-f32
@@ -520,87 +425,196 @@
   (prop-absolute binf.gen/f32
                  4
                  binf/ra-f32
-                 binf/wa-f32))
+                 binf/wa-f32
+                 eq-float))
 
 
 (TC.ct/defspec rwa-f64
 
-  (prop-absolute binf.gen/f64
+  (prop-absolute src
+                 binf.gen/f64
                  8
                  binf/ra-f64
-                 binf/wa-f64))
+                 binf/wa-f64
+                 eq-float))
 
 
+(TC.ct/defspec rwr-f32
+
+  (prop-relative src
+                 binf.gen/f32
+                 4
+                 binf/rr-f32
+                 binf/wr-f32
+                 eq-float))
 
 
+(TC.ct/defspec rwr-f64
+
+  (prop-relative src
+                 binf.gen/f64
+                 8
+                 binf/rr-f64
+                 binf/wr-f64
+                 eq-float))
 
 
+(def src-2
+
+  "On the JVM, represents a native view while in JS, represents a shared buffer.
+  
+   Both have nothing in common but below tests can be reused across platforms."
+  
+  #?(:clj  (binf.native/view view-size)
+     :cljs (binf.buffer/alloc-shared view-size)))
 
 
+(TC.ct/defspec rwa-i8-2
 
-(t/deftest view-uints
-
-  (-view-uints view-8))
-
-
-
-#?(:clj (t/deftest view-uints-native
-
-  (-view-uints view-8-native)))
+  (prop-absolute src-2
+                 binf.gen/i8
+                 1
+                 binf/ra-i8
+                 binf/wa-b8))
 
 
+(TC.ct/defspec rwa-i16-2
 
-#?(:cljs (t/deftest view-uints-shared
-
-  (-view-uints view-8-shared)))
-
-
-
-(t/deftest view-i64
-
-  (-view-i64 view-8))
+  (prop-absolute src-2
+                 binf.gen/i16
+                 2
+                 binf/ra-i16
+                 binf/wa-b16))
 
 
+(TC.ct/defspec rwa-i32-2
 
-#?(:clj (t/deftest view-i64-native
-
-  (-view-i64 view-8-native)))
-
-
-
-#?(:cljs (t/deftest view-i64-shared
-
-  (-view-i64 view-8-shared)))
+  (prop-absolute src-2
+                 binf.gen/i32
+                 4
+                 binf/ra-i32
+                 binf/wa-b32))
 
 
+(TC.ct/defspec rwa-i64-2
 
-#?(:clj (t/deftest view-f32
-
-  (-view-f32 view-8)))
-
-
-
-#?(:clj (t/deftest view-f32-native
-
-  (-view-f32 view-8-native)))
+  (prop-absolute src-2
+                 binf.gen/i64
+                 8
+                 binf/ra-i64
+                 binf/wa-b64))
 
 
+(TC.ct/defspec rwa-u8-2
 
-(t/deftest view-f64
-
-  (-view-f64 view-8))
-
-
-
-#?(:clj (t/deftest view-f64-native
-
-  (-view-f64 view-8-native)))
+  (prop-absolute src-2
+                 binf.gen/u8
+                 1
+                 binf/ra-u8
+                 binf/wa-b8))
 
 
+(TC.ct/defspec rwa-u16-2
 
-#?(:cljs (t/deftest view-f64-shared
+  (prop-absolute src-2
+                 binf.gen/u16
+                 2
+                 binf/ra-u16
+                 binf/wa-b16))
 
-  (-view-f64 view-8-shared)))
+
+(TC.ct/defspec rwa-u32-2
+
+  (prop-absolute src-2
+                 binf.gen/u32
+                 4
+                 binf/ra-u32
+                 binf/wa-b32))
+
+
+(TC.ct/defspec rwa-u64-2
+
+  (prop-absolute src-2
+                 binf.gen/u64
+                 8
+                 binf/ra-u64
+                 binf/wa-b64))
+
+
+(TC.ct/defspec rwr-i8-2
+
+  (prop-relative src-2
+                 binf.gen/i8
+                 1
+                 binf/rr-i8
+                 binf/wr-b8))
+
+
+(TC.ct/defspec rwr-i16-2
+
+  (prop-relative src-2
+                 binf.gen/i16
+                 2
+                 binf/rr-i16
+                 binf/wr-b16))
+
+
+(TC.ct/defspec rwr-i32-2
+
+  (prop-relative src-2
+                 binf.gen/i32
+                 4
+                 binf/rr-i32
+                 binf/wr-b32))
+
+
+(TC.ct/defspec rwr-i64-2
+
+  (prop-relative src-2
+                 binf.gen/i64
+                 8
+                 binf/rr-i64
+                 binf/wr-b64))
+
+
+(TC.ct/defspec rwa-f32-2
+
+  (prop-absolute src-2
+                 binf.gen/f32
+                 4
+                 binf/ra-f32
+                 binf/wa-f32
+                 eq-float))
+
+
+(TC.ct/defspec rwa-f64-2
+
+  (prop-absolute src-2
+                 binf.gen/f64
+                 8
+                 binf/ra-f64
+                 binf/wa-f64
+                 eq-float))
+
+
+(TC.ct/defspec rwr-f32-2
+
+  (prop-relative src-2
+                 binf.gen/f32
+                 4
+                 binf/rr-f32
+                 binf/wr-f32
+                 eq-float))
+
+
+(TC.ct/defspec rwr-f64-2
+
+  (prop-relative src-2
+                 binf.gen/f64
+                 8
+                 binf/rr-f64
+                 binf/wr-f64
+                 eq-float))
 
 
 ;;;;;;;;;; Copying from/to buffers
