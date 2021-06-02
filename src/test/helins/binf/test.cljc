@@ -317,6 +317,8 @@
 
 
 
+
+
 (def buff-size
      1024)
 
@@ -346,21 +348,194 @@
                 start
                 size)]))
 
-     
+
+
+(defn prop-absolute
+
+  ""
+
+
+  ([gen n-byte ra wa]
+
+   (prop-absolute gen
+                  n-byte
+                  ra
+                  wa
+                  =))
+
+
+  ([gen n-byte ra wa eq]
+
+   (TC.prop/for-all [x      gen
+                     [pos
+                      view] (gen-write n-byte)]
+     (eq x
+         (-> view
+             (wa pos
+                 x)
+             (ra pos))))))
+
+
+
+(defn prop-relative
+
+  ""
+
+
+  ([gen n-byte ra wa]
+
+   (prop-relative gen
+                  n-byte
+                  ra
+                  wa
+                  =))
+
+  ([gen n-byte rr wr eq]
+
+   (TC.prop/for-all [x      gen
+                     [pos
+                      view] (gen-write n-byte)]
+     (eq x
+         (-> view
+             (binf/seek pos)
+             (wr x)
+             (binf/seek (- (binf/position view)
+                          n-byte))
+             rr)))))
 
 
 
 (TC.ct/defspec rwa-i8
 
-  (TC.prop/for-all [i8     binf.gen/i8
-                    [pos
-                     view] ]
-    (binf/wa-b8 view
-                pos
-                i8)
-    (= i8
-       (binf/ra-i8 view
-                   pos))))
+  (prop-absolute binf.gen/i8
+                 1
+                 binf/ra-i8
+                 binf/wa-b8))
+
+
+(TC.ct/defspec rwa-i16
+
+  (prop-absolute binf.gen/i16
+                 2
+                 binf/ra-i16
+                 binf/wa-b16))
+
+
+(TC.ct/defspec rwa-i32
+
+  (prop-absolute binf.gen/i32
+                 4
+                 binf/ra-i32
+                 binf/wa-b32))
+
+
+(TC.ct/defspec rwa-i64
+
+  (prop-absolute binf.gen/i64
+                 8
+                 binf/ra-i64
+                 binf/wa-b64))
+
+
+(TC.ct/defspec rwa-u8
+
+  (prop-absolute binf.gen/u8
+                 1
+                 binf/ra-u8
+                 binf/wa-b8))
+
+
+(TC.ct/defspec rwa-u16
+
+  (prop-absolute binf.gen/u16
+                 2
+                 binf/ra-u16
+                 binf/wa-b16))
+
+
+(TC.ct/defspec rwa-u32
+
+  (prop-absolute binf.gen/u32
+                 4
+                 binf/ra-u32
+                 binf/wa-b32))
+
+
+(TC.ct/defspec rwa-u64
+
+  (prop-absolute binf.gen/u64
+                 8
+                 binf/ra-u64
+                 binf/wa-b64))
+
+
+(TC.ct/defspec rwr-i8
+
+  (prop-relative binf.gen/i8
+                 1
+                 binf/rr-i8
+                 binf/wr-b8))
+
+
+(TC.ct/defspec rwr-i16
+
+  (prop-relative binf.gen/i16
+                 2
+                 binf/rr-i16
+                 binf/wr-b16))
+
+
+(TC.ct/defspec rwr-i32
+
+  (prop-relative binf.gen/i32
+                 4
+                 binf/rr-i32
+                 binf/wr-b32))
+
+
+(TC.ct/defspec rwr-i64
+
+  (prop-relative binf.gen/i64
+                 8
+                 binf/rr-i64
+                 binf/wr-b64))
+
+
+
+(defn eq-float
+
+  ""
+
+  [x y]
+
+  (if (Double/isNaN x)
+    (Double/isNaN y)
+    (= x
+       y)))
+
+
+
+(TC.ct/defspec rwa-f32
+
+  (prop-absolute binf.gen/f32
+                 4
+                 binf/ra-f32
+                 binf/wa-f32))
+
+
+(TC.ct/defspec rwa-f64
+
+  (prop-absolute binf.gen/f64
+                 8
+                 binf/ra-f64
+                 binf/wa-f64))
+
+
+
+
+
+
+
 
 
 (t/deftest view-uints

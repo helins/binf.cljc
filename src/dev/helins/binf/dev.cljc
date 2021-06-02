@@ -34,5 +34,15 @@
 
 (comment
 
+  
+  (def v
+       (-> (binf.buffer/alloc 64)
+           binf/view))
+
+  (binf/wa-f32 v
+               0
+               ##NaN)
+  (binf/ra-f32 v
+               0)
 
   )

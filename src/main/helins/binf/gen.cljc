@@ -11,41 +11,58 @@
 
   {:author "Adam Helinski"}
 
-  (:require [clojure.test.check.generators :as tc.gen]
+  (:require [clojure.test.check.generators :as TC.gen]
             [helins.binf                   :as binf]
-            [helins.binf.buffer            :as binf.buffer]))
+            [helins.binf.buffer            :as binf.buffer]
+            [helins.binf.float             :as binf.float]))
+
+
+;;;;;;;;;; Floas
+
+
+(def f32
+     (TC.gen/fmap binf.float/f32
+                  (TC.gen/double* {:infinite? false
+                                   :max       3.402823466e38
+                                   :min       1.175494351e-38
+                                   :NaN?      true})))
+
+
+
+(def f64
+     TC.gen/double)
 
 
 ;;;;;;;;;; Integers <= 32-bits
 
 
 (def i8
-     (tc.gen/choose -128
+     (TC.gen/choose -128
                     127))
 
 
 (def i16
-     (tc.gen/choose -32768
+     (TC.gen/choose -32768
                     32767))
 
 
 (def i32
-     (tc.gen/choose -2147483648
+     (TC.gen/choose -2147483648
                     2147483647))
 
 
 (def u8
-     (tc.gen/choose 0
+     (TC.gen/choose 0
                     255))
 
 
 (def u16
-     (tc.gen/choose 0
+     (TC.gen/choose 0
                     65535))
 
 
 (def u32
-     (tc.gen/choose 0
+     (TC.gen/choose 0
                     4294967295))
 
 
@@ -53,21 +70,21 @@
 
 
 (def i64
-     #?(:clj  tc.gen/large-integer
-        :cljs (tc.gen/fmap (fn [[a b]]
+     #?(:clj  TC.gen/large-integer
+        :cljs (TC.gen/fmap (fn [[a b]]
                              (js/BigInt.asIntN 64
                                                (str a
                                                     b)))
-                           (tc.gen/tuple u32
+                           (TC.gen/tuple u32
                                          u32))))
 
 (def u64
-     #?(:clj  tc.gen/large-integer
-        :cljs (tc.gen/fmap (fn [[a b]]
+     #?(:clj  TC.gen/large-integer
+        :cljs (TC.gen/fmap (fn [[a b]]
                              (js/BigInt.asUintN 64
                                                 (str a
                                                      b)))
-                           (tc.gen/tuple u32
+                           (TC.gen/tuple u32
                                          u32))))
 
 
@@ -76,17 +93,17 @@
 
 
 (def view
-     (tc.gen/fmap (fn [u8+]
+     (TC.gen/fmap (fn [u8+]
                     (let [view (binf/view (binf.buffer/alloc (count u8+)))]
                       (doseq [u8 u8+]
                         (binf/wr-b8 view
                                     u8))
                       (binf/seek view
                                  0)))
-                  (tc.gen/vector u8)))
+                  (TC.gen/vector u8)))
 
 
 
 (def buffer
-     (tc.gen/fmap binf/backing-buffer
+     (TC.gen/fmap binf/backing-buffer
                   view))
