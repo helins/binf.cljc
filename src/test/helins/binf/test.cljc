@@ -7,14 +7,18 @@
 
   {:author "Adam Helins"}
 
-  (:require [clojure.test               :as t]
-            [helins.binf                :as binf]
-            [helins.binf.buffer         :as binf.buffer]
-            [helins.binf.int            :as binf.int]
-            [helins.binf.int64          :as binf.int64]
-            #?(:clj [helins.binf.native :as binf.native])
-            [helins.binf.test.buffer    :as binf.test.buffer]
-            [helins.binf.test.string    :as binf.test.string]))
+  (:require [clojure.test                  :as t]
+            [clojure.test.check.clojure-test :as TC.ct]
+            [clojure.test.check.generators :as TC.gen]
+            [clojure.test.check.properties :as TC.prop]
+            [helins.binf                   :as binf]
+            [helins.binf.buffer            :as binf.buffer]
+            [helins.binf.gen               :as binf.gen]
+            [helins.binf.int               :as binf.int]
+            [helins.binf.int64             :as binf.int64]
+            #?(:clj [helins.binf.native    :as binf.native])
+            [helins.binf.test.buffer       :as binf.test.buffer]
+            [helins.binf.test.string       :as binf.test.string]))
 
 
 #?(:clj (set! *warn-on-reflection*
@@ -55,10 +59,13 @@
 
 (t/deftest offset-view
   (let [view (-> (binf.buffer/alloc 64)
-                 (binf/view 32 16)
+                 (binf/view 32
+                            16)
                  (binf/endian-set :little-endian))]
-    (binf/wa-b8 view 0 42)
-    (t/is (= 42 (binf/ra-u8 view 0)))))
+    (binf/wa-b8 view 0
+                42)
+    (t/is (= 42
+             (binf/ra-u8 view 0)))))
 
 
 (t/deftest buffer->view
@@ -308,6 +315,52 @@
                       binf/rr-f64))
                "Relative f64"))))
 
+
+
+(def buff-size
+     1024)
+
+
+(def buff
+     (binf.buffer/alloc buff-size))
+         
+
+
+(defn gen-write
+
+  ""
+
+  [n-byte]
+
+  (TC.gen/let [start (TC.gen/choose 0
+                                    (- buff-size
+                                       n-byte))
+               size  (TC.gen/choose n-byte
+                                    (- buff-size
+                                       start))
+               pos   (TC.gen/choose 0
+                                    (- size
+                                       n-byte))]
+    [pos
+     (binf/view buff
+                start
+                size)]))
+
+     
+
+
+
+(TC.ct/defspec rwa-i8
+
+  (TC.prop/for-all [i8     binf.gen/i8
+                    [pos
+                     view] ]
+    (binf/wa-b8 view
+                pos
+                i8)
+    (= i8
+       (binf/ra-i8 view
+                   pos))))
 
 
 (t/deftest view-uints
