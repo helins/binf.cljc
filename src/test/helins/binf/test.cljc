@@ -968,7 +968,11 @@
 ;;;;;;;;;; Reallocating views
 
 
-(TC.ct/defspec grow
+(defn prop-grow
+
+  ""
+
+  [src]
 
   (let [view     (binf/view src)
         view-vec (vec (binf/ra-buffer view
@@ -1009,7 +1013,16 @@
                                position))))))))
 
 
-;; TODO. Alternative views.
+
+(TC.ct/defspec grow
+
+  (prop-grow src))
+
+
+
+(TC.ct/defspec grow-2
+
+  (prop-grow src-2))
 
 
 ;;;;;;;;;; Additional types / Boolean
