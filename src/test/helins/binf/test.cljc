@@ -627,174 +627,105 @@
 
   [src]
 
-  (let [limit (binf/limit src)]
-    (TC.gen/let [n-byte-buffer (TC.gen/choose 0
-                                              limit)
-                 [position
-                  view]        (gen-write src
-                                          n-byte-buffer)
-                 buffer        (binf.gen/buffer n-byte-buffer)
-                 n-byte-copy   (TC.gen/choose 0
-                                              n-byte-buffer)
-                 offset        (TC.gen/choose 0
-                                              (- n-byte-buffer
-                                                 n-byte-copy))]
-      [view
-       position
-       buffer
-       offset
-       n-byte-copy])))
+  (TC.gen/let [n-byte-buffer (TC.gen/choose 0
+                                            view-size)
+               [position
+                view]        (gen-write src
+                                        n-byte-buffer)
+               buffer        (binf.gen/buffer n-byte-buffer)
+               n-byte-copy   (TC.gen/choose 0
+                                            n-byte-buffer)
+               offset        (TC.gen/choose 0
+                                            (- n-byte-buffer
+                                               n-byte-copy))]
+    [view
+     position
+     buffer
+     offset
+     n-byte-copy]))
+
+
+
+(defn prop-buffer
+
+  ""
+
+  [src w r]
+
+  (TC.prop/for-all [[view
+                     position
+                     buffer
+                     offset
+                     n-byte]  (gen-write-buffer src)]
+    (= (doall (seq buffer))
+       (-> view
+           (w position
+              buffer
+              offset
+              n-byte)
+           (r position
+              n-byte
+              buffer
+              offset)
+           seq))))
+
+
+
+(defn prop-rwa-buffer
+
+  ""
+
+  [src]
+
+  (prop-buffer src
+               binf/wa-buffer
+               binf/ra-buffer))
+
+
+
+(defn prop-rwr-buffer
+
+  ""
+
+  [src]
+
+  (prop-buffer src
+               (fn write [view position buffer offset n-byte]
+                 (-> view
+                     (binf/seek position)
+                     (binf/wr-buffer buffer
+                                     offset
+                                     n-byte)))
+               (fn read [view position n-byte buffer offset]
+                 (-> view
+                     (binf/seek position)
+                     (binf/rr-buffer n-byte
+                                     buffer
+                                     offset)))))
 
 
 
 (TC.ct/defspec rwa-buffer
 
-  (TC.prop/for-all [[view
-                     position
-                     buffer
-                     offset
-                     n-byte]  (gen-write-buffer src)]
-    (= (doall (seq buffer))
-       (-> view
-           (binf/wa-buffer position
-                           buffer
-                           offset
-                           n-byte)
-           (binf/ra-buffer position
-                           n-byte
-                           buffer
-                           offset)
-           seq))))
+  (prop-rwa-buffer src))
 
 
 
 (TC.ct/defspec rwr-buffer
 
-  (TC.prop/for-all [[view
-                     position
-                     buffer
-                     offset
-                     n-byte]  (gen-write-buffer src)]
-    (= (doall (seq buffer))
-       (-> view
-           (binf/wa-buffer position
-                           buffer
-                           offset
-                           n-byte)
-           (binf/ra-buffer position
-                           n-byte
-                           buffer
-                           offset)
-           seq))))
+  (prop-rwr-buffer src))
 
 
 
+(TC.ct/defspec rwa-buffer-2
+
+  (prop-rwa-buffer src-2))
 
 
 
-(def copy-size
-     10)
+(TC.ct/defspec rwr-buffer-2
 
-
-
-(defn- -rwa-buffer
-
-  [view]
-
-  (t/is (= (take 7
-                 binf.test.buffer/copy-target)
-           (seq (binf/ra-buffer (binf/wa-buffer view
-                                                5
-                                                (binf/backing-buffer (binf.test.buffer/make-view))
-                                                2
-                                                2)
-                                0
-                                7)))
-        "Absolute writing")
-
-  (t/is (= (take 5
-                 (drop 2
-                       binf.test.buffer/copy-target))
-           (seq (binf/ra-buffer view
-                                2
-                                5)))
-        "Absolute reading")
-
-  (t/is (zero? (binf/position view))
-        "Position is unchanged"))
-
-
-
-
-(defn- -rwr-buffer
-
-  [view]
-
-  (binf/seek view
-             5)
-
-  (t/is (= (take 7
-                 binf.test.buffer/copy-target)
-           (seq (binf/ra-buffer (binf/wr-buffer view
-                                                (binf/backing-buffer (binf.test.buffer/make-view))
-                                                2
-                                                2)
-                                0
-                                7)))
-        "Relative writing")
-
-  (t/is (= (binf/position view)
-           7)
-        "Writing is relative")
-
-  (binf/seek view
-             0)
-
-  (t/is (= (take 7
-                 binf.test.buffer/copy-target)
-           (seq (binf/rr-buffer view
-                                7)))
-        "Relative reading")
-
-  (t/is (= (binf/position view)
-           7)
-        "Reading is relative"))
-
-
-
-(t/deftest rwa-buffer
-
-  (-rwa-buffer (binf/view (binf.buffer/alloc copy-size))))
-
-
-
-#?(:clj (t/deftest rwa-buffer-native
-
-  (-rwa-buffer (binf.native/view copy-size))))
-
-
-
-#?(:cljs (t/deftest rwa-buffer-shared
-
-  (-rwa-buffer (binf/view (binf.buffer/alloc-shared copy-size)))))
-
-
-
-(t/deftest rwr-buffer
-
-  (-rwr-buffer (binf/view (binf.buffer/alloc copy-size))))
-
-
-
-#?(:clj (t/deftest rwr-buffer-shared
-
-  (-rwr-buffer (binf.native/view copy-size))))
-
-
-
-#?(:cljs (t/deftest rwr-buffer-shared
-
-  (-rwr-buffer (binf/view (binf.buffer/alloc-shared copy-size)))))
+  (prop-rwr-buffer src-2))
 
 
 ;;;;;;;;;; Encoding and decoding strings
