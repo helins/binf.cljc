@@ -45,13 +45,6 @@
 
 (extend-type DirectByteBuffer
 
-
-  binf.protocol/-IByteBuffer
-
-    (-array-index [_this position]
-      position)
-
-
   binf.protocol/IGrow
 
     (grow [this n-additional-byte]
@@ -62,12 +55,6 @@
 
 
 (extend-type ByteBuffer
-
-
-  binf.protocol/-IByteBuffer
-
-    (-array-index [this position]
-      position)
 
 
   binf.protocol/IAbsoluteReader
@@ -86,34 +73,28 @@
 
     (ra-u8 [this position]
       (binf.int/u8 (.get this
-                         (int (binf.protocol/-array-index this
-                                                          position)))))
+                         (int position))))
 
     (ra-i8 [this position]
       (.get this
-            (int (binf.protocol/-array-index this
-                                             position))))
+            (int position)))
 
     (ra-u16 [this position]
       (binf.int/u16 (.getShort this
-                               (binf.protocol/-array-index this
-                                                           position))))
+                               position)))
 
     (ra-i16 [this position]
       (.getShort this
-                 (binf.protocol/-array-index this
-                                             position)))
+                 position))
 
 
     (ra-u32 [this position]
       (binf.int/u32 (.getInt this
-                             (binf.protocol/-array-index this
-                                                         position))))
+                             position)))
 
     (ra-i32 [this position]
       (.getInt this
-               (binf.protocol/-array-index this
-                                           position)))
+               position))
 
     (ra-u64 [this position]
       (binf.protocol/ra-i64 this
@@ -121,18 +102,15 @@
 
     (ra-i64 [this position]
       (.getLong this
-                (binf.protocol/-array-index this
-                                            position)))
+                position))
 
     (ra-f32 [this position]
       (.getFloat this
-                 (binf.protocol/-array-index this
-                                             position)))
+                 position))
 
     (ra-f64 [this position]
       (.getDouble this
-                  (binf.protocol/-array-index this
-                                              position)))
+                  position))
 
     (ra-string [this decoder position n-byte]
       (.toString (.decode ^Charset decoder
@@ -159,51 +137,44 @@
 
     (wa-b8 [this position integer]
       (.put this
-            (binf.protocol/-array-index this
-                                        position)
+            position
             (unchecked-byte integer))
       this)
 
     (wa-b16 [this position integer]
       (.putShort this
-                 (binf.protocol/-array-index this
-                                             position)
+                 position
                  (unchecked-short integer))
       this)
 
     (wa-b32 [this position integer]
       (.putInt this
-               (binf.protocol/-array-index this
-                                           position)
+               position
                (unchecked-int integer))
       this)
 
     (wa-b64 [this position integer]
       (.putLong this
-                (binf.protocol/-array-index this
-                                            position)
+                position
                 integer)
       this)
 
     (wa-f32 [this position floating]
       (.putFloat this
-                 (binf.protocol/-array-index this
-                                             position)
+                 position
                  floating)
       this)
 
     (wa-f64 [this position floating]
       (.putDouble this
-                  (binf.protocol/-array-index this
-                                              position)
+                  position
                   floating)
       this)
 
     (wa-string [this position string]
       (let [saved-position (.position this)]
         (.position this
-                   (binf.protocol/-array-index this
-                                               position))
+                   position)
         (let [res (binf.protocol/wr-string this
                                            string)]
           (.position this
@@ -386,8 +357,7 @@
 
     (seek [this position]
       (.position this
-                 (binf.protocol/-array-index this
-                                             position))
+                 position)
       this)
 
     (skip [this n-byte]

@@ -182,17 +182,3 @@
   (view [viewable]
         [viewable offset]
         [viewable offset n-byte]))
-
-
-;;;;;;;;;; Hidden
-
-
-#?(:clj (defprotocol ^:no-doc -IByteBuffer
-
-  ;; Direct ByteBuffer do not implement `.arrayOffset`.
-  ;; 
-  ;; Implementing this protocol in both direct and regular ByteBuffers allows for maximum code reuse.
- 
-  (-array-index [this position]
-    ;; Given a position in a view (ie. ByteBuffer), returns the index in the backing array.
-    )))
