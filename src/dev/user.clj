@@ -7,13 +7,7 @@
 
   "For daydreaming at the REPL."
 
-  (:require [clojure.reflect]
-            [clojure.pprint]
-            [kaocha.repl]
-            [helins.binf        :as binf]
-            [helins.binf.buffer :as binf.buffer]
-            [helins.binf.dev]
-            [helins.binf.int64  :as binf.int64]))
+  (:require [helins.binf.dev]))
 
 
 (set! *warn-on-reflection*
@@ -24,9 +18,6 @@
 
 
 (comment
-
-
-  (kaocha.repl/run :jvm)
 
 
   )

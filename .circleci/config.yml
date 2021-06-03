@@ -67,10 +67,10 @@ jobs:
             - cljs-v1
       - run:
           name: Test
-          command: ./bin/test/node/run
+          command: ./bb test:node
       - run:
           name: Test advanced
-          command: ./bin/test/node/run
+          command: ./bb test:node:optimize
       - save_cache:
           key: cljs-v1-{{ checksum "deps.edn" }}
           <<: *cache_paths_clojure
@@ -92,7 +92,7 @@ jobs:
             - clojure-v1
       - run: 
           name: Koacha
-          command: ./bin/test/jvm/run
+          command: ./bb test:jvm
       - save_cache:
           key: clojure-v1-{{ checksum "pom.xml" }}
           <<: *cache_paths_clojure
