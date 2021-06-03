@@ -9,6 +9,7 @@
 
   {:author "Adam Helins"}
 
+  #?(:clj (:import java.nio.CharBuffer))
   (:require [clojure.string]
             [clojure.test                    :as t]
             [clojure.test.check.clojure-test :as TC.ct]
@@ -733,7 +734,7 @@
   (prop-rwr-buffer src-2))
 
 
-;;;;;;;;;; Encoding and decoding strings
+;;;;;;;;;; R/W strings that fit in a single view
 
 
 (defn gen-string
@@ -743,8 +744,8 @@
   [src]
 
   (TC.gen/let [n-char (TC.gen/choose 0
-                                     (Math/ceil (/ view-size
-                                                   4))) ;; Can accomodate any UTF-8 string within the view
+                                     (Math/floor (/ view-size
+                                                    4))) ;; Can accomodate any UTF-8 string within the view
                [pos
                 view] (gen-write src
                                  (* 4
@@ -757,6 +758,29 @@
      pos
      string]))
 
+
+
+(defn rr-string
+  
+  ""
+
+  [view position n-byte]
+
+  (-> view
+      (binf/seek position)
+      (binf/rr-string n-byte)))
+
+
+
+(defn wr-string
+
+  ""
+
+  [view position string]
+
+  (-> view
+      (binf/seek position)
+      (binf/wr-string string)))
 
 
 (defn prop-string
@@ -802,14 +826,8 @@
   [src]
 
   (prop-string src
-               (fn write [view position string]
-                 (-> view
-                     (binf/seek position)
-                     (binf/wr-string string)))
-               (fn read [view position n-byte]
-                 (-> view
-                     (binf/seek position)
-                     (binf/rr-string n-byte)))))
+               wr-string
+               rr-string))
 
 
 
@@ -836,8 +854,112 @@
   (prop-rwr-string src-2))
 
 
+;;;;;;;;;; R/W strings that does NOT fit into a single view
 
-;; TODO. Test not having enough space for whole string.
+
+(defn gen-string-big
+
+  ""
+
+  [src]
+
+  (TC.gen/let [n-byte    (TC.gen/choose 0
+                                        view-size)
+               [position
+                view]    (gen-write src
+                                    n-byte)
+               string    (TC.gen/fmap clojure.string/join
+                                      (let [n-char-min (inc (- (binf/limit view)
+                                                               position))]
+                                        (TC.gen/vector TC.gen/char
+                                                       n-char-min
+                                                       (+ n-char-min
+                                                          (Math/ceil (/ view-size
+                                                                        2))))))]
+    [view
+     position
+     string]))
+
+
+
+(defn prop-string-big
+
+  ""
+
+  [src w r]
+
+  (TC.prop/for-all [[view
+                     position
+                     string] (gen-string-big src)]
+    (let [[finished?
+           n-byte
+           #?(:clj _n-char
+              :cljs n-char)
+           #?(:clj char-buffer)] (w view
+                                    position
+                                    string)]
+      (and (not finished?)
+           (= string
+              (str (r view
+                      position
+                      n-byte)
+                   #?(:clj  (.toString ^CharBuffer char-buffer)
+                      :cljs (.substring string
+                                        n-char))))))))
+
+
+
+(defn prop-rwa-string-big
+
+  ""
+
+  [src]
+
+  (prop-string-big src
+                   binf/wa-string
+                   binf/ra-string))
+
+
+
+(defn prop-rwr-string-big
+
+  ""
+
+  [src]
+
+  (prop-string-big src
+                   (fn write [view position string]
+                     (-> view
+                         (binf/seek position)
+                         (binf/wr-string string)))
+                   (fn read [view position n-byte]
+                     (-> view
+                         (binf/seek position)
+                         (binf/rr-string n-byte)))))
+
+
+
+(TC.ct/defspec rwa-string-big
+
+  (prop-rwa-string-big src))
+
+
+
+(TC.ct/defspec rwr-string-big
+
+  (prop-rwr-string-big src))
+
+
+
+(TC.ct/defspec rwa-string-big-2
+
+  (prop-rwa-string-big src-2))
+
+
+
+(TC.ct/defspec rwr-string-big-2
+
+  (prop-rwr-string-big src-2))
 
 
 ;;;;;;;;;; Reallocating views
