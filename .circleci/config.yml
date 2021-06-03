@@ -16,6 +16,35 @@ cache_paths_clojure: &cache_paths_clojure
 
 
 
+
+commands:
+  install_bb:
+    description: "Install Babashka"
+    parameters:
+      version:
+        default: "0.4.4"
+        type: string
+    steps:
+      - restore_cache:
+          keys:
+            - babashka-<< parameters.version >>
+      - run:
+          name: Download Babashka
+          command: if ! [ -f "bb" ]; then \curl -L https://github.com/babashka/babashka/releases/download/v0.4.4/babashka-0.4.4-linux-amd64.tar.gz -o bb.tar.gz ; fi
+      - run:
+          name: Uncompress Babashka
+          command: if [ -f "bb.tar.gz" ]; then \tar -xzvf bb.tar.gz ; fi
+      - run:
+          name: Ensure Babashka is executable
+          command: chmod +x bb
+      - save_cache:
+          key: babashka-<< parameters.version >>
+          paths:
+            - bb
+
+
+
+
 executors:
   exec_java:
     docker:
@@ -31,6 +60,7 @@ jobs:
       - image: circleci/clojure:openjdk-11-tools-deps-node-browsers
     steps:
       - checkout
+      - install_bb
       - restore_cache:
           keys:
             - cljs-v1-{{ checksum "deps.edn" }}
@@ -55,6 +85,7 @@ jobs:
       - image: circleci/clojure:openjdk-11-tools-deps-node-browsers
     steps:
       - checkout
+      - install_bb
       - restore_cache:
           keys:
             - clojure-v1-{{ checksum "pom.xml" }}

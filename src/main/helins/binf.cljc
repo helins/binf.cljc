@@ -666,7 +666,7 @@
 
 (defn limit
 
-  "Returns the number of bytes a view contains."
+  "Returns the number of bytes a view or a buffer contains."
 
   [view]
 
