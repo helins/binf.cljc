@@ -621,33 +621,71 @@
 ;;;;;;;;;; Copying from/to buffers
 
 
+(defn gen-write-buffer
+
+  ""
+
+  [src]
+
+  (let [limit (binf/limit src)]
+    (TC.gen/let [n-byte-buffer (TC.gen/choose 0
+                                              limit)
+                 [position
+                  view]        (gen-write src
+                                          n-byte-buffer)
+                 buffer        (binf.gen/buffer n-byte-buffer)
+                 n-byte-copy   (TC.gen/choose 0
+                                              n-byte-buffer)
+                 offset        (TC.gen/choose 0
+                                              (- n-byte-buffer
+                                                 n-byte-copy))]
+      [view
+       position
+       buffer
+       offset
+       n-byte-copy])))
+
+
 
 (TC.ct/defspec rwa-buffer
 
-  (TC.prop/for-all [result (TC.gen/let [n-byte-buffer (TC.gen/choose 0
-                                                                     view-size)
-                                        [position
-                                         view]        (gen-write src
-                                                                 n-byte-buffer)
-                                        buffer        (binf.gen/buffer n-byte-buffer)
-                                        n-byte-copy   (TC.gen/choose 0
-                                                                     n-byte-buffer)
-                                        offset        (TC.gen/choose 0
-                                                                     (- n-byte-buffer
-                                                                        n-byte-copy))]
-                             (= (doall (seq buffer))
-                                (-> view
-                                    (binf/wa-buffer position
-                                                    buffer
-                                                    offset
-                                                    n-byte-copy)
-                                    (binf/ra-buffer position
-                                                    n-byte-copy
-                                                    buffer
-                                                    offset)
-                                    seq)))]
-    result))
+  (TC.prop/for-all [[view
+                     position
+                     buffer
+                     offset
+                     n-byte]  (gen-write-buffer src)]
+    (= (doall (seq buffer))
+       (-> view
+           (binf/wa-buffer position
+                           buffer
+                           offset
+                           n-byte)
+           (binf/ra-buffer position
+                           n-byte
+                           buffer
+                           offset)
+           seq))))
 
+
+
+(TC.ct/defspec rwr-buffer
+
+  (TC.prop/for-all [[view
+                     position
+                     buffer
+                     offset
+                     n-byte]  (gen-write-buffer src)]
+    (= (doall (seq buffer))
+       (-> view
+           (binf/wa-buffer position
+                           buffer
+                           offset
+                           n-byte)
+           (binf/ra-buffer position
+                           n-byte
+                           buffer
+                           offset)
+           seq))))
 
 
 
