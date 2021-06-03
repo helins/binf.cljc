@@ -29,16 +29,7 @@
               true))
 
 
-;;;;;;;;;; Miscellaneous
-
-
-(def gen-endianess
-
-  ""
-
-  (TC.gen/elements [:big-endian
-                    :little-endian]))
-
+;;;;;;;;;; Miscellaneous helpers
 
 
 (defn eq-float
@@ -51,6 +42,175 @@
     (Double/isNaN y)
     (= x
        y)))
+
+
+;;;;;;;;;; Custom relative R/W functions
+
+
+(defn rr-bool
+
+  ""
+
+  [view position]
+
+  (-> view
+      (binf/seek position)
+      binf/rr-bool))
+
+
+
+(defn rr-string
+  
+  ""
+
+  [view position n-byte]
+
+  (-> view
+      (binf/seek position)
+      (binf/rr-string n-byte)))
+
+
+
+(defn wr-bool
+
+  ""
+
+  [view position bool]
+
+  (-> view
+      (binf/seek position)
+      (binf/wr-bool bool)))
+
+
+
+(defn wr-string
+
+  ""
+
+  [view position string]
+
+  (-> view
+      (binf/seek position)
+      (binf/wr-string string)))
+
+
+
+;;;;;;;;;; Generators
+
+
+(def gen-endianess
+
+  ""
+
+  (TC.gen/elements [:big-endian
+                    :little-endian]))
+
+
+
+(defn gen-write
+
+  ""
+
+  [src n-byte]
+
+  (TC.gen/let [start (TC.gen/choose 0
+                                    (- view-size
+                                       n-byte))
+               size  (TC.gen/choose n-byte
+                                    (- view-size
+                                       start))
+               pos   (TC.gen/choose 0
+                                    (- size
+                                       n-byte))]
+    [pos
+     (binf/view src
+                start
+                size)]))
+
+
+;;;;;;;;;; Base buffers and views
+
+
+(def view-size
+     1024)
+
+
+
+(def src
+     (binf.buffer/alloc view-size))
+
+
+
+(def src-2
+
+  "On the JVM, represents a native view while in JS, represents a shared buffer.
+  
+   Both have nothing in common but below tests can be reused across platforms."
+  
+  #?(:clj  (binf.native/view view-size)
+     :cljs (binf.buffer/alloc-shared view-size)))
+
+
+;;;;;;;;;; Generic properties
+
+
+(defn prop-rwa
+
+  ""
+
+
+  ([src gen n-byte ra wa]
+
+   (prop-rwa src
+             gen
+             n-byte
+             ra
+             wa
+             =))
+
+
+  ([src gen n-byte ra wa eq]
+
+   (TC.prop/for-all [x      gen
+                     [pos
+                      view] (gen-write src
+                                       n-byte)]
+     (eq x
+         (-> view
+             (wa pos
+                 x)
+             (ra pos))))))
+
+
+
+(defn prop-rwr
+
+  ""
+
+
+  ([src gen n-byte ra wa]
+
+   (prop-rwr src
+             gen
+             n-byte
+             ra
+             wa
+             =))
+
+
+  ([src gen n-byte rr wr eq]
+
+   (TC.prop/for-all [x      gen
+                     [pos
+                      view] (gen-write src
+                                       n-byte)]
+     (eq x
+         (-> view
+             (binf/seek pos)
+             (wr x)
+             (binf/seek (- (binf/position view)
+                          n-byte))
+             rr)))))
 
 
 ;;;;;;;;;; Creating views
@@ -230,407 +390,349 @@
              #?(:clj (binf/remaining v-native))))))
 
 
-;;;;;;;;; Numerical R/W
+;;;;;;;;;; R/W booleans
+
+
+(TC.ct/defspec rwa-bool
+
+  (prop-rwa src
+            TC.gen/boolean
+            1
+            binf/ra-bool
+            binf/wa-bool))
+
+
+
+(TC.ct/defspec rwr-bool
+
+  (prop-rwa src
+            TC.gen/boolean
+            1
+            rr-bool
+            wr-bool))
+
+
+
+(TC.ct/defspec rwa-bool-2
+
+  (prop-rwa src-2
+            TC.gen/boolean
+            1
+            binf/ra-bool
+            binf/wa-bool))
+
+
+
+(TC.ct/defspec rwr-bool-2
+
+  (prop-rwa src-2
+            TC.gen/boolean
+            1
+            rr-bool
+            wr-bool))
+
+
+;;;;;;;;; R/W numbers
 
 
 ;; TODO. Ensure position has been moved correctly in relative R/W + not at all in absolute R/W.
 ;; TODO. Randomize endianess.
 
 
-(def view-size
-     1024)
-
-
-
-(defn gen-write
-
-  ""
-
-  [src n-byte]
-
-  (TC.gen/let [start (TC.gen/choose 0
-                                    (- view-size
-                                       n-byte))
-               size  (TC.gen/choose n-byte
-                                    (- view-size
-                                       start))
-               pos   (TC.gen/choose 0
-                                    (- size
-                                       n-byte))]
-    [pos
-     (binf/view src
-                start
-                size)]))
-
-
-
-(defn prop-absolute
-
-  ""
-
-
-  ([src gen n-byte ra wa]
-
-   (prop-absolute src
-                  gen
-                  n-byte
-                  ra
-                  wa
-                  =))
-
-
-  ([src gen n-byte ra wa eq]
-
-   (TC.prop/for-all [x      gen
-                     [pos
-                      view] (gen-write src
-                                       n-byte)]
-     (eq x
-         (-> view
-             (wa pos
-                 x)
-             (ra pos))))))
-
-
-
-(defn prop-relative
-
-  ""
-
-
-  ([src gen n-byte ra wa]
-
-   (prop-relative src
-                  gen
-                  n-byte
-                  ra
-                  wa
-                  =))
-
-
-  ([src gen n-byte rr wr eq]
-
-   (TC.prop/for-all [x      gen
-                     [pos
-                      view] (gen-write src
-                                       n-byte)]
-     (eq x
-         (-> view
-             (binf/seek pos)
-             (wr x)
-             (binf/seek (- (binf/position view)
-                          n-byte))
-             rr)))))
-
-
-(def src
-     (binf.buffer/alloc view-size))
-
-
-
 (TC.ct/defspec rwa-i8
 
-  (prop-absolute src
-                 binf.gen/i8
-                 1
-                 binf/ra-i8
-                 binf/wa-b8))
+  (prop-rwa src
+            binf.gen/i8
+            1
+            binf/ra-i8
+            binf/wa-b8))
 
 
 (TC.ct/defspec rwa-i16
 
-  (prop-absolute src
-                 binf.gen/i16
-                 2
-                 binf/ra-i16
-                 binf/wa-b16))
+  (prop-rwa src
+            binf.gen/i16
+            2
+            binf/ra-i16
+            binf/wa-b16))
 
 
 (TC.ct/defspec rwa-i32
 
-  (prop-absolute src
-                 binf.gen/i32
-                 4
-                 binf/ra-i32
-                 binf/wa-b32))
+  (prop-rwa src
+            binf.gen/i32
+            4
+            binf/ra-i32
+            binf/wa-b32))
 
 
 (TC.ct/defspec rwa-i64
 
-  (prop-absolute src
-                 binf.gen/i64
-                 8
-                 binf/ra-i64
-                 binf/wa-b64))
+  (prop-rwa src
+            binf.gen/i64
+            8
+            binf/ra-i64
+            binf/wa-b64))
 
 
 (TC.ct/defspec rwa-u8
 
-  (prop-absolute src
-                 binf.gen/u8
-                 1
-                 binf/ra-u8
-                 binf/wa-b8))
+  (prop-rwa src
+            binf.gen/u8
+            1
+            binf/ra-u8
+            binf/wa-b8))
 
 
 (TC.ct/defspec rwa-u16
 
-  (prop-absolute src
-                 binf.gen/u16
-                 2
-                 binf/ra-u16
-                 binf/wa-b16))
+  (prop-rwa src
+            binf.gen/u16
+            2
+            binf/ra-u16
+            binf/wa-b16))
 
 
 (TC.ct/defspec rwa-u32
 
-  (prop-absolute src
-                 binf.gen/u32
-                 4
-                 binf/ra-u32
-                 binf/wa-b32))
+  (prop-rwa src
+            binf.gen/u32
+            4
+            binf/ra-u32
+            binf/wa-b32))
 
 
 (TC.ct/defspec rwa-u64
 
-  (prop-absolute src
-                 binf.gen/u64
-                 8
-                 binf/ra-u64
-                 binf/wa-b64))
+  (prop-rwa src
+            binf.gen/u64
+            8
+            binf/ra-u64
+            binf/wa-b64))
 
 
 (TC.ct/defspec rwr-i8
 
-  (prop-relative src
-                 binf.gen/i8
-                 1
-                 binf/rr-i8
-                 binf/wr-b8))
+  (prop-rwr src
+            binf.gen/i8
+            1
+            binf/rr-i8
+            binf/wr-b8))
 
 
 (TC.ct/defspec rwr-i16
 
-  (prop-relative src
-                 binf.gen/i16
-                 2
-                 binf/rr-i16
-                 binf/wr-b16))
+  (prop-rwr src
+            binf.gen/i16
+            2
+            binf/rr-i16
+            binf/wr-b16))
 
 
 (TC.ct/defspec rwr-i32
 
-  (prop-relative src
-                 binf.gen/i32
-                 4
-                 binf/rr-i32
-                 binf/wr-b32))
+  (prop-rwr src
+            binf.gen/i32
+            4
+            binf/rr-i32
+            binf/wr-b32))
 
 
 (TC.ct/defspec rwr-i64
 
-  (prop-relative src
-                 binf.gen/i64
-                 8
-                 binf/rr-i64
-                 binf/wr-b64))
+  (prop-rwr src
+            binf.gen/i64
+            8
+            binf/rr-i64
+            binf/wr-b64))
 
 
 (TC.ct/defspec rwa-f32
 
-  (prop-absolute binf.gen/f32
-                 4
-                 binf/ra-f32
-                 binf/wa-f32
-                 eq-float))
+  (prop-rwa src
+            binf.gen/f32
+            4
+            binf/ra-f32
+            binf/wa-f32
+            eq-float))
 
 
 (TC.ct/defspec rwa-f64
 
-  (prop-absolute src
-                 binf.gen/f64
-                 8
-                 binf/ra-f64
-                 binf/wa-f64
-                 eq-float))
+  (prop-rwa src
+            binf.gen/f64
+            8
+            binf/ra-f64
+            binf/wa-f64
+            eq-float))
 
 
 (TC.ct/defspec rwr-f32
 
-  (prop-relative src
-                 binf.gen/f32
-                 4
-                 binf/rr-f32
-                 binf/wr-f32
-                 eq-float))
+  (prop-rwr src
+            binf.gen/f32
+            4
+            binf/rr-f32
+            binf/wr-f32
+            eq-float))
 
 
 (TC.ct/defspec rwr-f64
 
-  (prop-relative src
-                 binf.gen/f64
-                 8
-                 binf/rr-f64
-                 binf/wr-f64
-                 eq-float))
-
-
-(def src-2
-
-  "On the JVM, represents a native view while in JS, represents a shared buffer.
-  
-   Both have nothing in common but below tests can be reused across platforms."
-  
-  #?(:clj  (binf.native/view view-size)
-     :cljs (binf.buffer/alloc-shared view-size)))
+  (prop-rwr src
+            binf.gen/f64
+            8
+            binf/rr-f64
+            binf/wr-f64
+            eq-float))
 
 
 (TC.ct/defspec rwa-i8-2
 
-  (prop-absolute src-2
-                 binf.gen/i8
-                 1
-                 binf/ra-i8
-                 binf/wa-b8))
+  (prop-rwa src-2
+            binf.gen/i8
+            1
+            binf/ra-i8
+            binf/wa-b8))
 
 
 (TC.ct/defspec rwa-i16-2
 
-  (prop-absolute src-2
-                 binf.gen/i16
-                 2
-                 binf/ra-i16
-                 binf/wa-b16))
+  (prop-rwa src-2
+            binf.gen/i16
+            2
+            binf/ra-i16
+            binf/wa-b16))
 
 
 (TC.ct/defspec rwa-i32-2
 
-  (prop-absolute src-2
-                 binf.gen/i32
-                 4
-                 binf/ra-i32
-                 binf/wa-b32))
+  (prop-rwa src-2
+            binf.gen/i32
+            4
+            binf/ra-i32
+            binf/wa-b32))
 
 
 (TC.ct/defspec rwa-i64-2
 
-  (prop-absolute src-2
-                 binf.gen/i64
-                 8
-                 binf/ra-i64
-                 binf/wa-b64))
+  (prop-rwa src-2
+            binf.gen/i64
+            8
+            binf/ra-i64
+            binf/wa-b64))
 
 
 (TC.ct/defspec rwa-u8-2
 
-  (prop-absolute src-2
-                 binf.gen/u8
-                 1
-                 binf/ra-u8
-                 binf/wa-b8))
+  (prop-rwa src-2
+            binf.gen/u8
+            1
+            binf/ra-u8
+            binf/wa-b8))
 
 
 (TC.ct/defspec rwa-u16-2
 
-  (prop-absolute src-2
-                 binf.gen/u16
-                 2
-                 binf/ra-u16
-                 binf/wa-b16))
+  (prop-rwa src-2
+            binf.gen/u16
+            2
+            binf/ra-u16
+            binf/wa-b16))
 
 
 (TC.ct/defspec rwa-u32-2
 
-  (prop-absolute src-2
-                 binf.gen/u32
-                 4
-                 binf/ra-u32
-                 binf/wa-b32))
+  (prop-rwa src-2
+            binf.gen/u32
+            4
+            binf/ra-u32
+            binf/wa-b32))
 
 
 (TC.ct/defspec rwa-u64-2
 
-  (prop-absolute src-2
-                 binf.gen/u64
-                 8
-                 binf/ra-u64
-                 binf/wa-b64))
+  (prop-rwa src-2
+            binf.gen/u64
+            8
+            binf/ra-u64
+            binf/wa-b64))
 
 
 (TC.ct/defspec rwr-i8-2
 
-  (prop-relative src-2
-                 binf.gen/i8
-                 1
-                 binf/rr-i8
-                 binf/wr-b8))
+  (prop-rwr src-2
+            binf.gen/i8
+            1
+            binf/rr-i8
+            binf/wr-b8))
 
 
 (TC.ct/defspec rwr-i16-2
 
-  (prop-relative src-2
-                 binf.gen/i16
-                 2
-                 binf/rr-i16
-                 binf/wr-b16))
+  (prop-rwr src-2
+            binf.gen/i16
+            2
+            binf/rr-i16
+            binf/wr-b16))
 
 
 (TC.ct/defspec rwr-i32-2
 
-  (prop-relative src-2
-                 binf.gen/i32
-                 4
-                 binf/rr-i32
-                 binf/wr-b32))
+  (prop-rwr src-2
+            binf.gen/i32
+            4
+            binf/rr-i32
+            binf/wr-b32))
 
 
 (TC.ct/defspec rwr-i64-2
 
-  (prop-relative src-2
-                 binf.gen/i64
-                 8
-                 binf/rr-i64
-                 binf/wr-b64))
+  (prop-rwr src-2
+            binf.gen/i64
+            8
+            binf/rr-i64
+            binf/wr-b64))
 
 
 (TC.ct/defspec rwa-f32-2
 
-  (prop-absolute src-2
-                 binf.gen/f32
-                 4
-                 binf/ra-f32
-                 binf/wa-f32
-                 eq-float))
+  (prop-rwa src-2
+            binf.gen/f32
+            4
+            binf/ra-f32
+            binf/wa-f32
+            eq-float))
 
 
 (TC.ct/defspec rwa-f64-2
 
-  (prop-absolute src-2
-                 binf.gen/f64
-                 8
-                 binf/ra-f64
-                 binf/wa-f64
-                 eq-float))
+  (prop-rwa src-2
+            binf.gen/f64
+            8
+            binf/ra-f64
+            binf/wa-f64
+            eq-float))
 
 
 (TC.ct/defspec rwr-f32-2
 
-  (prop-relative src-2
-                 binf.gen/f32
-                 4
-                 binf/rr-f32
-                 binf/wr-f32
-                 eq-float))
+  (prop-rwr src-2
+            binf.gen/f32
+            4
+            binf/rr-f32
+            binf/wr-f32
+            eq-float))
 
 
 (TC.ct/defspec rwr-f64-2
 
-  (prop-relative src-2
-                 binf.gen/f64
-                 8
-                 binf/rr-f64
-                 binf/wr-f64
-                 eq-float))
+  (prop-rwr src-2
+            binf.gen/f64
+            8
+            binf/rr-f64
+            binf/wr-f64
+            eq-float))
 
 
 ;;;;;;;;;; Copying from/to buffers
@@ -767,29 +869,6 @@
      pos
      string]))
 
-
-
-(defn rr-string
-  
-  ""
-
-  [view position n-byte]
-
-  (-> view
-      (binf/seek position)
-      (binf/rr-string n-byte)))
-
-
-
-(defn wr-string
-
-  ""
-
-  [view position string]
-
-  (-> view
-      (binf/seek position)
-      (binf/wr-string string)))
 
 
 (defn prop-string
@@ -1003,6 +1082,8 @@
                 (binf/position view-2))
              (= endianess
                 (binf/endian-get view-2))
+             (= (type view)
+                (type view-2))
              (let [before (binf/ra-u64 view
                                        position)]
                (binf/wa-b64 view-2
@@ -1023,25 +1104,3 @@
 (TC.ct/defspec grow-2
 
   (prop-grow src-2))
-
-
-;;;;;;;;;; Additional types / Boolean
-
-
-(t/deftest bool
-
-  (let [view (binf/view (binf.buffer/alloc 2))]
-
-    (t/is (= true
-             (-> view
-                 (binf/wr-bool true)
-                 (binf/seek 0)
-                 binf/rr-bool))
-          "Relative")
-
-    (t/is (= true
-             (-> view
-                 (binf/wa-bool 1
-                               true)
-                 (binf/ra-bool 1)))
-          "Absolute")))
