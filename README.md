@@ -48,10 +48,10 @@ requires all namespaces of this library (quite a few) and can be used for
 REPLing around.
 
 Cloning this repo is a fast way of trying things out. See the
-"[Development](#develop)" section.
+"[Development and testing](#develop)" section.
 
 
-## Usage
+## Usage <a name="usage">
 
 This is an overview.
 
@@ -71,12 +71,12 @@ Let us require the main namespaces used in this document:
 BinF is highly versatile because it leverages what the host offers, following the
 Clojure mindset. The following main concepts must be understood.
 
-A view is an object encompassing a raw chunk of memory and offering utilities for
+A **view** is an object encompassing a raw chunk of memory and offering utilities for
 manipulating it: reading and/or writing binary data. Such a chunk of memory
 could be a byte array or a file. It does not really matter since views abstract
 those chunks.
 
-More precisely, a view is anything that implement at least some of the protocols
+More precisely, a view is anything that implements at least some of the protocols
 defined in the `helins.binf.protocol` namespace. Only rarely will the user
 implement anything since BinF already enhances common classes.
 
@@ -88,7 +88,7 @@ which is used pretty much everywhere. In JS, they enhance the just-as-ubiquitous
 By enhancing these host classes, code can be reused for many contexts: handling
 memory, handling a file, a socket, ...
 
-Finally, by definition, a buffer is an opaque byte array which can be manipulated only
+Finally, by definition, a **buffer** is an opaque byte array which can be manipulated only
 via a view. It represents the lowest-level of directly accessible memory a host
 can provide. On the JVM, a buffer is a plain old byte array. In JS, it is an [ArrayBuffer](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer)
 or optionally a
@@ -139,13 +139,13 @@ namespace. Some examples showing the naming convention are:
 |---|---|
 | wa-b32 | Write a 32-bit integer at an absolute position |
 | rr-i64 | Read a signed 64-bit integer from the current relative position |
-| wr-buffer | Copy the given buffer to the current relative position |
+| wr-buffer | Copy the given buffer to the current relative position of the view |
 | ra-string | Read a string from an absolute position |
 
 The first letter denotes `r`eading or `w`riting, the second letter denotes
 `a`bsolute or `r`elative.
 
-It is best to follow that naming convention when writing business logic.
+It is best to follow that naming convention when writing custom functions.
 
 For instance, writing and reading a `YYYY/mm/dd` date "relatively":
 
@@ -331,6 +331,8 @@ API](https://cljdoc.org/d/io.helins/binf).
 
 ### Interacting with native libraries and WebAssembly
 
+**The following namespace is experimental and not yet considered stable.**
+
 Complete example in the [helins.binf.example.cabi](../main/src/example/helins/binf/example/cabi.cljc)
 namespace.
 
@@ -405,10 +407,10 @@ meant to be used with WebAssembly which is (as of today) 32-bit:
                                        :binf.cabi/n-byte 1
                                        :binf.cabi/offset 2
                                        :binf.cabi/type  :u8}
-                               :year {:binf.cabi/align  2
-                                      :binf.cabi/n-byte 2
-                                      :binf.cabi/offset 0 
-                                      :binf.cabi/type   :u16}}
+                               :year  {:binf.cabi/align  2
+                                       :binf.cabi/n-byte 2
+                                       :binf.cabi/offset 0 
+                                       :binf.cabi/type   :u16}}
     :binf.cabi.struct/type    :MyDate})
 ```
 
@@ -419,36 +421,20 @@ layed out with their memory offsets computed.
 A more challenging example would not be so easy to compute by hand.
 
 
-## Running tests
+## Development and testing <a name="develop">
 
-On the JVM, using [Kaocha](https://github.com/lambdaisland/kaocha):
+This repository is organized with [Babashka](https://github.com/babashka/babashka), a wonderful tool for any Clojurist.
 
-```bash
-$ ./bin/test/jvm/run
-$ ./bin/test/jvm/watch
-```
-On NodeJS, using [Shadow-CLJS](https://github.com/thheller/shadow-cljs):
+All tasks can be listed by running:
 
-```bash
-$ ./bin/test/node/run
-
-# Or testing an advanced build:
-$ ./bin/test/node/advanced
+```shell
+$ bb tasks
 ```
 
+For instance, for starting a Clojure dev environment:
 
-## Development
-
-Starting in Clojure JVM mode, mentioning an additional deps alias (here, a local
-setup of NREPL):
-```bash
-$ ./bin/dev/clojure :nrepl
-```
-
-Starting in CLJS mode using [Shadow-CLJS](https://github.com/thheller/shadow-cljs):
-```bash
-$ ./bin/dev/cljs
-# Then open ./cljs/index.html
+```shell
+$ bb dev:clojure
 ```
 
 
