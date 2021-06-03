@@ -223,7 +223,8 @@
 ;;;;;;;;; Numerical R/W
 
 
-;; TODO. Ensure position has been moved correctly in relative R/W.
+;; TODO. Ensure position has been moved correctly in relative R/W + not at all in absolute R/W.
+;; TODO. Randomize endianess.
 
 
 (def view-size
@@ -782,7 +783,11 @@
 
 
 
-(TC.ct/defspec rwa-string
+(defn prop-rwa-string
+
+  ""
+
+  [src]
 
   (prop-string src
                binf/wa-string
@@ -790,7 +795,11 @@
 
 
 
-(TC.ct/defspec rwr-string
+(defn prop-rwr-string
+
+  ""
+
+  [src]
 
   (prop-string src
                (fn write [view position string]
@@ -804,109 +813,31 @@
 
 
 
+(TC.ct/defspec rwa-string
+
+  (prop-rwa-string src))
 
 
 
-(defn -string
+(TC.ct/defspec rwr-string
 
-  [string res]
-
-  (t/is (first res)
-        "Enough bytes for writing strings")
-
-  (t/is (= (count string)
-           (res 2))
-        "Char count is accurate")
-
-  (t/is (<= (res 2)
-            (res 1))
-        "Cannot write more chars than bytes"))
+  (prop-rwr-string src))
 
 
 
-(defn- -a-string
-  
-  [f-view]
+(TC.ct/defspec rwa-string-2
 
-  (t/is (false? (first (binf/wa-string (binf/view (binf.buffer/alloc 10))
-                                       0
-                                       binf.test.string/string)))
-        "Not enough bytes to write everything")
-  (let [view (f-view)
-        res  (binf/wa-string view
-                             0
-                             binf.test.string/string)]
-
-    (-string binf.test.string/string
-             res)
-
-    (t/is (zero? (binf/position view))
-          "Write was absolute")
-
-    (t/is (= binf.test.string/string
-             (binf/ra-string view
-                             0
-                             (res 1)))
-          "Properly decoding encoded string")
-    
-    (t/is (zero? (binf/position view))
-          "Read was absolute")))
+  (prop-rwa-string src-2))
 
 
 
-(defn- -r-string
+(TC.ct/defspec rwr-string-2
 
-  [f-view]
-
-  (t/is (false? (first (binf/wr-string (binf/view (binf.buffer/alloc 10))
-                                       binf.test.string/string)))
-        "Not enough bytes to write everything")
-  (let [view (f-view)
-        res  (binf/wr-string view
-                             binf.test.string/string)]
-
-    (-string binf.test.string/string
-             res)
-
-    (t/is (= (res 1)
-             (binf/position view))
-          "Write was relative")
-
-    (binf/seek view
-               0)
-
-    (t/is (= binf.test.string/string
-             (binf/rr-string view
-                             (res 1)))
-          "Properly decoding encoded string")
-    
-    (t/is (= (res 1)
-             (binf/position view))
-          "Read was relative")))
+  (prop-rwr-string src-2))
 
 
 
-(t/deftest a-string
-
-  (-a-string #(binf/view (binf.buffer/alloc 1024))))
-
-
-
-#?(:clj (t/deftest a-string-native
-
-  (-a-string #(binf.native/view 1024))))
-
-
-
-#_(t/deftest r-string
-
-  (-r-string #(binf/view (binf.buffer/alloc 1024))))
-
-
-
-#?(:clj (t/deftest r-string-native
-
-  (-r-string #(binf.native/view 1024))))
+;; TODO. Test not having enough space for whole string.
 
 
 ;;;;;;;;;; Reallocating views
