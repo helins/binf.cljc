@@ -758,23 +758,51 @@
 
 
 
-(TC.ct/defspec rwa-string
+(defn prop-string
+
+  ""
+
+  [src w r]
 
   (TC.prop/for-all [[view
-                     pos
-                     string] (gen-string src)]
+                     position
+                     string]   (gen-string src)]
     (let [[finished?
            n-byte
-           n-char]   (binf/wa-string view
-                                     pos
-                                     string)]
+           n-char]   (w view
+                        position
+                        string)]
       (and finished?
            (= (count string)
               n-char)
            (= string
-              (binf/ra-string view
-                              pos
-                              n-byte))))))
+              (r view
+                 position
+                 n-byte))))))
+
+
+
+(TC.ct/defspec rwa-string
+
+  (prop-string src
+               binf/wa-string
+               binf/ra-string))
+
+
+
+(TC.ct/defspec rwr-string
+
+  (prop-string src
+               (fn write [view position string]
+                 (-> view
+                     (binf/seek position)
+                     (binf/wr-string string)))
+               (fn read [view position n-byte]
+                 (-> view
+                     (binf/seek position)
+                     (binf/rr-string n-byte)))))
+
+
 
 
 
