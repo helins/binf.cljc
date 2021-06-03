@@ -5,32 +5,17 @@
 
 (ns helins.binf.test.string
 
-  ""
+  "Testing strings utilities"
 
   {:author "Adam Helinski"}
 
-  (:require [clojure.test                    :as t]
-            [clojure.test.check.clojure-test :as tc.ct]
+  (:require [clojure.test.check.clojure-test :as tc.ct]
             [clojure.test.check.generators   :as tc.gen]
             [clojure.test.check.properties   :as tc.prop]
             [helins.binf.string              :as binf.string]))
 
 
 ;;;;;;;;;;
-
-
-(def string
-     "²é&\"'(§è!çà)-aertyuiopqsdfhgklmwcvbnùµ,;:=")
-
-
-
-(t/deftest main
-
-  (t/is (= string
-           (-> string
-               binf.string/encode
-               binf.string/decode))))
-
 
 
 (tc.ct/defspec gen

@@ -10,8 +10,8 @@
    R/W tests ensures a few things at once:
 
    - Endianess is randomized
-   - 
-  "
+   - Positioning behaves well both in absolute and relative R/W
+   - Operating consistenly on subviews"
 
   {:author "Adam Helins"}
 
@@ -63,58 +63,6 @@
     (NaN? y)
     (= x
        y)))
-
-
-;;;;;;;;;; Custom relative R/W functions
-
-
-(defn rr-bool
-
-  ""
-
-  [view position]
-
-  (-> view
-      (binf/seek position)
-      binf/rr-bool))
-
-
-
-(defn rr-string
-  
-  ""
-
-  [view _position n-byte]
-
-  (-> view
-      (binf/seek (- (binf/position view)
-                    n-byte))
-      (binf/rr-string n-byte)))
-
-
-
-(defn wr-bool
-
-  ""
-
-  [view position bool]
-
-  (-> view
-      (binf/seek position)
-      (binf/wr-bool bool)))
-
-
-
-(defn wr-string
-
-  ""
-
-  [view position string]
-
-  (-> view
-      (binf/seek position)
-      (binf/wr-string string)))
-
 
 
 ;;;;;;;;;; Generic generators
@@ -226,16 +174,14 @@
 
    (TC.prop/for-all [x         gen
                      [position
-                      view] (  gen-write src
-                                         n-byte)]
+                      view]    (gen-write src
+                                          n-byte)]
      (-> view
          (binf/seek position)
          (wr x))
      (let [position-after (binf/position view)]
        (and (eq x
                 (-> view
-                    (binf/seek position)
-                    (wr x)
                     (binf/seek (- (binf/position view)
                                  n-byte))
                     rr))
@@ -246,178 +192,86 @@
 ;;;;;;;;;; Creating views
 
 
-(def offset
-     4)
+(defn gen-create
 
+  ""
 
-(def size
-     16)
+  [[src start limit _endianess]]
 
-
-(def size-2
-     4)
-
-
-(def view
-     (-> (binf.buffer/alloc size)
-         binf/view
-         (binf/endian-set :little-endian)))
-
-
-#?(:clj (def view-native
-             (binf/endian-set (binf.native/view size)
-                              :little-endian)))
-
-
-#?(:cljs (def view-shared
-              (-> (binf.buffer/alloc-shared size)
-                  binf/view
-                  (binf/endian-set :little-endian))))
-
-
-(t/deftest offset-view
-  (let [view (-> (binf.buffer/alloc 64)
-                 (binf/view 32
-                            16)
-                 (binf/endian-set :little-endian))]
-    (binf/wa-b8 view 0
-                42)
-    (t/is (= 42
-             (binf/ra-u8 view 0)))))
-
-
-(t/deftest buffer->view
-
-  ;; Without offset nor size
-  
-  (t/is (= 0
-           (binf/buffer-offset view)
-           #?(:cljs (binf/buffer-offset view-shared))))
-  (t/is (= 0
-           (binf/position view)
-           #?(:clj (binf/position view-native))
-           #?(:cljs (binf/position view-shared))))
-  (t/is (= size
-           (binf/limit view)
-           #?(:clj (binf/limit view-native))
-           #?(:cljs (binf/limit view-shared))))
-  (t/is (= size
-           (binf/remaining view)
-           #?(:clj (binf/remaining view-native))
-           #?(:cljs (binf/remaining view-shared))))
-
-  ;; With offset
-
-  (let [v (binf/view (binf.buffer/alloc size)
-                     offset)
-        #?@(:cljs [v-shared (binf/view (binf.buffer/alloc-shared size)
-                                       offset)])]
-    (t/is (= offset
-             (binf/buffer-offset v)
-             #?(:cljs (binf/buffer-offset v-shared))))
-    (t/is (= 0
-             (binf/position v)
-             #?(:cljs (binf/position v-shared))))
-    (t/is (= (- size
-                offset)
-             (binf/limit v)
-             #?(:cljs (binf/limit v-shared))))
-    (t/is (= (- size
-                offset)
-             (binf/remaining v)
-             #?(:cljs (binf/remaining v-shared)))))
-
-  ;; With offset and size
-
-  (let [v (binf/view (binf.buffer/alloc size)
-                     offset
-                     size-2)
-        #?@(:cljs [v-shared (binf/view (binf.buffer/alloc-shared size)
-                                       offset
-                                       size-2)])]
-    (t/is (= offset
-             (binf/buffer-offset v)
-             #?(:cljs (binf/buffer-offset v-shared))))
-    (t/is (= 0
-             (binf/position v)
-             #?(:cljs (binf/position v-shared))))
-    (t/is (= size-2
-             (binf/limit v)
-             #?(:cljs (binf/limit v-shared))))
-    (t/is (= size-2
-             (binf/remaining v)
-             #?(:cljs (binf/remaining v-shared))))))
+  (TC.gen/let [endianess gen-endianess
+               offset    (TC.gen/choose 0
+                                        limit)
+               limit-2   (or (TC.gen/return nil)
+                             (TC.gen/choose 0
+                                            (- limit
+                                               offset)))
+               recur?    TC.gen/boolean]
+    (let [view (-> src
+                   binf/view
+                   (binf/endian-set endianess))
+          ret  [(if limit-2
+                  (binf/view view
+                             offset
+                             limit-2)
+                  (binf/view view
+                             offset))
+                (+ start
+                   offset)
+                (or limit-2
+                    (- limit
+                       offset))
+                endianess]]
+      (if recur?
+        (gen-create ret)
+        ret))))
 
 
 
-(t/deftest view->view
+(defn prop-create
 
-  ;; Without offset nor size
-  
-  (let [v (binf/view view)]
-    (t/is (= :little-endian
-             (binf/endian-get v))
-          "Endianess is duplicated")
-    (t/is (= 0
-             (binf/buffer-offset v)))
-    (t/is (= 0
-             (binf/position v)))
-    (t/is (= size
-             (binf/limit v)))
-    (t/is (= size
-             (binf/remaining v))))
+  ""
 
-  ;; With offset
+  [src]
 
-  (let [v (binf/view view
-                     offset)
-        #?@(:clj [v-native (binf/view view-native
-                                      offset)])]
-    (t/is (= :little-endian
-             (binf/endian-get v))
-          "Endianess is duplicated")
-    #?(:clj (t/is (= :little-endian
-                     (binf/endian-get v-native))
-                  "Endianess is duplicated in native view"))
-    (t/is (= offset
-             (binf/buffer-offset v)))
-    (t/is (= 0
-             (binf/position v)
-             #?(:clj (binf/position v-native))))
-    (t/is (= (- size
-                offset)
-             (binf/limit v)
-             #?(:clj (binf/limit v-native))))
-    (t/is (= (- size
-                offset)
-             (binf/remaining v)
-             #?(:clj (binf/remaining v-native)))))
+  (TC.prop/for-all [[view
+                     start
+                     limit
+                     endianess] (gen-create [src
+                                             0
+                                             view-size])
+                    u8          binf.gen/u8]
+    (and (zero? (binf/position view))
+         (= limit
+            (binf/limit view))
+         (if-some [offset (binf/buffer-offset view)]
+           (= start
+              offset)
+           true)
+         (= endianess
+            (binf/endian-get view))
+         (if (>= limit
+                 1)
+           (do
+             (binf/wa-b8 view
+                         0
+                         u8)
+             (= u8
+                (binf/ra-u8 (binf/view src)
+                            start)))
+           true))))
 
-  ;; With offset and size
 
-  (let [v (binf/view view
-                     offset
-                     size-2)
-        #?@(:clj [v-native (binf/view view-native
-                                      offset
-                                      size-2)])]
-    (t/is (= :little-endian
-             (binf/endian-get v))
-          "Endianess is duplicated")
-    #?(:clj (t/is (= :little-endian
-                     (binf/endian-get v-native))
-                  "Endianess is duplicated in native view"))
-    (t/is (= offset
-             (binf/buffer-offset v)))
-    (t/is (= 0
-             (binf/position v)
-             #?(:clj (binf/position v-native))))
-    (t/is (= size-2
-             (binf/limit v)
-             #?(:clj (binf/limit v-native))))
-    (t/is (= size-2
-             (binf/remaining v)
-             #?(:clj (binf/remaining v-native))))))
+
+
+(TC.ct/defspec create
+
+  (prop-create src))
+
+
+
+(TC.ct/defspec create-2
+
+  (prop-create src-2))
 
 
 ;;;;;;;;;; R/W booleans
@@ -435,11 +289,11 @@
 
 (TC.ct/defspec rwr-bool
 
-  (prop-rwa src
+  (prop-rwr src
             TC.gen/boolean
             1
-            rr-bool
-            wr-bool))
+            binf/rr-bool
+            binf/wr-bool))
 
 
 
@@ -455,11 +309,11 @@
 
 (TC.ct/defspec rwr-bool-2
 
-  (prop-rwa src-2
+  (prop-rwr src-2
             TC.gen/boolean
             1
-            rr-bool
-            wr-bool))
+            binf/rr-bool
+            binf/wr-bool))
 
 
 ;;;;;;;;; R/W numbers
@@ -919,30 +773,6 @@
 
 
 
-(defn prop-string
-
-  ""
-
-  [src w r]
-
-  (TC.prop/for-all [[view
-                     position
-                     string]   (gen-string src)]
-    (let [[finished?
-           n-byte
-           n-char]   (w view
-                        position
-                        string)]
-      (and finished?
-           (= (count string)
-              n-char)
-           (= string
-              (r view
-                 position
-                 n-byte))))))
-
-
-
 (defn prop-rwa-string
 
   ""
@@ -951,7 +781,7 @@
 
   (TC.prop/for-all [[view
                      position
-                     string]   (gen-string src)]
+                     string]  (gen-string src)]
     (binf/seek view
                0)
     (let [[finished?
@@ -1062,7 +892,7 @@
 
   (TC.prop/for-all [[view
                      position
-                     string] (gen-string-big src)]
+                     string]  (gen-string-big src)]
     (binf/seek view
                0)
     (let [[finished?
@@ -1094,7 +924,7 @@
 
   (TC.prop/for-all [[view
                      position
-                     string] (gen-string-big src)]
+                     string]  (gen-string-big src)]
     (let [[finished?
            n-byte
            #?(:clj  _n-char
@@ -1111,9 +941,9 @@
                        (binf/rr-string n-byte))
                    #?(:clj  (.toString ^CharBuffer char-buffer)
                       :cljs (.substring string
-                                        n-char)))
+                                        n-char))))
            (= position-after
-              (binf/position view)))))))
+              (binf/position view))))))
 
 
 
