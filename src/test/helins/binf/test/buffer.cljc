@@ -7,89 +7,72 @@
 
   {:author "Adam Helinski"}
 
-  (:require [clojure.test       :as t]
-            [helins.binf        :as binf]
-            [helins.binf.buffer :as binf.buffer]))
+  (:require [clojure.test.check.clojure-test :as TC.ct]
+            [clojure.test.check.generators   :as TC.gen]
+            [clojure.test.check.properties   :as TC.prop]
+            [helins.binf                     :as binf]
+            [helins.binf.buffer              :as binf.buffer]
+            [helins.binf.gen                 :as binf.gen]))
 
 
 ;;;;;;;;;;
 
 
-(defn make-view
+(TC.ct/defspec copy
 
-  ([]
-
-   (make-view binf.buffer/alloc))
-
-
-  ([make-buffer]
-
-   (let [view (binf/view (make-buffer 5))]
-     (dotimes [_ 5]
-       (binf/wr-b8 view
-                   1))
-     view)))
-
-
-
-(def copy-target
-     (concat (repeat 5
-                     0)
-             (repeat 2
-                     1)
-             (repeat 3
-                     0)))
-
-
-
-(t/deftest copy-buffer
-
-  (t/is (= (seq (binf/backing-buffer (make-view)))
-           (seq (binf.buffer/copy (binf/backing-buffer (make-view))))
-           #?(:cljs (seq (binf/backing-buffer (make-view binf.buffer/alloc-shared))))
-           #?(:cljs (seq (binf.buffer/copy (binf/backing-buffer (make-view binf.buffer/alloc-shared))))))
-        "Cloning")
-
-  (t/is (= (concat (repeat 5
-                           0)
-                   (repeat 5
-                           1))
-           (seq (binf.buffer/copy (binf.buffer/alloc 10)
-                                  5
-                                  (binf/backing-buffer (make-view))))
-           #?(:cljs (seq (binf.buffer/copy (binf.buffer/alloc-shared 10)
-                                           5
-                                           (binf/backing-buffer (make-view binf.buffer/alloc-shared))))))
-        "Without offset nor length")
-
-  (t/is (= (concat (repeat 5
-                           0)
-                   (repeat 3
-                           1)
-                   (repeat 2
-                           0))
-           (seq (binf.buffer/copy (binf.buffer/alloc 10)
-                                  5
-                                  (binf/backing-buffer (make-view))
-                                  2))
-           #?(:cljs (seq (binf.buffer/copy (binf.buffer/alloc-shared 10)
-                                           5
-                                           (binf/backing-buffer (make-view binf.buffer/alloc-shared))
-                                           2))))
-        "With offset")
-
-
-  (t/is (= copy-target
-           (seq (binf.buffer/copy (binf.buffer/alloc 10)
-                                  5
-                                  (binf/backing-buffer (make-view))
-                                  2
-                                  2))
-           #?(:cljs (seq (binf.buffer/copy (binf.buffer/alloc-shared 10)
-                                           5
-                                           (binf/backing-buffer (make-view binf.buffer/alloc-shared))
-                                           2
-                                           2))))
-        "With offset and length"))
-
-
+  (TC.prop/for-all [[src
+                     dest-offset
+                     src-offset
+                     n-byte]     (TC.gen/let [src         (binf.gen/buffer)
+                                              dest-offset (TC.gen/choose 0
+                                                                         (binf/limit src))
+                                              src-offset  (TC.gen/choose 0
+                                                                         (binf/limit src))
+                                              n-byte      (TC.gen/choose 0
+                                                                         (- (binf/limit src)
+                                                                            src-offset))]
+                                   [src
+                                    dest-offset
+                                    src-offset
+                                    n-byte])]
+    (let [src-limit (binf/limit src)
+          sq-offset (repeat dest-offset
+                            0)]
+      (and (= (seq src)
+              (seq (binf.buffer/copy src)))
+           (= (seq (concat (seq src)
+                           sq-offset))
+              (seq (binf.buffer/copy (binf.buffer/alloc (+ src-limit
+                                                           dest-offset))
+                                     src)))
+           (= (seq (concat sq-offset
+                           src
+                           sq-offset))
+              (seq (binf.buffer/copy (binf.buffer/alloc (+ src-limit
+                                                           (* 2
+                                                              dest-offset)))
+                                     dest-offset
+                                     src)))
+           (= (seq (concat sq-offset
+                           (drop src-offset
+                                 src)
+                           sq-offset))
+              (seq (binf.buffer/copy (binf.buffer/alloc (+ (- src-limit
+                                                              src-offset)
+                                                           (* 2
+                                                              dest-offset)))
+                                     dest-offset
+                                     src
+                                     src-offset)))
+           (= (seq (concat sq-offset
+                           (->> src
+                                (drop src-offset)
+                                (take n-byte))
+                           sq-offset))
+              (seq (binf.buffer/copy (binf.buffer/alloc (+ n-byte
+                                                           (* 2
+                                                              dest-offset)))
+                                     dest-offset
+                                     src
+                                     src-offset
+                                     n-byte)))))))

@@ -149,7 +149,7 @@
   binf.protocol/IPosition
 
     (limit [this]
-      (.byteLength this))))
+      (.-byteLength this))))
 
 
 
@@ -180,4 +180,4 @@
   binf.protocol/IPosition
 
     (limit [this]
-      (.byteLength this)))))
+      (.-byteLength this)))))
