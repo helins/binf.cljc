@@ -7,52 +7,35 @@
 
   {:author "Adam Helins"}
 
-  (:require [clojure.test.check.clojure-test :as tc.ct]
-            [clojure.test.check.generators   :as tc.gen]
-            [clojure.test.check.properties   :as tc.prop]
-            [helins.binf.float               :as binf.float]))
+  (:require [clojure.test.check.clojure-test :as TC.ct]
+            [clojure.test.check.properties   :as TC.prop]
+            [helins.binf.float               :as binf.float]
+            [helins.binf.gen                 :as binf.gen]))
 
 
 ;;;;;;;;;;
 
 
-(defn nan?
+(TC.ct/defspec f32
 
-  ""
-
-  [x]
-
-  #?(:clj  (Double/isNaN x)
-     :cljs (js/isNaN x)))
+  (TC.prop/for-all [x binf.gen/f32]
+    (binf.float/= x
+                  (binf.float/from-b32 (binf.float/b32 x)))))
 
 
 
-(defn f=
+(TC.ct/defspec f64
 
-  ""
-
-  [x-1 x-2]
-
-  (if (nan? x-1)
-    (nan? x-2)
-    (= x-1
-       x-2)))
-
-
-;;;;;;;;;;
-
-
-#?(:clj (tc.ct/defspec f32
-
-  (tc.prop/for-all [x (tc.gen/fmap unchecked-float
-                                   tc.gen/double)]
-    (f= x
-        (binf.float/from-b32 (binf.float/b32 x))))))
+  (TC.prop/for-all [x binf.gen/f64]
+    (binf.float/= x
+                  (binf.float/from-b64 (binf.float/b64 x)))))
 
 
 
-(tc.ct/defspec f64
+(TC.ct/defspec f32<->f64
 
-  (tc.prop/for-all [x tc.gen/double]
-    (f= x
-        (binf.float/from-b64 (binf.float/b64 x)))))
+  (TC.prop/for-all [x binf.gen/f32]
+    (binf.float/= x
+                  (-> x
+                      binf.float/f64
+                      binf.float/f32))))

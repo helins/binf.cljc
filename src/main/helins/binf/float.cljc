@@ -7,10 +7,13 @@
 
   "Handling floating values, miscellaneous coercions."
 
-  {:author "Adam Helinski"})
+  {:author "Adam Helinski"}
+
+  (:refer-clojure :exclude [=])
+  (:require [clojure.core]))
 
 
-;;;;;;;;;; 
+;;;;;;;;;; Conversions between floats and bit patterns
 
 
 (defn b32
@@ -97,7 +100,7 @@
                           0))))
 
 
-;;;;;;;;;;
+;;;;;;;;;; Conversions to floats
 
 
 (defn f32
@@ -126,3 +129,29 @@
   [x]
 
   (double x))
+
+
+;;;;;;;;;; Miscellaneous
+
+
+(defn nan?
+
+  "Returns true if `x` is `##NaN`."
+
+  [x]
+
+  #?(:clj  (Double/isNaN x)
+     :cljs (js/isNaN x)))
+
+
+
+(defn =
+
+  "Tests for equality between 2 floats where `##NaN` is equal to itself (unlike regular `=` or `==`)."
+
+  [x-1 x-2]
+
+  (if (nan? x-1)
+    (nan? x-2)
+    (clojure.core/= x-1
+                    x-2)))

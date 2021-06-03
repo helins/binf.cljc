@@ -23,6 +23,7 @@
             [clojure.test.check.properties   :as TC.prop]
             [helins.binf                     :as binf]
             [helins.binf.buffer              :as binf.buffer]
+            [helins.binf.float               :as binf.float]
             [helins.binf.gen                 :as binf.gen]
             [helins.binf.int                 :as binf.int]
             [helins.binf.int64               :as binf.int64]
@@ -39,31 +40,6 @@
 
 (def view-size
      1024)
-
-
-;;;;;;;;;; Miscellaneous helpers
-
-
-(defn NaN?
-  
-  ""
-
-  [n]
-
-  #?(:clj  (Double/isNaN n)
-     :cljs (js/isNaN n)))
-
-(defn eq-float
-
-  "Computes equality for floats where NaN is equal to itself."
-
-  [x y]
-
-  (if (NaN? x)
-    (NaN? y)
-    (= x
-       y)))
-
 
 ;;;;;;;;;; Generic generators
 
@@ -434,7 +410,7 @@
             4
             binf/ra-f32
             binf/wa-f32
-            eq-float))
+            binf.float/=))
 
 
 (TC.ct/defspec rwa-f64
@@ -444,7 +420,7 @@
             8
             binf/ra-f64
             binf/wa-f64
-            eq-float))
+            binf.float/=))
 
 
 (TC.ct/defspec rwr-f32
@@ -454,7 +430,7 @@
             4
             binf/rr-f32
             binf/wr-f32
-            eq-float))
+            binf.float/=))
 
 
 (TC.ct/defspec rwr-f64
@@ -464,7 +440,7 @@
             8
             binf/rr-f64
             binf/wr-f64
-            eq-float))
+            binf.float/=))
 
 
 (TC.ct/defspec rwa-i8-2
@@ -582,7 +558,7 @@
             4
             binf/ra-f32
             binf/wa-f32
-            eq-float))
+            binf.float/=))
 
 
 (TC.ct/defspec rwa-f64-2
@@ -592,7 +568,7 @@
             8
             binf/ra-f64
             binf/wa-f64
-            eq-float))
+            binf.float/=))
 
 
 (TC.ct/defspec rwr-f32-2
@@ -602,7 +578,7 @@
             4
             binf/rr-f32
             binf/wr-f32
-            eq-float))
+            binf.float/=))
 
 
 (TC.ct/defspec rwr-f64-2
@@ -612,7 +588,7 @@
             8
             binf/rr-f64
             binf/wr-f64
-            eq-float))
+            binf.float/=))
 
 
 ;;;;;;;;;; Copying from/to buffers
