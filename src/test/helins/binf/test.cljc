@@ -28,6 +28,12 @@
 #?(:clj (set! *warn-on-reflection*
               true))
 
+;;;;;;;;;; Values
+
+
+(def view-size
+     1024)
+
 
 ;;;;;;;;;; Miscellaneous helpers
 
@@ -95,7 +101,7 @@
 
 
 
-;;;;;;;;;; Generators
+;;;;;;;;;; Generic generators
 
 
 (def gen-endianess
@@ -113,27 +119,24 @@
 
   [src n-byte]
 
-  (TC.gen/let [start (TC.gen/choose 0
-                                    (- view-size
-                                       n-byte))
-               size  (TC.gen/choose n-byte
-                                    (- view-size
-                                       start))
-               pos   (TC.gen/choose 0
-                                    (- size
-                                       n-byte))]
+  (TC.gen/let [endianess gen-endianess
+               start     (TC.gen/choose 0
+                                        (- view-size
+                                           n-byte))
+               size      (TC.gen/choose n-byte
+                                        (- view-size
+                                           start))
+               pos       (TC.gen/choose 0
+                                        (- size
+                                           n-byte))]
     [pos
-     (binf/view src
-                start
-                size)]))
+     (-> src
+         (binf/view start
+                    size)
+         (binf/endian-set endianess))]))
 
 
 ;;;;;;;;;; Base buffers and views
-
-
-(def view-size
-     1024)
-
 
 
 (def src
