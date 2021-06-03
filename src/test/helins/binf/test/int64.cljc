@@ -7,38 +7,42 @@
 
   {:author "Adam Helins"}
 
-  (:require [clojure.test      :as t]
-            [helins.binf.int64 :as binf.int64])
-  (:refer-clojure :exclude [bit-clear
-                            bit-flip
-                            bit-set
-                            bit-test]))
+  (:require [clojure.test                    :as t]
+            [clojure.test.check.clojure-test :as TC.ct]
+            [clojure.test.check.generators   :as TC.gen]
+            [clojure.test.check.properties   :as TC.prop]
+            [helins.binf.gen                 :as binf.gen]
+            [helins.binf.int64               :as binf.int64]))
 
 
 ;;;;;;;;;; Casting to ints <= 32-bits
 
 
-(t/deftest casting-smaller
+(TC.ct/defspec cast-smaller-i
 
-  (let [n (binf.int64/i* -42)]
-    (t/is (= -42
-             (binf.int64/i8  n)
-             (binf.int64/i16 n)
-             (binf.int64/i32 n))
-          "Signed"))
+  (TC.prop/for-all [x binf.gen/i8]
+    (let [x64 (binf.int64/i* x)]
+      (= x
+         (binf.int64/i8 x64)
+         (binf.int64/i16 x64)
+         (binf.int64/i32 x64)))))
 
-  (let [n (binf.int64/u* 42)]
-    (t/is (= 42
-             (binf.int64/u8  n)
-             (binf.int64/u16 n)
-             (binf.int64/u32 n))
-          "Unsigned")))
+
+
+(TC.ct/defspec cast-smaller-u
+
+  (TC.prop/for-all [x binf.gen/u8]
+    (let [x64 (binf.int64/u* x)]
+      (= x
+         (binf.int64/u8 x64)
+         (binf.int64/u16 x64)
+         (binf.int64/u32 x64)))))
 
 
 ;;;;;;;;;; Bitwise operations from standard lib which does not work with js/BigInt
 
 
-(t/deftest bit-clear
+(t/deftest bit-clear--
 
   (t/is (zero? (binf.int64/u32 (binf.int64/bit-clear (binf.int64/u* 2r10)
                                                      (binf.int64/u* 1)))))
@@ -48,7 +52,7 @@
 
 
 
-(t/deftest bit-flip
+(t/deftest bit-flip--
 
   (t/is (zero? (binf.int64/u32 (binf.int64/bit-flip (binf.int64/u* 2r10)
                                                     (binf.int64/u* 1)))))
@@ -59,7 +63,7 @@
 
 
 
-(t/deftest bit-set
+(t/deftest bit-set--
 
   (t/is (= (binf.int64/u* 2)
            (binf.int64/bit-set (binf.int64/u* 2r00)
@@ -67,7 +71,7 @@
 
 
 
-(t/deftest bit-test
+(t/deftest bit-test--
 
   (t/is (true? (binf.int64/bit-test (binf.int64/u* 2r10)
                                     (binf.int64/u* 1))))
@@ -75,6 +79,31 @@
   (t/is (false? (binf.int64/bit-test (binf.int64/u* 0)
                                      (binf.int64/u* 1)))))
 
+
+
+(TC.ct/defspec bitwise
+
+  (TC.prop/for-all [i (TC.gen/fmap #(binf.int64/u* %)
+                                   (TC.gen/choose 0
+                                                  64))
+                    x (TC.gen/one-of [binf.gen/i64
+                                      binf.gen/u64])]
+    (let [off (binf.int64/bit-clear x
+                                    i)
+          on  (binf.int64/bit-set x
+                                  i)]
+    (and (not= off
+               on)
+         (not (binf.int64/bit-test off
+                                   i))
+         (binf.int64/bit-test on
+                              i)
+         (= off
+            (binf.int64/bit-flip on
+                                 i))
+         (= on
+            (binf.int64/bit-flip off
+                                 i))))))
 
 ;;;;;;;;;; Unsigned logic tests
 
