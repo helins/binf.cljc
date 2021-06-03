@@ -71,7 +71,7 @@
 
 (tc.ct/defspec gen
 
-  (tc.prop/for-all [buffer binf.gen/buffer]
+  (tc.prop/for-all [buffer (binf.gen/buffer)]
     (= (seq buffer)
        (let [view (-> buffer
                       binf.base64/encode
