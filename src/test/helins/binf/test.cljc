@@ -190,15 +190,20 @@
 
   ([src gen n-byte ra wa eq]
 
-   (TC.prop/for-all [x      gen
-                     [pos
-                      view] (gen-write src
-                                       n-byte)]
-     (eq x
-         (-> view
-             (wa pos
-                 x)
-             (ra pos))))))
+   (TC.prop/for-all [x         gen
+                     [position
+                      view]    (gen-write src
+                                          n-byte)]
+     (binf/seek view
+                0)
+     (wa view
+         position
+         x)
+     (= (zero? (binf/position view))
+        (eq x
+            (ra view
+                position))
+        (zero? (binf/position view))))))
 
 
 
@@ -811,21 +816,25 @@
                      buffer
                      offset
                      n-byte]  (gen-write-buffer src)]
+    (-> view
+        (binf/seek 0)
+        (binf/wa-buffer position
+                        buffer
+                        offset
+                        n-byte))
     (let [target (doall (seq buffer))]
       (buffer-erase buffer
                     offset
                     n-byte)
-      (= target
-         (-> view
-             (binf/wa-buffer position
-                             buffer
-                             offset
-                             n-byte)
-             (binf/ra-buffer position
-                             n-byte
-                             buffer
-                             offset)
-             seq)))))
+      (and (zero? (binf/position view))
+           (= target
+              (-> view
+                  (binf/ra-buffer position
+                                  n-byte
+                                  buffer
+                                  offset)
+                  seq))
+           (zero? (binf/position view))))))
 
 
 
@@ -943,20 +952,24 @@
   (TC.prop/for-all [[view
                      position
                      string]   (gen-string src)]
+    (binf/seek view
+               0)
     (let [[finished?
            n-byte
            n-char
            #?(:clj char-buffer)] (binf/wa-string view
                                                  position
                                                  string)]
-      (and finished?
+      (and (zero? (binf/position view))
+           finished?
            (= (count string)
               n-char)
            #?(:clj (nil? char-buffer))
            (= string
               (binf/ra-string view
                               position
-                              n-byte))))))
+                              n-byte))
+           (zero? (binf/position view))))))
 
 
 
@@ -1050,6 +1063,8 @@
   (TC.prop/for-all [[view
                      position
                      string] (gen-string-big src)]
+    (binf/seek view
+               0)
     (let [[finished?
            n-byte
            #?(:clj  _n-char
@@ -1057,14 +1072,16 @@
            #?(:clj char-buffer)] (binf/wa-string view
                                                  position
                                                  string)]
-      (and (not finished?)
+      (and (zero? (binf/position view))
+           (not finished?)
            (= string
               (str (binf/ra-string view
                                    position
                                    n-byte)
                    #?(:clj  (.toString ^CharBuffer char-buffer)
                       :cljs (.substring string
-                                        n-char))))))))
+                                        n-char))))
+           (zero? (binf/position view))))))
 
 
 
@@ -1082,9 +1099,9 @@
            n-byte
            #?(:clj  _n-char
               :cljs n-char)
-           #?(:clj char-buffer)] (binf/wa-string view
-                                                 position
-                                                 string)
+           #?(:clj char-buffer)] (-> view
+                                     (binf/seek position)
+                                     (binf/wr-string string))
           position-after         (binf/position view)]
       (and (not finished?)
            (= string
@@ -1158,6 +1175,7 @@
                         (repeat n-additional-byte
                                 0)))
              (= position
+                (binf/position view)
                 (binf/position view-2))
              (= endianess
                 (binf/endian-get view-2))
