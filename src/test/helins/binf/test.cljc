@@ -32,6 +32,15 @@
 ;;;;;;;;;; Miscellaneous
 
 
+(def gen-endianess
+
+  ""
+
+  (TC.gen/elements [:big-endian
+                    :little-endian]))
+
+
+
 (defn eq-float
 
   "Computes equality for floats where NaN is equal to itself."
@@ -928,14 +937,8 @@
   [src]
 
   (prop-string-big src
-                   (fn write [view position string]
-                     (-> view
-                         (binf/seek position)
-                         (binf/wr-string string)))
-                   (fn read [view position n-byte]
-                     (-> view
-                         (binf/seek position)
-                         (binf/rr-string n-byte)))))
+                   wr-string
+                   rr-string))
 
 
 
@@ -965,38 +968,39 @@
 ;;;;;;;;;; Reallocating views
 
 
-(t/deftest grow
+(TC.ct/defspec grow
 
-  (t/is (= [1 2 42 0 0 0]
-           (seq (binf/backing-buffer (binf/grow (-> (binf.buffer/alloc 4)
-                                                    binf/view
-                                                    (binf/wr-b8 1)
-                                                    (binf/wr-b8 2)
-                                                    (binf/wr-b8 42))
-                                                2)))
-           #?(:cljs (seq (binf/backing-buffer (binf/grow (-> (binf.buffer/alloc-shared 4)
-                                                             binf/view
-                                                             (binf/wr-b8 1)
-                                                             (binf/wr-b8 2)
-                                                             (binf/wr-b8 42))
-                                                         2))))))
+  (let [view     (binf/view src)
+        view-vec (vec (binf/ra-buffer view
+                                      0
+                                      view-size))]
+    (TC.prop/for-all [endianess         gen-endianess
+                      n-additional-byte (TC.gen/choose 0
+                                                       view-size)
+                      position          (TC.gen/choose 0
+                                                       view-size)]
+      (let [view-2  (binf/grow (-> view
+                                   (binf/endian-set endianess)
+                                   (binf/seek position))
+                               n-additional-byte)
+            limit-2 (binf/limit view-2)]
+        (and (= (+ view-size
+                   n-additional-byte)
+                (binf/limit view-2))
+             (= (seq (binf/ra-buffer view-2
+                                     0
+                                     limit-2))
+                (concat view-vec
+                        (repeat n-additional-byte
+                                0)))
+             (= position
+                (binf/position view-2))
+             (= endianess
+                (binf/endian-get view-2)))))))
 
-  (let [view (-> (binf/view (binf.buffer/alloc 100))
-                 (binf/seek 42))]
-    (t/is (= 42
-             (binf/position view)
-             (-> view
-                 (binf/grow 200)
-                 binf/position))
-          "Position is the same than in the original view"))
 
-  (t/is (= :little-endian
-           (-> (binf.buffer/alloc 42)
-               binf/view
-               (binf/endian-set :little-endian)
-               (binf/grow 24)
-               binf/endian-get))
-        "Endianess is duplicated"))
+;; TODO. Ensure modifying new view does not impact old one.
+;; TOOD. Alternative views.
 
 
 ;;;;;;;;;; Additional types / Boolean
