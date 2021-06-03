@@ -978,7 +978,9 @@
                       n-additional-byte (TC.gen/choose 0
                                                        view-size)
                       position          (TC.gen/choose 0
-                                                       view-size)]
+                                                       (- view-size
+                                                          8))
+                      u64               binf.gen/u64]
       (let [view-2  (binf/grow (-> view
                                    (binf/endian-set endianess)
                                    (binf/seek position))
@@ -996,11 +998,18 @@
              (= position
                 (binf/position view-2))
              (= endianess
-                (binf/endian-get view-2)))))))
+                (binf/endian-get view-2))
+             (let [before (binf/ra-u64 view
+                                       position)]
+               (binf/wa-b64 view-2
+                            position
+                            u64)
+               (= before
+                  (binf/ra-u64 view
+                               position))))))))
 
 
-;; TODO. Ensure modifying new view does not impact old one.
-;; TOOD. Alternative views.
+;; TODO. Alternative views.
 
 
 ;;;;;;;;;; Additional types / Boolean
