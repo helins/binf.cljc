@@ -5,7 +5,7 @@
 
 (ns helins.binf.test.native
 
-  ""
+  "Testing native pointer operations."
 
   {:author "Adam Helinski"}
 

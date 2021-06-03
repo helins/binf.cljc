@@ -7,13 +7,11 @@
 
   {:author "Adam Helins"}
 
-  (:require [clojure.test                    :as t]
-            [clojure.test.check.clojure-test :as TC.ct]
+  (:require [clojure.test.check.clojure-test :as TC.ct]
             [clojure.test.check.generators   :as TC.gen]
             [clojure.test.check.properties   :as TC.prop]
             [helins.binf                     :as binf]
             [helins.binf.base64              :as binf.base64]
-            [helins.binf.buffer              :as binf.buffer]
             [helins.binf.gen                 :as binf.gen]))
 
 

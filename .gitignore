@@ -33,4 +33,6 @@ package.json
 !/cljs/index.html
 
 
+/.clj-kondo/*
+!/.clj-kondo/config.edn
 /private

@@ -8,8 +8,8 @@
   {:author "Adam Helins"}
 
   (:require [clojure.test                    :as t]
-            [clojure.test.check.clojure-test :as tc.ct]
-            [clojure.test.check.properties   :as tc.prop]
+            [clojure.test.check.clojure-test :as TC.ct]
+            [clojure.test.check.properties   :as TC.prop]
             [helins.binf                     :as binf]
             [helins.binf.buffer              :as binf.buffer]
             [helins.binf.gen                 :as binf.gen]
@@ -237,9 +237,9 @@
          binf/view))
 
 
-(tc.ct/defspec gen-i32
+(TC.ct/defspec gen-i32
 
-  (tc.prop/for-all [i32 binf.gen/i32]
+  (TC.prop/for-all [i32 binf.gen/i32]
     (= i32
        (-> view-gen
            (binf/seek 0)
@@ -249,9 +249,9 @@
 
 
 
-(tc.ct/defspec gen-u32
+(TC.ct/defspec gen-u32
 
-  (tc.prop/for-all [u32 binf.gen/u32]
+  (TC.prop/for-all [u32 binf.gen/u32]
     (= u32
        (-> view-gen
            (binf/seek 0)
@@ -261,9 +261,9 @@
 
 
 
-(tc.ct/defspec gen-i64
+(TC.ct/defspec gen-i64
 
-  (tc.prop/for-all [i64 binf.gen/i64]
+  (TC.prop/for-all [i64 binf.gen/i64]
     (= i64
        (-> view-gen
            (binf/seek 0)
@@ -273,9 +273,9 @@
 
 
 
-(tc.ct/defspec gen-u64
+(TC.ct/defspec gen-u64
 
-  (tc.prop/for-all [u64 binf.gen/u64]
+  (TC.prop/for-all [u64 binf.gen/u64]
     (= u64
        (-> view-gen
            (binf/seek 0)
