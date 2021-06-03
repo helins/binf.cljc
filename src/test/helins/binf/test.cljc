@@ -9,7 +9,8 @@
 
   {:author "Adam Helins"}
 
-  (:require [clojure.test                    :as t]
+  (:require [clojure.string]
+            [clojure.test                    :as t]
             [clojure.test.check.clojure-test :as TC.ct]
             [clojure.test.check.generators   :as TC.gen]
             [clojure.test.check.properties   :as TC.prop]
@@ -220,6 +221,9 @@
 
 
 ;;;;;;;;; Numerical R/W
+
+
+;; TODO. Ensure position has been moved correctly in relative R/W.
 
 
 (def view-size
@@ -729,6 +733,50 @@
 
 
 ;;;;;;;;;; Encoding and decoding strings
+
+
+(defn gen-string
+
+  ""
+
+  [src]
+
+  (TC.gen/let [n-char (TC.gen/choose 0
+                                     (Math/ceil (/ view-size
+                                                   4))) ;; Can accomodate any UTF-8 string within the view
+               [pos
+                view] (gen-write src
+                                 (* 4
+                                    n-char))
+               string (TC.gen/fmap clojure.string/join
+                                   (TC.gen/vector TC.gen/char
+                                                  0
+                                                  n-char))]
+    [view
+     pos
+     string]))
+
+
+
+(TC.ct/defspec rwa-string
+
+  (TC.prop/for-all [[view
+                     pos
+                     string] (gen-string src)]
+    (let [[finished?
+           n-byte
+           n-char]   (binf/wa-string view
+                                     pos
+                                     string)]
+      (and finished?
+           (= (count string)
+              n-char)
+           (= string
+              (binf/ra-string view
+                              pos
+                              n-byte))))))
+
+
 
 
 (defn -string
