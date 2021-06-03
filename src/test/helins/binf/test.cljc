@@ -226,6 +226,7 @@
      1024)
 
 
+
 (defn gen-write
 
   ""
@@ -618,6 +619,39 @@
 
 
 ;;;;;;;;;; Copying from/to buffers
+
+
+
+(TC.ct/defspec rwa-buffer
+
+  (TC.prop/for-all [result (TC.gen/let [n-byte-buffer (TC.gen/choose 0
+                                                                     view-size)
+                                        [position
+                                         view]        (gen-write src
+                                                                 n-byte-buffer)
+                                        buffer        (binf.gen/buffer n-byte-buffer)
+                                        n-byte-copy   (TC.gen/choose 0
+                                                                     n-byte-buffer)
+                                        offset        (TC.gen/choose 0
+                                                                     (- n-byte-buffer
+                                                                        n-byte-copy))]
+                             (= (doall (seq buffer))
+                                (-> view
+                                    (binf/wa-buffer position
+                                                    buffer
+                                                    offset
+                                                    n-byte-copy)
+                                    (binf/ra-buffer position
+                                                    n-byte-copy
+                                                    buffer
+                                                    offset)
+                                    seq)))]
+    result))
+
+
+
+
+
 
 
 (def copy-size

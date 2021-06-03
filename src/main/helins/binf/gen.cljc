@@ -109,6 +109,12 @@
      (fmap (TC.gen/vector u8)))
 
 
+    ([n-byte]
+
+     (fmap (TC.gen/vector u8
+                          n-byte)))
+
+
     ([n-byte-min n-byte-max]
 
      (fmap (TC.gen/vector u8
@@ -128,6 +134,11 @@
      (fmap (view)))
 
 
+    ([n-byte]
+
+     (fmap (view n-byte)))
+
+
     ([n-byte-min n-byte-max]
 
      (fmap (view n-byte-min
@@ -140,8 +151,10 @@
 (comment
 
 
-  (seq (TC.gen/generate (buffer 16
-                                32)))
+  (TC.gen/generate (TC.gen/vector u8
+                                  5))
+
+  (binf/limit (TC.gen/generate (buffer 16)))
 
 
   )

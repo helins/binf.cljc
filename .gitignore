@@ -33,6 +33,4 @@ package.json
 !/cljs/index.html
 
 
-// Wasmer
-
-./wasmer/runtime/*
+/private
