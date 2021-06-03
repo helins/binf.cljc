@@ -5,7 +5,13 @@
 
 (ns helins.binf.test
 
-  "Testing core view utilities."
+  "Testing core view utilities.
+  
+   R/W tests ensures a few things at once:
+
+   - Endianess is randomized
+   - 
+  "
 
   {:author "Adam Helins"}
 
@@ -38,14 +44,23 @@
 ;;;;;;;;;; Miscellaneous helpers
 
 
+(defn NaN?
+  
+  ""
+
+  [n]
+
+  #?(:clj  (Double/isNaN n)
+     :cljs (js/isNaN n)))
+
 (defn eq-float
 
   "Computes equality for floats where NaN is equal to itself."
 
   [x y]
 
-  (if (Double/isNaN x)
-    (Double/isNaN y)
+  (if (NaN? x)
+    (NaN? y)
     (= x
        y)))
 
@@ -69,10 +84,11 @@
   
   ""
 
-  [view position n-byte]
+  [view _position n-byte]
 
   (-> view
-      (binf/seek position)
+      (binf/seek (- (binf/position view)
+                    n-byte))
       (binf/rr-string n-byte)))
 
 
@@ -203,17 +219,23 @@
 
   ([src gen n-byte rr wr eq]
 
-   (TC.prop/for-all [x      gen
-                     [pos
-                      view] (gen-write src
-                                       n-byte)]
-     (eq x
-         (-> view
-             (binf/seek pos)
-             (wr x)
-             (binf/seek (- (binf/position view)
-                          n-byte))
-             rr)))))
+   (TC.prop/for-all [x         gen
+                     [position
+                      view] (  gen-write src
+                                         n-byte)]
+     (-> view
+         (binf/seek position)
+         (wr x))
+     (let [position-after (binf/position view)]
+       (and (eq x
+                (-> view
+                    (binf/seek position)
+                    (wr x)
+                    (binf/seek (- (binf/position view)
+                                 n-byte))
+                    rr))
+            (= position-after
+               (binf/position view)))))))
 
 
 ;;;;;;;;;; Creating views
@@ -436,10 +458,6 @@
 
 
 ;;;;;;;;; R/W numbers
-
-
-;; TODO. Ensure position has been moved correctly in relative R/W + not at all in absolute R/W.
-;; TODO. Randomize endianess.
 
 
 (TC.ct/defspec rwa-i8
@@ -741,6 +759,22 @@
 ;;;;;;;;;; Copying from/to buffers
 
 
+
+(defn buffer-erase
+
+  ""
+
+  [buffer offset n-byte]
+
+  (let [view (binf/view buffer
+                        offset
+                        n-byte)]
+    (dotimes [_ n-byte]
+      (binf/wr-b8 view
+                  0))))
+
+
+
 (defn gen-write-buffer
 
   ""
@@ -766,40 +800,32 @@
 
 
 
-(defn prop-buffer
-
-  ""
-
-  [src w r]
-
-  (TC.prop/for-all [[view
-                     position
-                     buffer
-                     offset
-                     n-byte]  (gen-write-buffer src)]
-    (= (doall (seq buffer))
-       (-> view
-           (w position
-              buffer
-              offset
-              n-byte)
-           (r position
-              n-byte
-              buffer
-              offset)
-           seq))))
-
-
-
 (defn prop-rwa-buffer
 
   ""
 
   [src]
 
-  (prop-buffer src
-               binf/wa-buffer
-               binf/ra-buffer))
+  (TC.prop/for-all [[view
+                     position
+                     buffer
+                     offset
+                     n-byte]  (gen-write-buffer src)]
+    (let [target (doall (seq buffer))]
+      (buffer-erase buffer
+                    offset
+                    n-byte)
+      (= target
+         (-> view
+             (binf/wa-buffer position
+                             buffer
+                             offset
+                             n-byte)
+             (binf/ra-buffer position
+                             n-byte
+                             buffer
+                             offset)
+             seq)))))
 
 
 
@@ -809,19 +835,29 @@
 
   [src]
 
-  (prop-buffer src
-               (fn write [view position buffer offset n-byte]
-                 (-> view
-                     (binf/seek position)
-                     (binf/wr-buffer buffer
-                                     offset
-                                     n-byte)))
-               (fn read [view position n-byte buffer offset]
-                 (-> view
-                     (binf/seek position)
-                     (binf/rr-buffer n-byte
-                                     buffer
-                                     offset)))))
+  (TC.prop/for-all [[view
+                     position
+                     buffer
+                     offset
+                     n-byte]  (gen-write-buffer src)]
+    (-> view
+        (binf/seek position)
+        (binf/wr-buffer buffer
+                        offset
+                        n-byte))
+    (let [position-after (binf/position view)
+          target         (doall (seq buffer))]
+      (buffer-erase buffer
+                    offset
+                    n-byte)
+      (= target
+         (-> view
+             (binf/seek (- (binf/position view)
+                           n-byte))
+             (binf/rr-buffer n-byte
+                             buffer
+                             offset)
+             seq)))))
 
 
 
@@ -904,9 +940,23 @@
 
   [src]
 
-  (prop-string src
-               binf/wa-string
-               binf/ra-string))
+  (TC.prop/for-all [[view
+                     position
+                     string]   (gen-string src)]
+    (let [[finished?
+           n-byte
+           n-char
+           #?(:clj char-buffer)] (binf/wa-string view
+                                                 position
+                                                 string)]
+      (and finished?
+           (= (count string)
+              n-char)
+           #?(:clj (nil? char-buffer))
+           (= string
+              (binf/ra-string view
+                              position
+                              n-byte))))))
 
 
 
@@ -916,9 +966,27 @@
 
   [src]
 
-  (prop-string src
-               wr-string
-               rr-string))
+  (TC.prop/for-all [[view
+                     position
+                     string]  (gen-string src)]
+    (let [[finished?
+           n-byte
+           n-char
+           #?(:clj char-buffer)] (-> view
+                                     (binf/seek position)
+                                     (binf/wr-string string))
+          position-after         (binf/position view)]
+      (and finished?
+           (= (count string)
+              n-char)
+           #?(:clj (nil? char-buffer))
+           (= string
+              (-> view
+                  (binf/seek (- position-after
+                                n-byte))
+                  (binf/rr-string n-byte)))
+           (= position-after
+              (binf/position view))))))
 
 
 
@@ -973,42 +1041,31 @@
 
 
 
-(defn prop-string-big
-
-  ""
-
-  [src w r]
-
-  (TC.prop/for-all [[view
-                     position
-                     string] (gen-string-big src)]
-    (let [[finished?
-           n-byte
-           #?(:clj _n-char
-              :cljs n-char)
-           #?(:clj char-buffer)] (w view
-                                    position
-                                    string)]
-      (and (not finished?)
-           (= string
-              (str (r view
-                      position
-                      n-byte)
-                   #?(:clj  (.toString ^CharBuffer char-buffer)
-                      :cljs (.substring string
-                                        n-char))))))))
-
-
-
 (defn prop-rwa-string-big
 
   ""
 
   [src]
 
-  (prop-string-big src
-                   binf/wa-string
-                   binf/ra-string))
+  (TC.prop/for-all [[view
+                     position
+                     string] (gen-string-big src)]
+    (let [[finished?
+           n-byte
+           #?(:clj  _n-char
+              :cljs n-char)
+           #?(:clj char-buffer)] (binf/wa-string view
+                                                 position
+                                                 string)]
+      (and (not finished?)
+           (= string
+              (str (binf/ra-string view
+                                   position
+                                   n-byte)
+                   #?(:clj  (.toString ^CharBuffer char-buffer)
+                      :cljs (.substring string
+                                        n-char))))))))
+
 
 
 
@@ -1018,9 +1075,28 @@
 
   [src]
 
-  (prop-string-big src
-                   wr-string
-                   rr-string))
+  (TC.prop/for-all [[view
+                     position
+                     string] (gen-string-big src)]
+    (let [[finished?
+           n-byte
+           #?(:clj  _n-char
+              :cljs n-char)
+           #?(:clj char-buffer)] (binf/wa-string view
+                                                 position
+                                                 string)
+          position-after         (binf/position view)]
+      (and (not finished?)
+           (= string
+              (str (-> view
+                       (binf/seek (- position-after
+                                     n-byte))
+                       (binf/rr-string n-byte))
+                   #?(:clj  (.toString ^CharBuffer char-buffer)
+                      :cljs (.substring string
+                                        n-char)))
+           (= position-after
+              (binf/position view)))))))
 
 
 
