@@ -143,7 +143,13 @@
                                            n-additional-byte))]
           (copy buffer-new
                 this)
-          buffer-new))))
+          buffer-new))
+
+
+  binf.protocol/IPosition
+
+    (limit [this]
+      (.byteLength this))))
 
 
 
@@ -168,4 +174,10 @@
                                                  n-additional-byte))]
           (copy buffer-new
                 this)
-          buffer-new)))))
+          buffer-new))
+
+
+  binf.protocol/IPosition
+
+    (limit [this]
+      (.byteLength this)))))

@@ -8,73 +8,57 @@
   {:author "Adam Helins"}
 
   (:require [clojure.test                    :as t]
-            [clojure.test.check.clojure-test :as tc.ct]
-            [clojure.test.check.generators   :as tc.gen]
-            [clojure.test.check.properties   :as tc.prop]
+            [clojure.test.check.clojure-test :as TC.ct]
+            [clojure.test.check.generators   :as TC.gen]
+            [clojure.test.check.properties   :as TC.prop]
             [helins.binf                     :as binf]
             [helins.binf.base64              :as binf.base64]
             [helins.binf.buffer              :as binf.buffer]
             [helins.binf.gen                 :as binf.gen]))
 
 
-;;;;;;;;;;
+;;;;;;;;;; Helpers
 
 
-(t/deftest main
+(defn to-seq
 
-  (let [buffer (binf.buffer/alloc 64)
-        view   (binf/view buffer)
-        #?@(:cljs [buffer-shared (binf.buffer/alloc-shared 64)
-                   view-shared   (binf/view buffer-shared)])]
-    (dotimes [i 64]
-      (binf/wr-b8 view
-                  i)
-      #?(:cljs (binf/wr-b8 view-shared
-                           i)))
-    (t/is (= (seq buffer)
-             (seq (-> buffer
-                      binf.base64/encode
-                      binf.base64/decode
-                      binf/backing-buffer))
-             #?(:cljs (seq (-> buffer-shared
-                               binf.base64/encode
-                               (binf.base64/decode binf.buffer/alloc-shared)
-                               binf/backing-buffer))))
-          "Without offset nor lenght")
-    (t/is (= (drop 5
-                   (seq buffer))
-             (seq (-> buffer
-                      (binf.base64/encode 5)
-                      binf.base64/decode
-                      binf/backing-buffer))
-             #?(:cljs (seq (-> buffer-shared
-                               (binf.base64/encode 5)
-                               (binf.base64/decode binf.buffer/alloc-shared)
-                               binf/backing-buffer))))
-          "With offset without length")
-    (t/is (= (->> (seq buffer)
-                  (drop 5)
-                  (take 20))
-             (seq (-> buffer
-                      (binf.base64/encode 5
-                                          20)
-                      binf.base64/decode
-                      binf/backing-buffer))
-             #?(:cljs (seq (-> buffer-shared
-                               (binf.base64/encode 5
-                                                   20)
-                               (binf.base64/decode binf.buffer/alloc-shared)
-                               binf/backing-buffer))))
-          "With offset and length")))
+  "Reads the given `view` as a buffer relatively until its end and returns it as a sequence."
+
+  [view]
+
+  (seq (binf/rr-buffer view
+                       (binf/limit view))))
 
 
+;;;;;;;;;; Tests
 
-(tc.ct/defspec gen
 
-  (tc.prop/for-all [buffer (binf.gen/buffer)]
-    (= (seq buffer)
-       (let [view (-> buffer
-                      binf.base64/encode
-                      binf.base64/decode)]
-         (seq (binf/rr-buffer view
-                              (binf/limit view)))))))
+(TC.ct/defspec main
+
+  (TC.prop/for-all [[buffer
+                     offset
+                     n-byte] (TC.gen/let [buffer (binf.gen/buffer)
+                                          offset (TC.gen/choose 0
+                                                                (binf/limit buffer))
+                                          n-byte (TC.gen/choose 0
+                                                                (- (binf/limit buffer)
+                                                                   offset))]
+                               [buffer
+                                offset
+                                n-byte])]
+    (and (= (seq buffer)
+            (to-seq (-> buffer
+                        binf.base64/encode
+                        binf.base64/decode)))
+         (= (seq (drop offset
+                       buffer))
+            (to-seq (-> buffer
+                        (binf.base64/encode offset)
+                        binf.base64/decode)))
+         (= (seq (->> buffer
+                      (drop offset)
+                      (take n-byte)))
+            (to-seq (-> buffer
+                        (binf.base64/encode offset
+                                            n-byte)
+                        binf.base64/decode))))))
