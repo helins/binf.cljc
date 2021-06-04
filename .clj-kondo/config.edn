@@ -1,2 +1,2 @@
-{:lint-as {clojure.test.check.clojure-test/defspec clojure.test/deftest
-           clojure.test.check.properties/for-all   clojure.core/let}}
+{:lint-as {clojure.test.check.properties/for-all clojure.core/let
+           helins.mprop/deftest                  clojure.test/deftest}}

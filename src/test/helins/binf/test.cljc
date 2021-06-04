@@ -17,14 +17,14 @@
 
   #?(:clj (:import java.nio.CharBuffer))
   (:require [clojure.string]
-            [clojure.test.check.clojure-test :as TC.ct]
             [clojure.test.check.generators   :as TC.gen]
             [clojure.test.check.properties   :as TC.prop]
             [helins.binf                     :as binf]
             [helins.binf.buffer              :as binf.buffer]
             [helins.binf.float               :as binf.float]
             [helins.binf.gen                 :as binf.gen]
-            #?(:clj [helins.binf.native      :as binf.native])))
+            #?(:clj [helins.binf.native      :as binf.native])
+            [helins.mprop                    :as mprop]))
 
 
 #?(:clj (set! *warn-on-reflection*
@@ -123,11 +123,18 @@
      (wa view
          position
          x)
-     (= (zero? (binf/position view))
-        (eq x
-            (ra view
-                position))
-        (zero? (binf/position view))))))
+     (mprop/mult
+
+       "Position did not change after writing"
+       (zero? (binf/position view))
+
+       "Output is input"
+       (eq x
+           (ra view
+               position))
+
+       "Position did not change after reading"
+       (zero? (binf/position view))))))
 
 
 
@@ -156,13 +163,18 @@
          (binf/seek position)
          (wr x))
      (let [position-after (binf/position view)]
-       (and (eq x
-                (-> view
-                    (binf/seek (- (binf/position view)
-                                 n-byte))
-                    rr))
-            (= position-after
-               (binf/position view)))))))
+       (mprop/mult
+
+         "Output is input after position has been updated"
+         (eq x
+             (-> view
+                 (binf/seek (- (binf/position view)
+                              n-byte))
+                 rr))
+
+         "After reading, position has been updated"
+         (= position-after
+            (binf/position view)))))))
 
 
 ;;;;;;;;;; Creating views
@@ -218,36 +230,47 @@
                                              0
                                              view-size])
                     u8          binf.gen/u8]
-    (and (zero? (binf/position view))
-         (= limit
-            (binf/limit view))
-         (if-some [offset (binf/buffer-offset view)]
-           (= start
-              offset)
-           true)
-         (= endianess
-            (binf/endian-get view))
-         (if (>= limit
-                 1)
-           (do
-             (binf/wa-b8 view
-                         0
-                         u8)
-             (= u8
-                (binf/ra-u8 (binf/view src)
-                            start)))
-           true))))
+    (mprop/mult
+
+      "Position is 0 is new view"
+      (zero? (binf/position view))
+
+      "Check limit of new view"
+      (= limit
+         (binf/limit view))
+
+      "Check offset in backing buffer (if any)"
+      (if-some [offset (binf/buffer-offset view)]
+        (= start
+           offset)
+        true)
+
+      "Endianess has been copied from source"
+      (= endianess
+         (binf/endian-get view))
+
+      "Writing in new impacts the original"
+      (if (>= limit
+              1)
+        (do
+          (binf/wa-b8 view
+                      0
+                      u8)
+          (= u8
+             (binf/ra-u8 (binf/view src)
+                         start)))
+        true))))
 
 
 
 
-(TC.ct/defspec create
+(mprop/deftest create
 
   (prop-create src))
 
 
 
-(TC.ct/defspec create-2
+(mprop/deftest create-2
 
   (prop-create src-2))
 
@@ -255,7 +278,7 @@
 ;;;;;;;;;; R/W booleans
 
 
-(TC.ct/defspec rwa-bool
+(mprop/deftest rwa-bool
 
   (prop-rwa src
             TC.gen/boolean
@@ -265,7 +288,7 @@
 
 
 
-(TC.ct/defspec rwr-bool
+(mprop/deftest rwr-bool
 
   (prop-rwr src
             TC.gen/boolean
@@ -275,7 +298,7 @@
 
 
 
-(TC.ct/defspec rwa-bool-2
+(mprop/deftest rwa-bool-2
 
   (prop-rwa src-2
             TC.gen/boolean
@@ -285,7 +308,7 @@
 
 
 
-(TC.ct/defspec rwr-bool-2
+(mprop/deftest rwr-bool-2
 
   (prop-rwr src-2
             TC.gen/boolean
@@ -297,7 +320,7 @@
 ;;;;;;;;; R/W numbers
 
 
-(TC.ct/defspec rwa-i8
+(mprop/deftest rwa-i8
 
   (prop-rwa src
             binf.gen/i8
@@ -306,7 +329,7 @@
             binf/wa-b8))
 
 
-(TC.ct/defspec rwa-i16
+(mprop/deftest rwa-i16
 
   (prop-rwa src
             binf.gen/i16
@@ -315,7 +338,7 @@
             binf/wa-b16))
 
 
-(TC.ct/defspec rwa-i32
+(mprop/deftest rwa-i32
 
   (prop-rwa src
             binf.gen/i32
@@ -324,7 +347,7 @@
             binf/wa-b32))
 
 
-(TC.ct/defspec rwa-i64
+(mprop/deftest rwa-i64
 
   (prop-rwa src
             binf.gen/i64
@@ -333,7 +356,7 @@
             binf/wa-b64))
 
 
-(TC.ct/defspec rwa-u8
+(mprop/deftest rwa-u8
 
   (prop-rwa src
             binf.gen/u8
@@ -342,7 +365,7 @@
             binf/wa-b8))
 
 
-(TC.ct/defspec rwa-u16
+(mprop/deftest rwa-u16
 
   (prop-rwa src
             binf.gen/u16
@@ -351,7 +374,7 @@
             binf/wa-b16))
 
 
-(TC.ct/defspec rwa-u32
+(mprop/deftest rwa-u32
 
   (prop-rwa src
             binf.gen/u32
@@ -360,7 +383,7 @@
             binf/wa-b32))
 
 
-(TC.ct/defspec rwa-u64
+(mprop/deftest rwa-u64
 
   (prop-rwa src
             binf.gen/u64
@@ -369,7 +392,7 @@
             binf/wa-b64))
 
 
-(TC.ct/defspec rwr-i8
+(mprop/deftest rwr-i8
 
   (prop-rwr src
             binf.gen/i8
@@ -378,7 +401,7 @@
             binf/wr-b8))
 
 
-(TC.ct/defspec rwr-i16
+(mprop/deftest rwr-i16
 
   (prop-rwr src
             binf.gen/i16
@@ -387,7 +410,7 @@
             binf/wr-b16))
 
 
-(TC.ct/defspec rwr-i32
+(mprop/deftest rwr-i32
 
   (prop-rwr src
             binf.gen/i32
@@ -396,7 +419,7 @@
             binf/wr-b32))
 
 
-(TC.ct/defspec rwr-i64
+(mprop/deftest rwr-i64
 
   (prop-rwr src
             binf.gen/i64
@@ -405,7 +428,7 @@
             binf/wr-b64))
 
 
-(TC.ct/defspec rwa-f32
+(mprop/deftest rwa-f32
 
   (prop-rwa src
             binf.gen/f32
@@ -415,7 +438,7 @@
             binf.float/=))
 
 
-(TC.ct/defspec rwa-f64
+(mprop/deftest rwa-f64
 
   (prop-rwa src
             binf.gen/f64
@@ -425,7 +448,7 @@
             binf.float/=))
 
 
-(TC.ct/defspec rwr-f32
+(mprop/deftest rwr-f32
 
   (prop-rwr src
             binf.gen/f32
@@ -435,7 +458,7 @@
             binf.float/=))
 
 
-(TC.ct/defspec rwr-f64
+(mprop/deftest rwr-f64
 
   (prop-rwr src
             binf.gen/f64
@@ -445,7 +468,7 @@
             binf.float/=))
 
 
-(TC.ct/defspec rwa-i8-2
+(mprop/deftest rwa-i8-2
 
   (prop-rwa src-2
             binf.gen/i8
@@ -454,7 +477,7 @@
             binf/wa-b8))
 
 
-(TC.ct/defspec rwa-i16-2
+(mprop/deftest rwa-i16-2
 
   (prop-rwa src-2
             binf.gen/i16
@@ -463,7 +486,7 @@
             binf/wa-b16))
 
 
-(TC.ct/defspec rwa-i32-2
+(mprop/deftest rwa-i32-2
 
   (prop-rwa src-2
             binf.gen/i32
@@ -472,7 +495,7 @@
             binf/wa-b32))
 
 
-(TC.ct/defspec rwa-i64-2
+(mprop/deftest rwa-i64-2
 
   (prop-rwa src-2
             binf.gen/i64
@@ -481,7 +504,7 @@
             binf/wa-b64))
 
 
-(TC.ct/defspec rwa-u8-2
+(mprop/deftest rwa-u8-2
 
   (prop-rwa src-2
             binf.gen/u8
@@ -490,7 +513,7 @@
             binf/wa-b8))
 
 
-(TC.ct/defspec rwa-u16-2
+(mprop/deftest rwa-u16-2
 
   (prop-rwa src-2
             binf.gen/u16
@@ -499,7 +522,7 @@
             binf/wa-b16))
 
 
-(TC.ct/defspec rwa-u32-2
+(mprop/deftest rwa-u32-2
 
   (prop-rwa src-2
             binf.gen/u32
@@ -508,7 +531,7 @@
             binf/wa-b32))
 
 
-(TC.ct/defspec rwa-u64-2
+(mprop/deftest rwa-u64-2
 
   (prop-rwa src-2
             binf.gen/u64
@@ -517,7 +540,7 @@
             binf/wa-b64))
 
 
-(TC.ct/defspec rwr-i8-2
+(mprop/deftest rwr-i8-2
 
   (prop-rwr src-2
             binf.gen/i8
@@ -526,7 +549,7 @@
             binf/wr-b8))
 
 
-(TC.ct/defspec rwr-i16-2
+(mprop/deftest rwr-i16-2
 
   (prop-rwr src-2
             binf.gen/i16
@@ -535,7 +558,7 @@
             binf/wr-b16))
 
 
-(TC.ct/defspec rwr-i32-2
+(mprop/deftest rwr-i32-2
 
   (prop-rwr src-2
             binf.gen/i32
@@ -544,7 +567,7 @@
             binf/wr-b32))
 
 
-(TC.ct/defspec rwr-i64-2
+(mprop/deftest rwr-i64-2
 
   (prop-rwr src-2
             binf.gen/i64
@@ -553,7 +576,7 @@
             binf/wr-b64))
 
 
-(TC.ct/defspec rwa-f32-2
+(mprop/deftest rwa-f32-2
 
   (prop-rwa src-2
             binf.gen/f32
@@ -563,7 +586,7 @@
             binf.float/=))
 
 
-(TC.ct/defspec rwa-f64-2
+(mprop/deftest rwa-f64-2
 
   (prop-rwa src-2
             binf.gen/f64
@@ -573,7 +596,7 @@
             binf.float/=))
 
 
-(TC.ct/defspec rwr-f32-2
+(mprop/deftest rwr-f32-2
 
   (prop-rwr src-2
             binf.gen/f32
@@ -583,7 +606,7 @@
             binf.float/=))
 
 
-(TC.ct/defspec rwr-f64-2
+(mprop/deftest rwr-f64-2
 
   (prop-rwr src-2
             binf.gen/f64
@@ -659,15 +682,22 @@
       (buffer-erase buffer
                     offset
                     n-byte)
-      (and (zero? (binf/position view))
-           (= target
-              (-> view
-                  (binf/ra-buffer position
-                                  n-byte
-                                  buffer
-                                  offset)
-                  seq))
-           (zero? (binf/position view))))))
+      (mprop/mult
+
+        "Position did not change after writing"
+        (zero? (binf/position view))
+
+        "Reading back what has been written"
+        (= target
+           (-> view
+               (binf/ra-buffer position
+                               n-byte
+                               buffer
+                               offset)
+               seq))
+
+        "Position did not change after reading"
+        (zero? (binf/position view))))))
 
 
 
@@ -687,40 +717,48 @@
         (binf/wr-buffer buffer
                         offset
                         n-byte))
-    (let [target (doall (seq buffer))]
+    (let [position-after (binf/position view)
+          target         (doall (seq buffer))]
       (buffer-erase buffer
                     offset
                     n-byte)
-      (= target
-         (-> view
-             (binf/seek (- (binf/position view)
-                           n-byte))
-             (binf/rr-buffer n-byte
-                             buffer
-                             offset)
-             seq)))))
+      (mprop/mult
+
+        "Reading back what has been written after deducing the right position"
+        (= target
+           (-> view
+               (binf/seek (- (binf/position view)
+                             n-byte))
+               (binf/rr-buffer n-byte
+                               buffer
+                               offset)
+               seq))
+
+        "Position has been updated after reading"
+        (= position-after
+           (binf/position view))))))
 
 
 
-(TC.ct/defspec rwa-buffer
+(mprop/deftest rwa-buffer
 
   (prop-rwa-buffer src))
 
 
 
-(TC.ct/defspec rwr-buffer
+(mprop/deftest rwr-buffer
 
   (prop-rwr-buffer src))
 
 
 
-(TC.ct/defspec rwa-buffer-2
+(mprop/deftest rwa-buffer-2
 
   (prop-rwa-buffer src-2))
 
 
 
-(TC.ct/defspec rwr-buffer-2
+(mprop/deftest rwr-buffer-2
 
   (prop-rwr-buffer src-2))
 
@@ -768,16 +806,29 @@
            #?(:clj char-buffer)] (binf/wa-string view
                                                  position
                                                  string)]
-      (and (zero? (binf/position view))
-           finished?
-           (= (count string)
-              n-char)
-           #?(:clj (nil? char-buffer))
-           (= string
-              (binf/ra-string view
-                              position
-                              n-byte))
-           (zero? (binf/position view))))))
+      (mprop/mult
+
+        "Position did not change after writing"
+        (zero? (binf/position view))
+
+        "Writing oeration is finished"
+        finished?
+
+        "All characters have been written"
+        (= (count string)
+           n-char)
+
+        #?@(:clj ["There is no char-buffer for continuing the operation"
+                  (nil? char-buffer)])
+
+        "Reading back the written strings"
+        (= string
+           (binf/ra-string view
+                           position
+                           n-byte))
+
+        "Position did not change after reading"
+        (zero? (binf/position view))))))
 
 
 
@@ -797,39 +848,50 @@
                                      (binf/seek position)
                                      (binf/wr-string string))
           position-after         (binf/position view)]
-      (and finished?
-           (= (count string)
-              n-char)
-           #?(:clj (nil? char-buffer))
-           (= string
-              (-> view
-                  (binf/seek (- position-after
-                                n-byte))
-                  (binf/rr-string n-byte)))
-           (= position-after
-              (binf/position view))))))
+      (mprop/mult
+
+        "Writing operation is finished"
+        finished?
+
+        "All characters have been written"
+        (= (count string)
+           n-char)
+
+        #?@(:clj ["There is no char-buffer for continuing the operation"
+                  (nil? char-buffer)])
+
+        "Reading back the written string after deducing the position"
+        (= string
+           (-> view
+               (binf/seek (- position-after
+                             n-byte))
+               (binf/rr-string n-byte)))
+
+        "Position did not change after reading"
+        (= position-after
+           (binf/position view))))))
 
 
 
-(TC.ct/defspec rwa-string
+(mprop/deftest rwa-string
 
   (prop-rwa-string src))
 
 
 
-(TC.ct/defspec rwr-string
+(mprop/deftest rwr-string
 
   (prop-rwr-string src))
 
 
 
-(TC.ct/defspec rwa-string-2
+(mprop/deftest rwa-string-2
 
   (prop-rwa-string src-2))
 
 
 
-(TC.ct/defspec rwr-string-2
+(mprop/deftest rwr-string-2
 
   (prop-rwr-string src-2))
 
@@ -881,16 +943,25 @@
            #?(:clj char-buffer)] (binf/wa-string view
                                                  position
                                                  string)]
-      (and (zero? (binf/position view))
-           (not finished?)
-           (= string
-              (str (binf/ra-string view
-                                   position
-                                   n-byte)
-                   #?(:clj  (.toString ^CharBuffer char-buffer)
-                      :cljs (.substring string
-                                        n-char))))
-           (zero? (binf/position view))))))
+      (mprop/mult
+
+        "Position did not change after writing"
+        (zero? (binf/position view))
+
+        "Writing is not finished"
+        (not finished?)
+
+        "String can be recomputed by reading what has been written and concatenating with what is remaining"
+        (= string
+           (str (binf/ra-string view
+                                position
+                                n-byte)
+                #?(:clj  (.toString ^CharBuffer char-buffer)
+                   :cljs (.substring string
+                                     n-char))))
+
+        "Position did not change after reading"
+        (zero? (binf/position view))))))
 
 
 
@@ -912,39 +983,46 @@
                                      (binf/seek position)
                                      (binf/wr-string string))
           position-after         (binf/position view)]
-      (and (not finished?)
-           (= string
-              (str (-> view
-                       (binf/seek (- position-after
-                                     n-byte))
-                       (binf/rr-string n-byte))
-                   #?(:clj  (.toString ^CharBuffer char-buffer)
-                      :cljs (.substring string
-                                        n-char))))
-           (= position-after
-              (binf/position view))))))
+      (mprop/mult
+
+        "Operation is not finished"
+        (not finished?)
+
+        "String can be recomputed by reading what has been written and concatenating with what is remaining"
+        (= string
+           (str (-> view
+                    (binf/seek (- position-after
+                                  n-byte))
+                    (binf/rr-string n-byte))
+                #?(:clj  (.toString ^CharBuffer char-buffer)
+                   :cljs (.substring string
+                                     n-char))))
+
+        "Position has been updated after reading"
+        (= position-after
+           (binf/position view))))))
 
 
 
-(TC.ct/defspec rwa-string-big
+(mprop/deftest rwa-string-big
 
   (prop-rwa-string-big src))
 
 
 
-(TC.ct/defspec rwr-string-big
+(mprop/deftest rwr-string-big
 
   (prop-rwr-string-big src))
 
 
 
-(TC.ct/defspec rwa-string-big-2
+(mprop/deftest rwa-string-big-2
 
   (prop-rwa-string-big src-2))
 
 
 
-(TC.ct/defspec rwr-string-big-2
+(mprop/deftest rwr-string-big-2
 
   (prop-rwr-string-big src-2))
 
@@ -975,39 +1053,52 @@
                                    (binf/seek position))
                                n-additional-byte)
             limit-2 (binf/limit view-2)]
-        (and (= (+ view-size
-                   n-additional-byte)
-                (binf/limit view-2))
-             (= (seq (binf/ra-buffer view-2
-                                     0
-                                     limit-2))
-                (concat view-vec
-                        (repeat n-additional-byte
-                                0)))
-             (= position
-                (binf/position view)
-                (binf/position view-2))
-             (= endianess
-                (binf/endian-get view-2))
-             (= (type view)
-                (type view-2))
-             (let [before (binf/ra-u64 view
-                                       position)]
-               (binf/wa-b64 view-2
-                            position
-                            u64)
-               (= before
-                  (binf/ra-u64 view
-                               position))))))))
+        (mprop/mult
+
+          "New size is adequate"
+          (= (+ view-size
+                n-additional-byte)
+             (binf/limit view-2))
+
+          "Original buffer has been copied"
+          (= (seq (binf/ra-buffer view-2
+                                  0
+                                  limit-2))
+             (concat view-vec
+                     (repeat n-additional-byte
+                             0)))
+
+          "Position is preserved"
+          (= position
+             (binf/position view)
+             (binf/position view-2))
+
+          "Endianess is preserved"
+          (= endianess
+             (binf/endian-get view-2))
+
+          "Type is preserved"
+          (= (type view)
+             (type view-2))
+
+          "Writing in new does not impact the original"
+          (let [before (binf/ra-u64 view
+                                    position)]
+            (binf/wa-b64 view-2
+                         position
+                         u64)
+            (= before
+               (binf/ra-u64 view
+                            position))))))))
 
 
 
-(TC.ct/defspec grow
+(mprop/deftest grow
 
   (prop-grow src))
 
 
 
-(TC.ct/defspec grow-2
+(mprop/deftest grow-2
 
   (prop-grow src-2))
