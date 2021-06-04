@@ -431,7 +431,7 @@ All tasks can be listed by running:
 $ bb tasks
 ```
 
-For instance, for starting a Clojure dev environment:
+For instance, task starting a Clojure dev environment:
 
 ```shell
 $ bb dev:clojure

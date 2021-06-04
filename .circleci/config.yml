@@ -30,7 +30,7 @@ commands:
             - babashka-<< parameters.version >>
       - run:
           name: Download Babashka
-          command: if ! [ -f "bb" ]; then \curl -L https://github.com/babashka/babashka/releases/download/v0.4.4/babashka-0.4.4-linux-amd64.tar.gz -o bb.tar.gz ; fi
+          command: if ! [ -f "bb" ]; then \curl -L https://github.com/babashka/babashka/releases/download/v<< parameters.version >>/babashka-<< parameters.version >>-linux-amd64.tar.gz -o bb.tar.gz ; fi
       - run:
           name: Uncompress Babashka
           command: if [ -f "bb.tar.gz" ]; then \tar -xzvf bb.tar.gz ; fi
