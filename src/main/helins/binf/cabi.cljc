@@ -5,7 +5,9 @@
 
 (ns helins.binf.cabi
 
-  "Interaction with environments that conforms to a C-like ABI.
+  "<!> Stil experimental <!>
+  
+   Interaction with environments that conforms to a C-like ABI.
 
    This namespace is mainly about defining C structures in order to pass them or to understand
    them when interacting with native functions. It could be when using JNI on the JVM or when

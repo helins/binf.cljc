@@ -1,42 +1,109 @@
-{:tasks {deploy             {:depends [jar]
-                             :doc     "Deploy this project to Clojars"
-                             :task    (clojure "-X:deploy")}
+{:tasks {deploy
+
+         {:depends [jar]
+          :doc     "Deploy this project to Clojars"
+          :task    (clojure "-X:deploy")}
          
-         dev:clojure        {:doc  "Start Clojure JVM dev environment (NREPL on port 14563)"
-                             :task (clojure "-M:dev:test:nrepl")}
 
-         dev:cljs           {:doc  "Start CLJS dev environment (NREPL on port 14563, server on port 8000)"
-                             :task (clojure "-M:cljs:dev:test watch dev")}
 
-         install            {:depends [jar]
-                             :doc     "Install jar to local Maven repo"
-                             :task    (clojure "-X:install")}
+         dev:clojure
 
-         jar                {:doc  "Build a jar for this project"
-                             :task (clojure "-X:jar")}
+         {:doc  "Start Clojure JVM dev environment (NREPL on port 14563)"
+          :task (clojure "-M:dev:test:nrepl")}
 
-         lint               {:doc "Start Clj-kondo on './src' (further path can be provided as command-line argument)"
-                             :task (shell (str "clj-kondo --lint src/"
-                                               (first *command-line-args*)))}
 
-         pom                {:doc  "Sync POM file with deps.edn"
-                             :task (do
-                                     (println "Attention, POM must be synced manually because it provides `test.check` for Cljdoc analysis")
-                                     (System/exit 42))}
 
-         test:jvm           {:doc  "Run tests on the JVM once"
-                             :task (clojure "-M:kaocha:test -m kaocha.runner --config-file kaocha.edn :jvm")}
+         dev:cljs
 
-         test:jvm:watch     {:doc "Run tests on the JVM everytime a file is changed"
-                             :task (clojure "-M:kaocha:test -m kaocha.runner --config-file kaocha.edn --watch :jvm")}
+         {:doc  "Start CLJS dev environment (NREPL on port 14563, server on port 8000)"
+          :task (clojure "-M:cljs:dev:test watch dev")}
 
-         test:node          {:doc  "Run tests on NodeJS after unoptimized compilation"
-                             :task (do
-                                     (clojure "-M:cljs:test compile test-node")
-                                     (shell "node ./compiled/node/test.js"))}
 
-         test:node:optimize {:doc  "Run tests on NodeJS after advanced compilation"
-                             :task (do
-                                     (clojure "-M:cljs:test release test-node")
-                                     (shell "node ./compiled/node/test.js"))}
+
+         install
+
+         {:depends [jar]
+          :doc     "Install jar to local Maven repo"
+          :task    (clojure "-X:install")}
+
+
+
+         jar
+
+         {:doc  "Build a jar for this project"
+          :task (clojure "-X:jar")}
+
+
+
+         lint
+
+         {:doc "Start Clj-kondo on './src' (further path can be provided as command-line argument)"
+          :task (shell (str "clj-kondo --lint src/"
+                            (first *command-line-args*)))}
+
+
+
+         pom
+
+         {:doc  "Sync POM file with deps.edn"
+          :task (do
+                  (println "Attention, POM must be synced manually because it provides `test.check` for Cljdoc analysis")
+                  (System/exit 42))}
+
+
+
+         test:jvm
+
+         {:doc  "Run tests on the JVM once ; accepts Kaocha CLI arguments"
+          :task (test-jvm nil)}
+
+
+         test:jvm:watch
+
+         {:doc "Run tests on the JVM everytime a file is changed ; accepts Kaocha CLI arguments"
+          :task (test-jvm ["--watch"])}
+
+
+
+         test:node
+
+         {:doc  "Run tests on NodeJS after unoptimized compilation"
+          :task (test-node false)}
+
+
+
+         test:node:optimize
+
+         {:doc  "Run tests on NodeJS after advanced compilation"
+          :task (test-node true)}
+
+
+
+         :init
+
+         (do
+           (require 'clojure.string)
+
+
+           (defn test-jvm
+
+             ;; Concats CLI args with the given ones.
+
+             [arg+]
+
+             (clojure (str "-M:kaocha:test -m kaocha.runner --config-file kaocha.edn :jvm "
+                           (clojure.string/join " "
+                                                (concat arg+
+                                                        *command-line-args*)))))
+
+           (defn test-node
+
+             [optimize?]
+
+             (clojure (format "-M:cljs:test %s test-node"
+                              (if optimize?
+                                "release"
+                                "compile")))
+             (shell "node ./compiled/node/test.js"))
+           )
          }}

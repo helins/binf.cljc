@@ -5,14 +5,16 @@
 
 (ns helins.binf.test.int
 
+  "Testing <= 32-bit integer utilities."
+
   {:author "Adam Helins"}
 
-  (:require [clojure.test                    :as t]
-            [clojure.test.check.clojure-test :as TC.ct]
-            [clojure.test.check.properties   :as TC.prop]
-            [helins.binf.gen                 :as binf.gen]
-            [helins.binf.int                 :as binf.int]
-            [helins.binf.int64               :as binf.int64]))
+  (:require [clojure.test                  :as T]
+            [clojure.test.check.properties :as TC.prop]
+            [helins.binf.gen               :as binf.gen]
+            [helins.binf.int               :as binf.int]
+            [helins.binf.int64             :as binf.int64]
+            [helins.mprop                  :as mprop]))
 
 
 ;;;;;;;;;; Casting signed <-> unsigned
@@ -32,7 +34,7 @@
 
 
 
-(TC.ct/defspec i8
+(mprop/deftest i8
 
   (prop-cast-iu binf.gen/i8
                 binf.int/u8
@@ -40,7 +42,7 @@
 
 
 
-(TC.ct/defspec i16
+(mprop/deftest i16
 
   (prop-cast-iu binf.gen/i16
                 binf.int/u16
@@ -48,7 +50,7 @@
 
 
 
-(TC.ct/defspec i32
+(mprop/deftest i32
 
   (prop-cast-iu binf.gen/i32
                 binf.int/u32
@@ -56,7 +58,7 @@
 
 
 
-(TC.ct/defspec u8
+(mprop/deftest u8
 
   (prop-cast-iu binf.gen/u8
                 binf.int/i8
@@ -64,7 +66,7 @@
 
 
 
-(TC.ct/defspec u16
+(mprop/deftest u16
 
   (prop-cast-iu binf.gen/u16
                 binf.int/i16
@@ -72,7 +74,7 @@
 
 
 
-(TC.ct/defspec u32
+(mprop/deftest u32
 
   (prop-cast-iu binf.gen/u32
                 binf.int/i32
@@ -82,16 +84,16 @@
 ;;;;;;;;;; Reconstructing values from bytes
 
 
-(t/deftest byte-combining
+(T/deftest byte-combining
 
-  (t/is (= 0x1122
+  (T/is (= 0x1122
            (binf.int/i16 0x11
                          0x22)
            (binf.int/u16 0x11
                          0x22))
         "16-bits")
 
-  (t/is (= 0x11223344
+  (T/is (= 0x11223344
            (binf.int/i32 0x11
                          0x22
                          0x33
@@ -106,7 +108,7 @@
                          0x3344))
         "32-bit")
 
-  (t/is (= (binf.int64/i* 0x1122334455667788)
+  (T/is (= (binf.int64/i* 0x1122334455667788)
            (binf.int/i64 0x11
                          0x22
                          0x33
@@ -123,7 +125,7 @@
                          0x55667788))
         "Signed 64-bit")
 
-  (t/is (= (binf.int64/u* 0x1122334455667788)
+  (T/is (= (binf.int64/u* 0x1122334455667788)
            (binf.int/u64 0x11
                          0x22
                          0x33
@@ -144,11 +146,11 @@
 ;;;;;;;;;; Stringifying
 
 
-(t/deftest string
+(T/deftest string
 
-  (t/is (= "255"
+  (T/is (= "255"
            (binf.int/str 0xff)))
 
-  (t/is (= "ff"
+  (T/is (= "ff"
            (binf.int/str 16
                          0xff))))

@@ -5,20 +5,22 @@
 
 (ns helins.binf.test.int64
 
+  "Testing 64-bit integer utilities."
+
   {:author "Adam Helins"}
 
-  (:require [clojure.test                    :as t]
-            [clojure.test.check.clojure-test :as TC.ct]
-            [clojure.test.check.generators   :as TC.gen]
-            [clojure.test.check.properties   :as TC.prop]
-            [helins.binf.gen                 :as binf.gen]
-            [helins.binf.int64               :as binf.int64]))
+  (:require [clojure.test                  :as T]
+            [clojure.test.check.generators :as TC.gen]
+            [clojure.test.check.properties :as TC.prop]
+            [helins.binf.gen               :as binf.gen]
+            [helins.binf.int64             :as binf.int64]
+            [helins.mprop                  :as mprop]))
 
 
 ;;;;;;;;;; Casting to ints <= 32-bits
 
 
-(TC.ct/defspec cast-smaller-i
+(mprop/deftest cast-smaller-i
 
   (TC.prop/for-all [x binf.gen/i8]
     (let [x64 (binf.int64/i* x)]
@@ -29,7 +31,7 @@
 
 
 
-(TC.ct/defspec cast-smaller-u
+(mprop/deftest cast-smaller-u
 
   (TC.prop/for-all [x binf.gen/u8]
     (let [x64 (binf.int64/u* x)]
@@ -42,46 +44,46 @@
 ;;;;;;;;;; Bitwise operations from standard lib which does not work with js/BigInt
 
 
-(t/deftest bit-clear--
+(T/deftest bit-clear--
 
-  (t/is (zero? (binf.int64/u32 (binf.int64/bit-clear (binf.int64/u* 2r10)
+  (T/is (zero? (binf.int64/u32 (binf.int64/bit-clear (binf.int64/u* 2r10)
                                                      (binf.int64/u* 1)))))
 
-  (t/is (zero? (binf.int64/u32 (binf.int64/bit-clear (binf.int64/u* 0)
+  (T/is (zero? (binf.int64/u32 (binf.int64/bit-clear (binf.int64/u* 0)
                                                      (binf.int64/u* 1))))))
 
 
 
-(t/deftest bit-flip--
+(T/deftest bit-flip--
 
-  (t/is (zero? (binf.int64/u32 (binf.int64/bit-flip (binf.int64/u* 2r10)
+  (T/is (zero? (binf.int64/u32 (binf.int64/bit-flip (binf.int64/u* 2r10)
                                                     (binf.int64/u* 1)))))
 
-  (t/is (= (binf.int64/u* 2)
+  (T/is (= (binf.int64/u* 2)
            (binf.int64/bit-flip (binf.int64/u* 2r00)
                                 (binf.int64/u* 1)))))
 
 
 
-(t/deftest bit-set--
+(T/deftest bit-set--
 
-  (t/is (= (binf.int64/u* 2)
+  (T/is (= (binf.int64/u* 2)
            (binf.int64/bit-set (binf.int64/u* 2r00)
                                (binf.int64/u* 1)))))
 
 
 
-(t/deftest bit-test--
+(T/deftest bit-test--
 
-  (t/is (true? (binf.int64/bit-test (binf.int64/u* 2r10)
+  (T/is (true? (binf.int64/bit-test (binf.int64/u* 2r10)
                                     (binf.int64/u* 1))))
 
-  (t/is (false? (binf.int64/bit-test (binf.int64/u* 0)
+  (T/is (false? (binf.int64/bit-test (binf.int64/u* 0)
                                      (binf.int64/u* 1)))))
 
 
 
-(TC.ct/defspec bitwise
+(mprop/deftest bitwise
 
   (TC.prop/for-all [i (TC.gen/fmap #(binf.int64/u* %)
                                    (TC.gen/choose 0
@@ -118,70 +120,70 @@
 
 
 
-(t/deftest u<
+(T/deftest u<
 
-  (t/is (binf.int64/u< u64-min
+  (T/is (binf.int64/u< u64-min
                        u64-max))
 
-  (t/is (false? (binf.int64/u< u64-max
+  (T/is (false? (binf.int64/u< u64-max
                                u64-min)))
 
-  (t/is (false? (binf.int64/u< u64-max
+  (T/is (false? (binf.int64/u< u64-max
                                u64-max))))
 
 
 
-(t/deftest u<=
+(T/deftest u<=
 
-  (t/is (binf.int64/u<= u64-min
+  (T/is (binf.int64/u<= u64-min
                         u64-max))
 
-  (t/is (false? (binf.int64/u<= u64-max
+  (T/is (false? (binf.int64/u<= u64-max
                                 u64-min)))
 
-  (t/is (binf.int64/u<= u64-max
+  (T/is (binf.int64/u<= u64-max
                         u64-max)))
 
 
 
-(t/deftest u>
+(T/deftest u>
 
-  (t/is (binf.int64/u> u64-max
+  (T/is (binf.int64/u> u64-max
                        u64-min))
 
-  (t/is (false? (binf.int64/u> u64-min
+  (T/is (false? (binf.int64/u> u64-min
                                u64-max)))
 
-  (t/is (false? (binf.int64/u> u64-max
+  (T/is (false? (binf.int64/u> u64-max
                                u64-max))))
 
 
 
-(t/deftest u>=
+(T/deftest u>=
 
-  (t/is (binf.int64/u>= u64-max
+  (T/is (binf.int64/u>= u64-max
                         u64-min))
 
-  (t/is (false? (binf.int64/u>= u64-min
+  (T/is (false? (binf.int64/u>= u64-min
                                 u64-max)))
 
-  (t/is (binf.int64/u>= u64-max
+  (T/is (binf.int64/u>= u64-max
                         u64-max)))
 
 
 ;;;;;;;;;; Unsigned maths
 
 
-(t/deftest udiv
+(T/deftest udiv
 
-  (t/is (= (binf.int64/u* 0x7fffffffffffffff)
+  (T/is (= (binf.int64/u* 0x7fffffffffffffff)
            (binf.int64/udiv u64-max
                             (binf.int64/u* 2)))))
 
 
 
-(t/deftest urem
+(T/deftest urem
 
-  (t/is (= (binf.int64/u* 1)
+  (T/is (= (binf.int64/u* 1)
            (binf.int64/urem (binf.int64/u* 10)
                             (binf.int64/u* 3)))))

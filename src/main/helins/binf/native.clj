@@ -15,7 +15,9 @@
 
    Manipulating raw pointers and managing memory is just as error prone as in native programming.
    Those utilities are for users knowing both what they want and what it implies. Otherwise,
-   segfaults are to be expected."
+   segfaults are to be expected.
+  
+   <!> Pointer utilities are still experimental <!>"
 
   {:author "Adam Helinski"}
 

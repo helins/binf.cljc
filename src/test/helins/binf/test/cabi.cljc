@@ -37,8 +37,6 @@
 
 (defn member
 
-  ""
-
   [f-member offset env]
 
   (assoc (f-member env)

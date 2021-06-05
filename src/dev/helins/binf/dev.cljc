@@ -24,7 +24,15 @@
             [helins.binf.string         :as binf.string]
             [helins.binf.test           :as binf.test]
             [helins.binf.test.base64    :as binf.test.base64]
-            [helins.binf.test.cabi      :as binf.test.cabi])
+            [helins.binf.test.buffer    :as binf.test.buffer]
+            [helins.binf.test.cabi      :as binf.test.cabi]
+            [helins.binf.test.endian    :as binf.test.endian]
+            [helins.binf.test.float     :as binf.test.float]
+            [helins.binf.test.int       :as binf.test.int]
+            [helins.binf.test.int64     :as binf.test.int64]
+            [helins.binf.test.leb128    :as binf.test.leb128]
+            [helins.binf.test.native    :as binf.test.native]
+            [helins.binf.test.string    :as binf.test.string])
   #?(:clj (:import java.io.RandomAccessFile
                    java.nio.channels.FileChannel$MapMode)))
 

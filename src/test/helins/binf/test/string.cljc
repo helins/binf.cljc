@@ -9,16 +9,16 @@
 
   {:author "Adam Helinski"}
 
-  (:require [clojure.test.check.clojure-test :as tc.ct]
-            [clojure.test.check.generators   :as tc.gen]
-            [clojure.test.check.properties   :as tc.prop]
-            [helins.binf.string              :as binf.string]))
+  (:require [clojure.test.check.generators :as tc.gen]
+            [clojure.test.check.properties :as tc.prop]
+            [helins.binf.string            :as binf.string]
+            [helins.mprop                  :as mprop]))
 
 
 ;;;;;;;;;;
 
 
-(tc.ct/defspec gen
+(mprop/deftest gen
 
   (tc.prop/for-all [string tc.gen/string]
     (= string

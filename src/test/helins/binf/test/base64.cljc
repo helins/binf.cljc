@@ -5,14 +5,16 @@
 
 (ns helins.binf.test.base64
 
+  "Testing Base64 utilities."
+
   {:author "Adam Helins"}
 
-  (:require [clojure.test.check.clojure-test :as TC.ct]
-            [clojure.test.check.generators   :as TC.gen]
-            [clojure.test.check.properties   :as TC.prop]
-            [helins.binf                     :as binf]
-            [helins.binf.base64              :as binf.base64]
-            [helins.binf.gen                 :as binf.gen]))
+  (:require [clojure.test.check.generators :as TC.gen]
+            [clojure.test.check.properties :as TC.prop]
+            [helins.binf                   :as binf]
+            [helins.binf.base64            :as binf.base64]
+            [helins.binf.gen               :as binf.gen]
+            [helins.mprop                  :as mprop]))
 
 
 ;;;;;;;;;; Helpers
@@ -31,7 +33,7 @@
 ;;;;;;;;;; Tests
 
 
-(TC.ct/defspec main
+(mprop/deftest main
 
   (TC.prop/for-all [[buffer
                      offset
@@ -44,19 +46,26 @@
                                [buffer
                                 offset
                                 n-byte])]
-    (and (= (seq buffer)
-            (to-seq (-> buffer
-                        binf.base64/encode
-                        binf.base64/decode)))
-         (= (seq (drop offset
-                       buffer))
-            (to-seq (-> buffer
-                        (binf.base64/encode offset)
-                        binf.base64/decode)))
-         (= (seq (->> buffer
-                      (drop offset)
-                      (take n-byte)))
-            (to-seq (-> buffer
-                        (binf.base64/encode offset
-                                            n-byte)
-                        binf.base64/decode))))))
+    (mprop/mult
+
+      "Without offset nor length"
+      (= (seq buffer)
+         (to-seq (-> buffer
+                     binf.base64/encode
+                     binf.base64/decode)))
+
+      "With offset"
+      (= (seq (drop offset
+                    buffer))
+         (to-seq (-> buffer
+                     (binf.base64/encode offset)
+                     binf.base64/decode)))
+
+      "With offset and length"
+      (= (seq (->> buffer
+                   (drop offset)
+                   (take n-byte)))
+         (to-seq (-> buffer
+                     (binf.base64/encode offset
+                                         n-byte)
+                     binf.base64/decode))))))

@@ -5,18 +5,20 @@
 
 (ns helins.binf.test.float
 
+  "Testing float utilities."
+
   {:author "Adam Helins"}
 
-  (:require [clojure.test.check.clojure-test :as TC.ct]
-            [clojure.test.check.properties   :as TC.prop]
-            [helins.binf.float               :as binf.float]
-            [helins.binf.gen                 :as binf.gen]))
+  (:require [clojure.test.check.properties :as TC.prop]
+            [helins.binf.float             :as binf.float]
+            [helins.binf.gen               :as binf.gen]
+            [helins.mprop                  :as mprop]))
 
 
 ;;;;;;;;;;
 
 
-(TC.ct/defspec f32
+(mprop/deftest f32
 
   (TC.prop/for-all [x binf.gen/f32]
     (binf.float/= x
@@ -24,7 +26,7 @@
 
 
 
-(TC.ct/defspec f64
+(mprop/deftest f64
 
   (TC.prop/for-all [x binf.gen/f64]
     (binf.float/= x
@@ -32,7 +34,7 @@
 
 
 
-(TC.ct/defspec f32<->f64
+(mprop/deftest f32<->f64
 
   (TC.prop/for-all [x binf.gen/f32]
     (binf.float/= x
