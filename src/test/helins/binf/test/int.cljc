@@ -36,6 +36,8 @@
 
 (mprop/deftest i8
 
+  {:ratio-num 200}
+
   (prop-cast-iu binf.gen/i8
                 binf.int/u8
                 binf.int/i8))
@@ -43,6 +45,8 @@
 
 
 (mprop/deftest i16
+
+  {:ratio-num 200}
 
   (prop-cast-iu binf.gen/i16
                 binf.int/u16
@@ -52,6 +56,8 @@
 
 (mprop/deftest i32
 
+  {:ratio-num 200}
+
   (prop-cast-iu binf.gen/i32
                 binf.int/u32
                 binf.int/i32))
@@ -59,6 +65,8 @@
 
 
 (mprop/deftest u8
+
+  {:ratio-num 200}
 
   (prop-cast-iu binf.gen/u8
                 binf.int/i8
@@ -68,6 +76,8 @@
 
 (mprop/deftest u16
 
+  {:ratio-num 200}
+
   (prop-cast-iu binf.gen/u16
                 binf.int/i16
                 binf.int/u16))
@@ -75,6 +85,8 @@
 
 
 (mprop/deftest u32
+
+  {:ratio-num 200}
 
   (prop-cast-iu binf.gen/u32
                 binf.int/i32

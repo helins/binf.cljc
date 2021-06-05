@@ -241,6 +241,8 @@
 
 (mprop/deftest gen-i32
 
+  {:ratio-num 200}
+
   (TC.prop/for-all [i32 binf.gen/i32]
     (= i32
        (-> view-gen
@@ -252,6 +254,8 @@
 
 
 (mprop/deftest gen-u32
+
+  {:ratio-num 200}
 
   (TC.prop/for-all [u32 binf.gen/u32]
     (= u32
@@ -265,6 +269,8 @@
 
 (mprop/deftest gen-i64
 
+  {:ratio-num 200}
+
   (TC.prop/for-all [i64 binf.gen/i64]
     (= i64
        (-> view-gen
@@ -276,6 +282,8 @@
 
 
 (mprop/deftest gen-u64
+
+  {:ratio-num 200}
 
   (TC.prop/for-all [u64 binf.gen/u64]
     (= u64

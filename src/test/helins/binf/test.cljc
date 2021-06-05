@@ -266,11 +266,15 @@
 
 (mprop/deftest create
 
+  {:ratio-num 100}
+
   (prop-create src))
 
 
 
 (mprop/deftest create-2
+
+  {:ratio-num 100}
 
   (prop-create src-2))
 
@@ -279,6 +283,8 @@
 
 
 (mprop/deftest rwa-bool
+
+  {:ratio-num 100}
 
   (prop-rwa src
             TC.gen/boolean
@@ -290,6 +296,8 @@
 
 (mprop/deftest rwr-bool
 
+  {:ratio-num 100}
+
   (prop-rwr src
             TC.gen/boolean
             1
@@ -300,6 +308,8 @@
 
 (mprop/deftest rwa-bool-2
 
+  {:ratio-num 100}
+
   (prop-rwa src-2
             TC.gen/boolean
             1
@@ -309,6 +319,8 @@
 
 
 (mprop/deftest rwr-bool-2
+
+  {:ratio-num 100}
 
   (prop-rwr src-2
             TC.gen/boolean
@@ -322,6 +334,8 @@
 
 (mprop/deftest rwa-i8
 
+  {:ratio-num 100}
+
   (prop-rwa src
             binf.gen/i8
             1
@@ -330,6 +344,8 @@
 
 
 (mprop/deftest rwa-i16
+
+  {:ratio-num 100}
 
   (prop-rwa src
             binf.gen/i16
@@ -340,6 +356,8 @@
 
 (mprop/deftest rwa-i32
 
+  {:ratio-num 100}
+
   (prop-rwa src
             binf.gen/i32
             4
@@ -348,6 +366,8 @@
 
 
 (mprop/deftest rwa-i64
+
+  {:ratio-num 100}
 
   (prop-rwa src
             binf.gen/i64
@@ -358,6 +378,8 @@
 
 (mprop/deftest rwa-u8
 
+  {:ratio-num 100}
+
   (prop-rwa src
             binf.gen/u8
             1
@@ -366,6 +388,8 @@
 
 
 (mprop/deftest rwa-u16
+
+  {:ratio-num 100}
 
   (prop-rwa src
             binf.gen/u16
@@ -376,6 +400,8 @@
 
 (mprop/deftest rwa-u32
 
+  {:ratio-num 100}
+
   (prop-rwa src
             binf.gen/u32
             4
@@ -384,6 +410,8 @@
 
 
 (mprop/deftest rwa-u64
+
+  {:ratio-num 100}
 
   (prop-rwa src
             binf.gen/u64
@@ -394,6 +422,8 @@
 
 (mprop/deftest rwr-i8
 
+  {:ratio-num 100}
+
   (prop-rwr src
             binf.gen/i8
             1
@@ -402,6 +432,8 @@
 
 
 (mprop/deftest rwr-i16
+
+  {:ratio-num 100}
 
   (prop-rwr src
             binf.gen/i16
@@ -412,6 +444,8 @@
 
 (mprop/deftest rwr-i32
 
+  {:ratio-num 100}
+
   (prop-rwr src
             binf.gen/i32
             4
@@ -421,6 +455,8 @@
 
 (mprop/deftest rwr-i64
 
+  {:ratio-num 100}
+
   (prop-rwr src
             binf.gen/i64
             8
@@ -429,6 +465,8 @@
 
 
 (mprop/deftest rwa-f32
+
+  {:ratio-num 100}
 
   (prop-rwa src
             binf.gen/f32
@@ -440,6 +478,8 @@
 
 (mprop/deftest rwa-f64
 
+  {:ratio-num 100}
+
   (prop-rwa src
             binf.gen/f64
             8
@@ -449,6 +489,8 @@
 
 
 (mprop/deftest rwr-f32
+
+  {:ratio-num 100}
 
   (prop-rwr src
             binf.gen/f32
@@ -460,6 +502,8 @@
 
 (mprop/deftest rwr-f64
 
+  {:ratio-num 100}
+
   (prop-rwr src
             binf.gen/f64
             8
@@ -470,6 +514,8 @@
 
 (mprop/deftest rwa-i8-2
 
+  {:ratio-num 100}
+
   (prop-rwa src-2
             binf.gen/i8
             1
@@ -478,6 +524,8 @@
 
 
 (mprop/deftest rwa-i16-2
+
+  {:ratio-num 100}
 
   (prop-rwa src-2
             binf.gen/i16
@@ -488,6 +536,8 @@
 
 (mprop/deftest rwa-i32-2
 
+  {:ratio-num 100}
+
   (prop-rwa src-2
             binf.gen/i32
             4
@@ -496,6 +546,8 @@
 
 
 (mprop/deftest rwa-i64-2
+
+  {:ratio-num 100}
 
   (prop-rwa src-2
             binf.gen/i64
@@ -506,6 +558,8 @@
 
 (mprop/deftest rwa-u8-2
 
+  {:ratio-num 100}
+
   (prop-rwa src-2
             binf.gen/u8
             1
@@ -514,6 +568,8 @@
 
 
 (mprop/deftest rwa-u16-2
+
+  {:ratio-num 100}
 
   (prop-rwa src-2
             binf.gen/u16
@@ -524,6 +580,8 @@
 
 (mprop/deftest rwa-u32-2
 
+  {:ratio-num 100}
+
   (prop-rwa src-2
             binf.gen/u32
             4
@@ -532,6 +590,8 @@
 
 
 (mprop/deftest rwa-u64-2
+
+  {:ratio-num 100}
 
   (prop-rwa src-2
             binf.gen/u64
@@ -542,6 +602,8 @@
 
 (mprop/deftest rwr-i8-2
 
+  {:ratio-num 100}
+
   (prop-rwr src-2
             binf.gen/i8
             1
@@ -550,6 +612,8 @@
 
 
 (mprop/deftest rwr-i16-2
+
+  {:ratio-num 100}
 
   (prop-rwr src-2
             binf.gen/i16
@@ -560,6 +624,8 @@
 
 (mprop/deftest rwr-i32-2
 
+  {:ratio-num 100}
+
   (prop-rwr src-2
             binf.gen/i32
             4
@@ -569,6 +635,8 @@
 
 (mprop/deftest rwr-i64-2
 
+  {:ratio-num 100}
+
   (prop-rwr src-2
             binf.gen/i64
             8
@@ -577,6 +645,8 @@
 
 
 (mprop/deftest rwa-f32-2
+
+  {:ratio-num 100}
 
   (prop-rwa src-2
             binf.gen/f32
@@ -588,6 +658,8 @@
 
 (mprop/deftest rwa-f64-2
 
+  {:ratio-num 100}
+
   (prop-rwa src-2
             binf.gen/f64
             8
@@ -598,6 +670,8 @@
 
 (mprop/deftest rwr-f32-2
 
+  {:ratio-num 100}
+
   (prop-rwr src-2
             binf.gen/f32
             4
@@ -607,6 +681,8 @@
 
 
 (mprop/deftest rwr-f64-2
+
+  {:ratio-num 100}
 
   (prop-rwr src-2
             binf.gen/f64
@@ -742,11 +818,15 @@
 
 (mprop/deftest rwa-buffer
 
+  {:ratio-num 50}
+
   (prop-rwa-buffer src))
 
 
 
 (mprop/deftest rwr-buffer
+
+  {:ratio-num 50}
 
   (prop-rwr-buffer src))
 
@@ -754,11 +834,15 @@
 
 (mprop/deftest rwa-buffer-2
 
+  {:ratio-num 50}
+
   (prop-rwa-buffer src-2))
 
 
 
 (mprop/deftest rwr-buffer-2
+
+  {:ratio-num 50}
 
   (prop-rwr-buffer src-2))
 
@@ -875,11 +959,15 @@
 
 (mprop/deftest rwa-string
 
+  {:ratio-num 50}
+
   (prop-rwa-string src))
 
 
 
 (mprop/deftest rwr-string
+
+  {:ratio-num 50}
 
   (prop-rwr-string src))
 
@@ -887,11 +975,15 @@
 
 (mprop/deftest rwa-string-2
 
+  {:ratio-num 50}
+
   (prop-rwa-string src-2))
 
 
 
 (mprop/deftest rwr-string-2
+
+  {:ratio-num 50}
 
   (prop-rwr-string src-2))
 
@@ -1006,11 +1098,15 @@
 
 (mprop/deftest rwa-string-big
 
+  {:ratio-num 50}
+
   (prop-rwa-string-big src))
 
 
 
 (mprop/deftest rwr-string-big
+
+  {:ratio-num 50}
 
   (prop-rwr-string-big src))
 
@@ -1018,11 +1114,15 @@
 
 (mprop/deftest rwa-string-big-2
 
+  {:ratio-num 50}
+
   (prop-rwa-string-big src-2))
 
 
 
 (mprop/deftest rwr-string-big-2
+
+  {:ratio-num 50}
 
   (prop-rwr-string-big src-2))
 
@@ -1095,10 +1195,14 @@
 
 (mprop/deftest grow
 
+  {:ratio-num 50}
+
   (prop-grow src))
 
 
 
 (mprop/deftest grow-2
+
+  {:ratio-num 50}
 
   (prop-grow src-2))

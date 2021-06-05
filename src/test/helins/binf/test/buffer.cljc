@@ -5,6 +5,8 @@
 
 (ns helins.binf.test.buffer
 
+  "Testing buffer utilities."
+
   {:author "Adam Helinski"}
 
   (:require [clojure.test.check.generators :as TC.gen]
@@ -19,6 +21,8 @@
 
 
 (mprop/deftest copy
+
+  {:ratio-num 100}
 
   (TC.prop/for-all [[src
                      dest-offset

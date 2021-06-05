@@ -35,6 +35,8 @@
 
 (mprop/deftest main
 
+  {:ratio-num 100}
+
   (TC.prop/for-all [[buffer
                      offset
                      n-byte] (TC.gen/let [buffer (binf.gen/buffer)

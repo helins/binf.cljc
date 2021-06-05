@@ -20,6 +20,8 @@
 
 (mprop/deftest f32
 
+  {:ratio-num 150}
+
   (TC.prop/for-all [x binf.gen/f32]
     (binf.float/= x
                   (binf.float/from-b32 (binf.float/b32 x)))))
@@ -28,6 +30,8 @@
 
 (mprop/deftest f64
 
+  {:ratio-num 150}
+
   (TC.prop/for-all [x binf.gen/f64]
     (binf.float/= x
                   (binf.float/from-b64 (binf.float/b64 x)))))
@@ -35,6 +39,8 @@
 
 
 (mprop/deftest f32<->f64
+
+  {:ratio-num 150}
 
   (TC.prop/for-all [x binf.gen/f32]
     (binf.float/= x

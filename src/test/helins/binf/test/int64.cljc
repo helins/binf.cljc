@@ -22,6 +22,8 @@
 
 (mprop/deftest cast-smaller-i
 
+  {:ratio-num 150}
+
   (TC.prop/for-all [x binf.gen/i8]
     (let [x64 (binf.int64/i* x)]
       (= x
@@ -32,6 +34,8 @@
 
 
 (mprop/deftest cast-smaller-u
+
+  {:ratio-num 150}
 
   (TC.prop/for-all [x binf.gen/u8]
     (let [x64 (binf.int64/u* x)]
@@ -84,6 +88,8 @@
 
 
 (mprop/deftest bitwise
+
+  {:ratio-num 200}
 
   (TC.prop/for-all [i (TC.gen/fmap #(binf.int64/u* %)
                                    (TC.gen/choose 0

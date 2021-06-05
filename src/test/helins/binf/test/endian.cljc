@@ -40,6 +40,8 @@
 
 (mprop/deftest b16
 
+  {:ratio-num 150}
+
   (tc.prop/for-all [u16 binf.gen/u16]
     (= u16
        (-> u16
@@ -51,6 +53,8 @@
 
 (mprop/deftest b32
 
+  {:ratio-num 150}
+
   (tc.prop/for-all [u32 binf.gen/u32]
     (= u32
        (-> u32
@@ -61,6 +65,8 @@
 
 
 (mprop/deftest b64
+
+  {:ratio-num 150}
 
   (tc.prop/for-all [u64 binf.gen/u64]
     (= u64

@@ -5,6 +5,8 @@
 
 (ns helins.binf.test.cabi
 
+  "Testing C-ABI utilities."
+
   {:author "Adam Helins"}
 
   (:require [clojure.test     :as t]

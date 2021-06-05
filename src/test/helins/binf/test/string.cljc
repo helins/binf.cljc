@@ -20,6 +20,9 @@
 
 (mprop/deftest gen
 
+  {:ratio-num  200
+   :ratio-size 3}
+
   (tc.prop/for-all [string tc.gen/string]
     (= string
        (-> string
