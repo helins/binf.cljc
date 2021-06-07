@@ -470,9 +470,7 @@
   [type member+]
 
   (fn def-struct [env]
-    (loop [align        (if (:binf.cabi/gpu? env) ;; TODO: find a way to avoid this `gpu?` switch.
-                          (:binf.cabi/align env 1)
-                          1)
+    (loop [align        1
            layout       []
            member-2+    member+
            name->member {}

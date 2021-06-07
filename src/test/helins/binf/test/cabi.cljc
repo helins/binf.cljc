@@ -30,9 +30,6 @@
 (def env32
      (binf.cabi/env w32))
 
-(def env32-gpu
-     (assoc (binf.cabi/env w32) :binf.cab/gpu? true))
-
 (def env64
      (binf.cabi/env w64))
 
@@ -350,7 +347,7 @@
     (let [v (alloc-view)
           ivec3 (binf.cabi/vector :ivec3 binf.cabi/i32 3 16)
           array-length 5
-          layout ((binf.cabi/array ivec3 array-length) env32-gpu)
+          layout ((binf.cabi/array ivec3 array-length) env32)
           data (->> (range (* array-length 3))
                     (partition 3)
                     (mapv vec))
@@ -369,7 +366,7 @@
       (let [v (alloc-view)
             column (binf.cabi/vector :ivec4 binf.cabi/i32 4 16)
             matrix (binf.cabi/vector :mat4x4 column 4 64)
-            layout (matrix env32-gpu)
+            layout (matrix env32)
             matrix (->> (range 16) (partition 4) (mapv vec))
             e (->> matrix (mapcat identity) vec)]
         (binf.cabi/wr-cabi v layout matrix)
@@ -381,7 +378,7 @@
       (let [v (alloc-view)
             column (binf.cabi/vector :ivec4 binf.cabi/i32 2 8)
             matrix (binf.cabi/vector :mat3x2 column 3 24)
-            layout (matrix env32-gpu)
+            layout (matrix env32)
             matrix (->> (range (* 3 2)) (partition 2) (mapv vec))
             e (->> matrix (mapcat identity) vec)]
         (binf.cabi/wr-cabi v layout matrix)
@@ -393,7 +390,7 @@
       (let [v (alloc-view)
             column (binf.cabi/vector :ivec4 binf.cabi/i32 3 16)
             matrix (binf.cabi/vector :mat2x3 column 2 32)
-            layout (matrix env32-gpu)
+            layout (matrix env32)
             matrix (->> (range (* 3 2)) (partition 3) (mapv vec))
             e (->> matrix (mapcat #(conj % 0)) vec)]
         (binf.cabi/wr-cabi v layout matrix)
@@ -405,7 +402,7 @@
 
   (t/testing "Single primitive"
     (let [v (alloc-view)
-          layout (binf.cabi/i32 env32-gpu)
+          layout (binf.cabi/i32 env32)
           e 42]
       (binf.cabi/wr-cabi v layout e)
       (binf/seek v 0)
@@ -419,7 +416,7 @@
                                    [:c 1000]
                                    :d
                                    [:e 42]
-                                   :f]) env32-gpu)]
+                                   :f]) env32)]
 
       (let [v (alloc-view)
             e :a]
@@ -517,7 +514,7 @@
     (let [v (alloc-view)
           layout ((binf.cabi/struct :my-struct
                                     [[:a binf.cabi/i32]
-                                     [:b binf.cabi/i32]]) env32-gpu)
+                                     [:b binf.cabi/i32]]) env32)
           e {:a 10 :b 20}]
       (binf.cabi/wr-cabi v layout e)
       (binf/seek v 0)
@@ -528,7 +525,7 @@
       (let [v (alloc-view)
             layout ((binf.cabi/struct :my-struct
                                       [[:a binf.cabi/i32]
-                                       [:b binf.cabi/i32]]) env32-gpu)
+                                       [:b binf.cabi/i32]]) env32)
             data {:b 20}
             e (assoc data :a 0)]
         (binf.cabi/wr-cabi v layout data)
@@ -538,7 +535,7 @@
 
   (t/testing "Simple array"
     (let [v (alloc-view)
-          layout ((binf.cabi/array binf.cabi/i32 5) env32-gpu)
+          layout ((binf.cabi/array binf.cabi/i32 5) env32)
           e [1 2 3 4 5]]
       (binf.cabi/wr-cabi v layout e)
       (binf/seek v 0)
@@ -550,7 +547,7 @@
           inner (binf.cabi/struct :my-struct
                                   [[:a binf.cabi/i32]
                                    [:b binf.cabi/i32]])
-          layout ((binf.cabi/array inner 5) env32-gpu)
+          layout ((binf.cabi/array inner 5) env32)
           e (->> (range 10) (partition 2) (mapv (fn [[a b]] {:a a :b b})))]
       (binf.cabi/wr-cabi v layout e)
       (binf/seek v 0)
@@ -560,7 +557,7 @@
   (t/testing "Simple array of specially aligned arrays"
     (let [v (alloc-view)
           ivec3 (binf.cabi/vector :ivec3 binf.cabi/i32 3 16)
-          layout ((binf.cabi/array ivec3 5) env32-gpu)
+          layout ((binf.cabi/array ivec3 5) env32)
           e (->> (range 1 8)
                  (partition 3 1)
                  (mapv vec))]
@@ -574,7 +571,7 @@
           ivec3 (binf.cabi/vector :ivec3 binf.cabi/i32 3 16)
           layout ((binf.cabi/struct :my-struct
                                     [[:position ivec3]
-                                     [:normal ivec3]]) env32-gpu)
+                                     [:normal ivec3]]) env32)
           e {:position [3 4 5]
              :normal [10 11 12]}]
       (binf.cabi/wr-cabi v layout e)
@@ -586,7 +583,7 @@
           ivec3 (binf.cabi/vector :ivec3 binf.cabi/i32 3 16)
           layout ((binf.cabi/struct :my-struct
                                     [[:position ivec3]
-                                     [:normal ivec3]]) env32-gpu)
+                                     [:normal ivec3]]) env32)
           e {:position [3 4 5]
              :normal [10 11 12]}]
       (binf.cabi/wr-cabi v layout e)
@@ -604,7 +601,7 @@
                                     [[:count binf.cabi/i32]
                                      [:min ivec3]
                                      [:max ivec3]
-                                     [:vertices (binf.cabi/array vertex 2)]]) env32-gpu)
+                                     [:vertices (binf.cabi/array vertex 2)]]) env32)
           e {:count 2
              :min [1 2 3]
              :max [11 12 13]
@@ -636,7 +633,7 @@
                                        [:e struct-a]
                                        [:f ivec3]
                                        [:g (binf.cabi/array struct-a 3)]
-                                       [:h binf.cabi/i32]]) env32-gpu)
+                                       [:h binf.cabi/i32]]) env32)
           data {}
           e {:a [0 0],
              :b [0 0 0],
@@ -672,7 +669,7 @@
                                        [:e struct-a]
                                        [:f ivec3]
                                        [:g (binf.cabi/array struct-a 3)]
-                                       [:h binf.cabi/i32]]) env32-gpu)
+                                       [:h binf.cabi/i32]]) env32)
           e {:a [0 0],
              :b [0 0 0],
              :c 0,
@@ -697,7 +694,7 @@
       (let [v (alloc-view)
             column (binf.cabi/vector :ivec4 binf.cabi/i32 4 16)
             matrix (binf.cabi/vector :mat4x4 column 4 64)
-            layout (matrix env32-gpu)
+            layout (matrix env32)
             e (->> (range 16) (partition 4) (mapv vec))]
         (binf.cabi/wr-cabi v layout e)
         (binf/seek v 0)
@@ -708,7 +705,7 @@
       (let [v (alloc-view)
             column (binf.cabi/vector :ivec4 binf.cabi/i32 2 8)
             matrix (binf.cabi/vector :mat3x2 column 3 24)
-            layout (matrix env32-gpu)
+            layout (matrix env32)
             e (->> (range (* 3 2)) (partition 2) (mapv vec))]
         (binf.cabi/wr-cabi v layout e)
         (binf/seek v 0)
@@ -719,7 +716,7 @@
       (let [v (alloc-view)
             column (binf.cabi/vector :ivec4 binf.cabi/i32 3 16)
             matrix (binf.cabi/vector :mat2x3 column 2 32)
-            layout (matrix env32-gpu)
+            layout (matrix env32)
             e (->> (range (* 3 2)) (partition 3) (mapv vec))]
         (binf.cabi/wr-cabi v layout e)
         (binf/seek v 0)
@@ -744,7 +741,7 @@
                                        [:e struct-a]
                                        [:f ivec3]
                                        [:g (binf.cabi/array struct-a 3)]
-                                       [:h binf.cabi/i32]]) env32-gpu)
+                                       [:h binf.cabi/i32]]) env32)
           e {:a [0 0],
              :b [0 0 0],
              :c 0,
