@@ -1,2 +1,1 @@
-{:lint-as {clojure.test.check.properties/for-all clojure.core/let
-           helins.mprop/deftest                  clojure.test/deftest}}
+{:config-paths ["io.helins/mprop"]}

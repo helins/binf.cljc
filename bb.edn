@@ -1,4 +1,22 @@
-{:tasks {deploy
+{:tasks {cp
+         
+         {:doc  "Print the classpath"
+          :task (do
+                  (println "Computing and printing classpath...\n")
+                  (doseq [line (sort (clojure.string/split (cp-string)
+                                                           (re-pattern ":")))]
+                    (println line)))}
+
+
+
+         cp:del
+
+         {:doc  "Delete cached classpath"
+          :task (fs/delete-tree ".cpcache")}
+
+
+
+         deploy
 
          {:depends [jar]
           :doc     "Deploy this project to Clojars"
@@ -43,12 +61,34 @@
 
 
 
+         lint:import
+
+         {:doc  "Initialize Clj-kondo and copy configuration files from dependencies"
+          :task (shell (format "clj-kondo --lint '%s' --dependencies --parallel --copy-configs"
+                               (cp-string)))}
+
+
+
          pom
 
          {:doc  "Sync POM file with deps.edn"
           :task (do
                   (println "Attention, POM must be synced manually because it provides `test.check` for Cljdoc analysis")
                   (System/exit 42))}
+
+
+
+         shadow:clean
+
+         {:doc  "Remove the given profile from Shadow-CLJS cache (for full recompilation)"
+          :task (shadow-clean (first *command-line-args*))}
+
+
+
+         shadow:clean-test
+
+         {:doc  "Like 'shadow:clean' but for the ':test-node' profile"
+          :task (shadow-clean "test-node")}
 
 
 
@@ -79,10 +119,45 @@
 
 
 
+         :requires ([babashka.fs :as fs])
+
          :init
 
          (do
-           (require 'clojure.string)
+           (defn cp-string
+
+             ;; Returns the classpath as a string, reading profiles from CLI args.
+
+             []
+
+             (with-out-str (clojure (str "-Spath "
+                                         (when (some? *command-line-args*)
+                                           (str "-A"
+                                                (clojure.string/join ""
+                                                                     *command-line-args*)))))))
+
+
+           (defn shadow-clean
+             
+             ;; Deletes a Shadow-CLJS profile.
+
+             [profile]
+
+             (when (empty? profile)
+               (println "A Shadow-CLJS profile must be provided.")
+               (System/exit 42))
+             (fs/delete-tree (str ".shadow-cljs/builds/"
+                                  profile)))
+
+
+           (defn test-env
+
+             ;; Returns env variables for testing.
+
+             []
+
+             {:extra-env {"MPROP_NUM_TESTS" (or (System/getenv "MPROP_NUM_TESTS")
+                                                               "200")}})
 
 
            (defn test-jvm
@@ -91,7 +166,8 @@
 
              [arg+]
 
-             (clojure (str "-M:kaocha:test -m kaocha.runner --config-file kaocha.edn :jvm "
+             (clojure (test-env)
+                      (str "-M:kaocha:test -m kaocha.runner --config-file kaocha.edn :jvm "
                            (clojure.string/join " "
                                                 (concat arg+
                                                         *command-line-args*)))))
@@ -100,7 +176,8 @@
 
              [optimize?]
 
-             (clojure (format "-M:cljs:test %s test-node"
+             (clojure (test-env)
+                      (format "-M:cljs:test %s test-node"
                               (if optimize?
                                 "release"
                                 "compile")))

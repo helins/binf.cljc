@@ -32,7 +32,7 @@
    :main-opts  ["-m" "nrepl.cmdline" "--port" "14563"]}
 
   :test
-  {:extra-deps  {io.helins/mprop {:mvn/version "0.0.0-alpha0"}}
+  {:extra-deps  {io.helins/mprop {:mvn/version "0.0.0"}}
    :extra-paths ["src/test"]}}
 
 
