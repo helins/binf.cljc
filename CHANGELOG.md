@@ -12,6 +12,16 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 
+### Removed
+
+
+
+## [1.1.0-beta1] - 2021-06-07
+
+### Fixed
+
+- Absolute R/W in subviews
+
 
 
 ## [1.1.0-beta0] - 2021-04-03
@@ -129,7 +139,9 @@ All notable changes to this project will be documented in this file.
 
 
 
-[Unreleased]: https://github.com/helins/binf.cljc/compare/1.0.0-beta1...HEAD
+[Unreleased]: https://github.com/helins/binf.cljc/compare/1.1.0-beta1...HEAD
+[1.1.0-beta1]: https://github.com/helins/binf.cljc/compare/1.1.0-beta0...1.1.0-beta1
+[1.1.0-beta0]: https://github.com/helins/binf.cljc/compare/1.0.0-beta1...1.1.0-beta0
 [1.0.0-beta1]: https://github.com/helins/binf.cljc/compare/1.0.0-beta0...1.0.0-beta1
 [1.0.0-beta0]: https://github.com/helins/binf.cljc/compare/0.0.0-beta0...1.0.0-beta0
 [0.0.0-beta0]: https://github.com/helins/binf.cljc/compare/0.0.0-alpha4...0.0.0-beta0

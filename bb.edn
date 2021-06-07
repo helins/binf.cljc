@@ -19,8 +19,10 @@
          deploy
 
          {:depends [jar]
-          :doc     "Deploy this project to Clojars"
-          :task    (clojure "-X:deploy")}
+          :doc     "Deploy this project to Clojars ; needs username and path leading to Clojars token"
+          :task    (clojure {:extra-env {"CLOJARS_USERNAME" (first *command-line-args*)
+                                         "CLOJARS_PASSWORD" (slurp (second *command-line-args*))}}
+                            "-X:deploy")}
          
 
 
@@ -55,7 +57,7 @@
 
          lint
 
-         {:doc "Start Clj-kondo on './src' (further path can be provided as command-line argument)"
+         {:doc "Start Clj-kondo on './src' ; further path can be provided as command-line argument"
           :task (shell (str "clj-kondo --lint src/"
                             (first *command-line-args*)))}
 
