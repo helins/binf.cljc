@@ -10,7 +10,8 @@
   {:author "Adam Helinski"
    :no-doc true}
 
-  (:require [helins.binf.buffer   :as binf.buffer]
+  (:require [goog.object]
+            [helins.binf.buffer   :as binf.buffer]
             [helins.binf.protocol :as binf.protocol]
             [helins.binf.string   :as binf.string]))
 
