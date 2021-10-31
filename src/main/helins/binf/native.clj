@@ -17,7 +17,7 @@
    Those utilities are for users knowing both what they want and what it implies. Otherwise,
    segfaults are to be expected.
   
-   <!> Pointer utilities are still experimental <!>"
+   <!> Pointer utilities are still experimental, might change in the future <!>"
 
   {:author "Adam Helinski"}
 

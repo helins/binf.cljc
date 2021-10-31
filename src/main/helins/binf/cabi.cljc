@@ -5,7 +5,7 @@
 
 (ns helins.binf.cabi
 
-  "<!> Stil experimental <!>
+  "<!> Stil very experimental, do not use in production <!> 
   
    Interaction with environments that conforms to a C-like ABI.
 

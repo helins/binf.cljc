@@ -16,6 +16,14 @@ All notable changes to this project will be documented in this file.
 
 
 
+## [1.1.0] - 2021-10-31
+
+### Fixed
+
+- Add `goog.object` require in CLJS protocol implementation
+
+
+
 ## [1.1.0-beta1] - 2021-06-07
 
 ### Fixed
@@ -139,7 +147,8 @@ All notable changes to this project will be documented in this file.
 
 
 
-[Unreleased]: https://github.com/helins/binf.cljc/compare/1.1.0-beta1...HEAD
+[Unreleased]: https://github.com/helins/binf.cljc/compare/1.1.0...HEAD
+[1.1.0]: https://github.com/helins/binf.cljc/compare/1.1.0-beta1...1.1.0
 [1.1.0-beta1]: https://github.com/helins/binf.cljc/compare/1.1.0-beta0...1.1.0-beta1
 [1.1.0-beta0]: https://github.com/helins/binf.cljc/compare/1.0.0-beta1...1.1.0-beta0
 [1.0.0-beta1]: https://github.com/helins/binf.cljc/compare/1.0.0-beta0...1.0.0-beta1

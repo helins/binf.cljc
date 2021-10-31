@@ -1,6 +1,6 @@
 {:aliases
  {:cljs
-  {:extra-deps {thheller/shadow-cljs {:mvn/version "2.11.23"}}
+  {:extra-deps {thheller/shadow-cljs {:mvn/version "2.15.12"}}
    :main-opts  ["-m" "shadow.cljs.devtools.cli"]}
 
   :deploy
@@ -27,12 +27,8 @@
   :kaocha
   {:extra-deps {lambdaisland/kaocha {:mvn/version "1.0.829"}}}
 
-  :nrepl
-  {:extra-deps {nrepl/nrepl {:mvn/version "RELEASE"}}
-   :main-opts  ["-m" "nrepl.cmdline" "--port" "14563"]}
-
   :test
-  {:extra-deps  {io.helins/mprop {:mvn/version "0.0.0"}}
+  {:extra-deps  {io.helins/mprop {:mvn/version "0.0.1"}}
    :extra-paths ["src/test"]}}
 
 
