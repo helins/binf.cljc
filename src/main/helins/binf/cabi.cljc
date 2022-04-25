@@ -47,7 +47,10 @@
   {:author "Adam Helinski"}
 
   (:refer-clojure :exclude [array
-                            struct]))
+                            vector
+                            struct])
+
+  (:require [helins.binf :as binf]))
 
 
 (declare force-env)
@@ -339,18 +342,49 @@
   "Given a description function for a type and a number of elements, returns a description function
    for an array."
 
-  [description-fn n-element]
+  ([description-fn n-element] (array description-fn n-element nil))
 
-  (fn def-array [env]
-    (let [{:as             element-2
-           :binf.cabi/keys [align
-                            n-byte]} (description-fn env)]
-      {:binf.cabi/align           align
-       :binf.cabi/n-byte          (* n-element
-                                     n-byte)
-       :binf.cabi/type            :array
-       :binf.cabi.array/element   element-2
-       :binf.cabi.array/n-element n-element})))
+  ([description-fn n-element align-override]
+
+   (fn def-array [env]
+     (let [{:as             element-2
+            :binf.cabi/keys [align
+                             n-byte]} (description-fn env)
+           final-align (or align-override align)]
+       {:binf.cabi/align           final-align
+        :binf.cabi/n-byte          (* n-element
+                                      (aligned final-align n-byte))
+        :binf.cabi/type            :array
+        :binf.cabi.array/element   element-2
+        :binf.cabi.array/n-element n-element}))))
+
+
+(defn vector
+
+  "Given a type name, a description function for a type and a number of elements, returns a
+   description function for a vector.
+
+   ```clojure
+   (def make-vec3
+        (vector :vec3 f32 3 16))
+   ```"
+
+  ([type description-fn n-element] (vector type description-fn n-element nil))
+
+  ([type description-fn n-element stride]
+
+   (fn def-vector [env]
+     (let [{:as             element-2
+            :binf.cabi/keys [align
+                             n-byte]} (description-fn env)
+           final-align (or stride align)]
+       {:binf.cabi/align           final-align
+        :binf.cabi/n-byte          (* n-element
+                                      n-byte)
+        :binf.cabi/type            :array
+        :binf.cabi.vector/type     type
+        :binf.cabi.array/element   element-2
+        :binf.cabi.array/n-element n-element}))))
 
 
 ;;;;;;;;;;
@@ -378,7 +412,7 @@
 
   [type constant+]
 
-  (fn def-struct [env]
+  (fn def-enum [env]
     (loop [constant-2+ constant+
            max-value   0
            tag->value  {}
@@ -505,3 +539,290 @@
          :binf.cabi/type          :union
          :binf.cabi.union/member+ name->member
          :binf.cabi.union/type    type}))))
+
+(defn wr-cabi
+
+  "Writes a clojure data structure to the current position by some `layout`."
+
+  [view layout data]
+
+  (case (:binf.cabi/type layout)
+
+    :ptr
+    (throw (ex-info "Not implemented: writing pointers" {}))
+
+    :bool
+    (if (some? data)
+      (binf/wr-bool view data)
+      (binf/skip view 1))
+
+    :i8
+    (if (some? data)
+      (binf/wr-b8 view data)
+      (binf/skip view 1))
+
+    :i16
+    (if (some? data)
+      (binf/wr-b16 view data)
+      (binf/skip view 2))
+
+    :i32
+    (if (some? data)
+      (binf/wr-b32 view data)
+      (binf/skip view 4))
+
+    :i64
+    (if (some? data)
+      (binf/wr-b64 view data)
+      (binf/skip view 8))
+
+    :u16
+    (if (some? data)
+      (binf/wr-b16 view data)
+      (binf/skip view 2))
+
+    :u32
+    (if (some? data)
+      (binf/wr-b32 view data)
+      (binf/skip view 4))
+
+    :u64
+    (if (some? data)
+      (binf/wr-b64 view data)
+      (binf/skip view 8))
+
+    :f32
+    (if (some? data)
+      (binf/wr-f32 view data)
+      (binf/skip view 4))
+
+    :f64
+    (if (some? data)
+      (binf/wr-f64 view data)
+      (binf/skip view 8))
+
+    :enum
+    (if (some? data)
+      (do
+        (assert (keyword? data))
+        (let [possibilities (:binf.cabi.enum/constant+ layout)
+              i (get possibilities data)]
+          (when-not (some? i)
+            (throw (ex-info (str "No " data " in enum " (:binf.cabi.enum/type layout)) (assoc layout :value data))))
+          (binf/wr-b32 view i)))
+      (binf/skip view 4))
+
+    :struct
+    (let [struct-layout (:binf.cabi.struct/layout layout)
+          members (:binf.cabi.struct/member+ layout)]
+      (loop [struct-layout struct-layout
+             prior-offset 0
+             prior-n-byte 0]
+        (if-let [mk (first struct-layout)]
+          (let [member (get members mk)
+                offset (:binf.cabi/offset member)
+                to-skip (- offset (+ prior-offset prior-n-byte))]
+            (when (< 0 to-skip)
+              (binf/skip view to-skip))
+            (wr-cabi view member (get data mk))
+            (recur (rest struct-layout) offset (:binf.cabi/n-byte member)))
+          (let [n-byte (:binf.cabi/n-byte layout)
+                to-skip (- n-byte (+ prior-offset prior-n-byte))]
+            (when (< 0 to-skip)
+              (binf/skip view to-skip))))))
+
+    :union
+    (if (some? data)
+      (let [[union-type union-data] (first data)
+            members (:binf.cabi.union/member+ layout)
+            union-layout (get members union-type)
+            to-skip (- (:binf.cabi/n-byte layout) (:binf.cabi/n-byte union-layout))]
+        (when-not (some? union-layout)
+          (throw (ex-info (str "No such " union-type " in union " (:binf.cabi.union/type layout)) {})))
+        (wr-cabi view union-layout union-data)
+        (when (< 0 to-skip)
+          (binf/skip view to-skip)))
+      (let [n-byte (- (:binf.cabi/n-byte layout) (:binf.cabi/n-byte layout))]
+        (binf/skip view n-byte)))
+
+    :alias
+    (wr-cabi view (:binf.cabi.alias/inner layout) data)
+
+    :array
+    (let [n-element (:binf.cabi.array/n-element layout)
+          element (:binf.cabi.array/element layout)
+          element-n-byte (:binf.cabi/n-byte element)
+          element-align (:binf.cabi/align element)
+          n-byte (:binf.cabi/n-byte layout)
+          element-padding (- (aligned element-align element-n-byte) element-n-byte)]
+      (loop [n-written 0
+             data data]
+        (if (seq data)
+          (if-let [d (first data)]
+            (do
+              (wr-cabi view element d)
+              (when (< 0 element-padding)
+                (binf/skip view element-padding))
+              (recur (inc n-written) (rest data)))
+            (let [align (:binf.cabi/align layout)
+                  to-skip (+ element-padding (aligned align element-n-byte))]
+              (binf/skip view to-skip)
+              (recur (inc n-written) (rest data))))
+          (let [to-skip (* (- n-element n-written) (aligned element-align element-n-byte))]
+            (when (< 0 to-skip)
+              (binf/skip view to-skip))))))))
+
+(defn wa-cabi
+
+  "Writes a clojure data structure to an absolute `position` by some `layout`."
+
+  [view position layout data]
+
+  (let [old-position (binf/position view)]
+    (binf/seek view position)
+    (wr-cabi view layout data)
+    (binf/seek view old-position)))
+
+
+(defn rr-cabi
+
+  "Reads a clojure data structure from the current position by some `layout`.
+
+   If unions are used a function `pick-union` can be supplied that decides which
+   union to use. It takes the union layout and the data read so far as arguments
+   and should return the key of the union type.
+
+   If `pick-union` is not supplied or returns null then it is not possible to
+   figure out which union to use so a byte buffer of the size of the union is
+   returned instead."
+
+  ([view layout] (rr-cabi view layout nil))
+
+  ([view layout {:keys [so-far pick-union] :as context}]
+
+   (case (:binf.cabi/type layout)
+
+     :ptr
+     (throw (ex-info "Not implemented: reading pointers" {}))
+
+     :struct
+     (let [struct-layout (:binf.cabi.struct/layout layout)
+           members (:binf.cabi.struct/member+ layout)
+           n-byte (:binf.cabi/n-byte layout)]
+       (loop [data {}
+              struct-layout struct-layout
+              prior-offset 0
+              prior-n-byte 0]
+         (if-let [mk (first struct-layout)]
+           (let [member (get members mk)
+                 _ (assert (some? member) (str "no " mk " in " members))
+                 offset (:binf.cabi/offset member)
+                 n-byte (:binf.cabi/n-byte member)
+                 to-skip (- offset (+ prior-offset prior-n-byte))]
+             (when (< 0 to-skip)
+               (binf/skip view to-skip))
+             (let [inner-data (rr-cabi view member (assoc context :so-far data))]
+               (recur (assoc data mk inner-data) (rest struct-layout) offset n-byte)))
+           (let [to-skip (- n-byte (+ prior-offset prior-n-byte))]
+             (when (< 0 to-skip)
+               (binf/skip view to-skip))
+             data))))
+
+     :union
+     (let [n-byte (:binf.cabi/n-byte layout)]
+       (cond
+         (some? pick-union)
+         (let [union-type (pick-union (:binf.cabi.union/type layout) so-far)]
+           (if (some? union-type)
+             (let [members (:binf.cabi.union/member+ layout)
+                   union-layout (get members union-type)
+                   to-skip (- n-byte (:binf.cabi/n-byte union-layout))]
+               (when-not (some? union-layout)
+                 (throw (ex-info (str "No such " union-type " in union " (:binf.cabi.union/type layout)) {})))
+               (let [union-data (rr-cabi view union-layout context)]
+                 (when (< 0 to-skip)
+                   (binf/skip view to-skip))
+                 (hash-map union-type union-data)))
+             (binf/rr-buffer view n-byte context)))
+
+         ;; TODO: maybe offer another way to figure out union?
+
+         :else
+         (binf/rr-buffer view n-byte context)))
+
+     :alias
+     (rr-cabi view (:binf.cabi.alias/inner layout) context)
+
+     :bool
+     (binf/rr-bool view)
+
+     :i8
+     (binf/rr-i8 view)
+
+     :i16
+     (binf/rr-i16 view)
+
+     :i32
+     (binf/rr-i32 view)
+
+     :i64
+     (binf/rr-i64 view)
+
+     :u8
+     (binf/rr-u8 view)
+
+     :u16
+     (binf/rr-u16 view)
+
+     :u32
+     (binf/rr-u32 view)
+
+     :u64
+     (binf/rr-u64 view)
+
+     :f32
+     (binf/rr-f32 view)
+
+     :f64
+     (binf/rr-f64 view)
+
+     :enum
+     (let [i (binf/rr-u32 view)
+           i->enum (->> (:binf.cabi.enum/constant+ layout)
+                        (map (fn [[i e]]
+                               [e i]))
+                        (into {}))
+           enum (get i->enum i)]
+       (when-not (some? enum)
+         (throw (ex-info (str "No " i " in enum " (:binf.cabi.enum/type layout)) (assoc layout :int i))))
+       enum)
+
+     :array
+     (let [n-element (:binf.cabi.array/n-element layout)
+           element (:binf.cabi.array/element layout)
+           element-n-byte (:binf.cabi/n-byte element)
+           element-align (:binf.cabi/align element)
+           to-skip (- (aligned element-align element-n-byte) element-n-byte)
+           data (loop [to-read (range n-element)
+                       data []]
+                  (if-let [_ (first to-read)]
+                    (let [d (rr-cabi view element context)]
+                      (when (< 0 to-skip)
+                        (binf/skip view to-skip))
+                      (recur (rest to-read) (conj data d)))
+                    data))]
+       data))))
+
+(defn ra-cabi
+
+  "Reads a clojure data structure from an absolute `position` by some `layout`."
+
+  ([view position layout] (ra-cabi view position layout nil))
+
+  ([view position layout context]
+
+   (let [old-position (binf/position view)]
+     (binf/seek view position)
+     (let [result (rr-cabi view layout context)]
+       (binf/seek view old-position)
+       result))))
